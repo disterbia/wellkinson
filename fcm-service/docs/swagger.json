@@ -1,0 +1,154 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/remove-alarm": {
+            "post": {
+                "description": "알람삭제시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "알람삭제"
+                ],
+                "summary": "알람설정",
+                "parameters": [
+                    {
+                        "description": "요청 DTO - 알람데이터",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/transport.Alarm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/save-alarm": {
+            "post": {
+                "description": "알람생성시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "알람생성"
+                ],
+                "summary": "알람설정",
+                "parameters": [
+                    {
+                        "description": "요청 DTO - 알람데이터",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/transport.Alarm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "transport.Alarm": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "endAt": {
+                    "type": "string",
+                    "example": "yyyy-mm-dd"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "startAt": {
+                    "type": "string",
+                    "example": "yyyy-mm-dd"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "hh:mm"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "User ID의 외래키",
+                    "type": "integer"
+                },
+                "week": {
+                    "description": "\"3,4,5,6\" 형식",
+                    "type": "string"
+                }
+            }
+        },
+        "transport.BasicResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
+        "transport.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "err": {
+                    "description": "wwwwww",
+                    "type": "string",
+                    "example": "account name"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,213 @@
+definitions:
+  transport.BasicResponse:
+    properties:
+      code:
+        type: string
+    type: object
+  transport.ErrorResponse:
+    properties:
+      err:
+        description: wwwwww
+        example: account name
+        type: string
+    type: object
+  transport.LoginRequest:
+    properties:
+      idToken:
+        type: string
+      user:
+        $ref: '#/definitions/transport.User'
+    type: object
+  transport.SuccessResponse:
+    properties:
+      jwt:
+        type: string
+    type: object
+  transport.User:
+    properties:
+      birthday:
+        type: string
+      created:
+        type: string
+      deviceID:
+        type: string
+      email:
+        type: string
+      fcm_token:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      isFirst:
+        type: boolean
+      name:
+        type: string
+      phone_num:
+        type: string
+      updated:
+        type: string
+      useAutoLogin:
+        type: boolean
+      usePrivacyProtection:
+        type: boolean
+      useSleepTracking:
+        type: boolean
+      userType:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auto-login:
+    post:
+      consumes:
+      - application/json
+      description: 최초 로그인 이후 앱 실행시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 JWT 토큰 반환
+          schema:
+            $ref: '#/definitions/transport.SuccessResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      security:
+      - jwt: []
+      summary: 자동로그인
+      tags:
+      - 로그인
+  /get-user:
+    post:
+      consumes:
+      - application/json
+      description: 유저 상태영구변경시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 유저 객체 반환
+          schema:
+            $ref: '#/definitions/transport.User'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: 유저 조회
+      tags:
+      - 회원조회(본인)
+  /google-login:
+    post:
+      consumes:
+      - application/json
+      description: 구글로그인 성공시 호출
+      parameters:
+      - description: 요청 DTO - idToken,기본값 데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/transport.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 JWT 토큰 반환
+          schema:
+            $ref: '#/definitions/transport.SuccessResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: 구글로그인
+      tags:
+      - 로그인
+  /kakao-login:
+    post:
+      consumes:
+      - application/json
+      description: 카카오로그인 성공시 호출
+      parameters:
+      - description: 요청 DTO - dToken,기본값 데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/transport.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 JWT 토큰 반환
+          schema:
+            $ref: '#/definitions/transport.SuccessResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: 카카오로그인
+      tags:
+      - 로그인
+  /set-user:
+    post:
+      consumes:
+      - application/json
+      description: 유저 상태영구변경시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 요청 DTO - 업데이트 할 데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/transport.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/transport.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: 유저 데이터 변경
+      tags:
+      - 회원상태 변경(본인)
+swagger: "2.0"
