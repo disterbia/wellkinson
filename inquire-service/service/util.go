@@ -1,64 +1,14 @@
-// /inquire-service/service/answer-service.go
-
 package service
 
 import (
 	"common/model"
-	"errors"
 	"fmt"
 	"log"
 	"net/smtp"
 	"os"
 
 	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 )
-
-type AnswerService interface {
-	AnswerInquire(answer model.InquireReply) (string, error)
-}
-
-type answerService struct {
-	db *gorm.DB
-}
-
-func NewAnswerService(db *gorm.DB) AnswerService {
-	return &answerService{db: db}
-}
-
-func (as *answerService) AnswerInquire(answer model.InquireReply) (string, error) {
-	var user model.User
-	var inquire model.Inquire
-
-	result := as.db.First(&user, answer.Uid)
-
-	if result.Error != nil {
-		return "", result.Error
-	}
-
-	result2 := as.db.First(&inquire, answer.InquireId)
-
-	if result2.Error != nil {
-		return "", result2.Error
-	}
-
-	if !user.IsAdmin() { // IsAdmin 메서드를 사용하여 확인
-		return "", errors.New("unauthorized: user is not an admin")
-	}
-
-	answer.Id = 0
-	result = as.db.Save(&answer)
-
-	if result.Error != nil {
-		return "", result.Error
-	}
-
-	err := sendEmail(inquire, answer)
-	if err != nil {
-		return "", err
-	}
-	return "200", nil
-}
 
 func sendEmail(inquire model.Inquire, answer model.InquireReply) error {
 	err := godotenv.Load(".env")

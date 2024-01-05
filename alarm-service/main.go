@@ -7,12 +7,15 @@ import (
 	"alarm-service/endpoint"
 	"alarm-service/service"
 	"alarm-service/transport"
+	"common/util"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"golang.org/x/time/rate"
 
 	_ "fcm-service/docs"
 
@@ -30,12 +33,16 @@ func main() {
 		log.Println("Database connection error:", err)
 	}
 
-	saveAlarmSvc := service.NewSaveAlarmService(database)
-	saveAlarmEndpoint := endpoint.SaveAlarmEndpoint(saveAlarmSvc)
-	removeAlarmSvc := service.NewRemoveAlarmService(database)
-	removeeAlarmEndpoint := endpoint.RemoveAlarmEndpoint(removeAlarmSvc)
+	alarmSvc := service.NewAlarmService(database)
+
+	saveAlarmEndpoint := endpoint.SaveAlarmEndpoint(alarmSvc)
+	removeeAlarmEndpoint := endpoint.RemoveAlarmEndpoint(alarmSvc)
 
 	router := gin.Default()
+
+	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 5)
+	router.Use(rateLimiter.Middleware())
+
 	router.POST("/save-alarm", transport.SaveAlarmHandler(saveAlarmEndpoint))
 	router.POST("/remove-alarm", transport.RemoveAlarmHandler(removeeAlarmEndpoint))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

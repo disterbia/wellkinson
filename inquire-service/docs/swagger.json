@@ -4,6 +4,44 @@
         "contact": {}
     },
     "paths": {
+        "/get-inquires": {
+            "get": {
+                "description": "나의문의보기시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "문의조회(본인)"
+                ],
+                "summary": "문의관련",
+                "responses": {
+                    "200": {
+                        "description": "문의내역 배열 반환",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/transport.Inquire"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/inquire-answer": {
             "post": {
                 "description": "답변등록시 호출",
@@ -14,12 +52,58 @@
                     "application/json"
                 ],
                 "tags": [
-                    "알람생성"
+                    "답변하기"
                 ],
-                "summary": "알람설정",
+                "summary": "문의관련",
                 "parameters": [
                     {
                         "description": "요청 DTO - 답변데이터",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/transport.InquireReply"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/transport.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/send-inquire": {
+            "post": {
+                "description": "문의등록시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "문의하기"
+                ],
+                "summary": "문의관련",
+                "parameters": [
+                    {
+                        "description": "요청 DTO - 문의데이터",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -66,6 +150,27 @@
                 "err": {
                     "description": "wwwwww",
                     "type": "string"
+                }
+            }
+        },
+        "transport.Inquire": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "user 아이디",
+                    "type": "integer"
                 }
             }
         },

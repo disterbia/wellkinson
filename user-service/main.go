@@ -3,8 +3,10 @@
 package main
 
 import (
+	"common/util"
 	"log"
 	"os"
+	"time"
 	"user-service/pkg/db"
 	"user-service/pkg/endpoint"
 	"user-service/pkg/service"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"golang.org/x/time/rate"
 
 	_ "user-service/docs"
 
@@ -32,23 +35,17 @@ func main() {
 		log.Println("Database connection error:", err)
 	}
 
-	gsvc := service.NewGoogleLoginService(database)
-	googleLoginEndpoint := endpoint.MakeLoginEndpoint(gsvc)
+	usvc := service.NewUserService(database)
 
-	ksvc := service.NewKakaoLoginService(database)
-	kakoLoginEndpoint := endpoint.MakeLoginEndpoint(ksvc)
-
-	autoLoginSvc := service.NewAutoLoginService(database)
-	autoLoginEndpoint := endpoint.MakeAutoLoginEndpoint(autoLoginSvc)
-
-	setUserSvc := service.NewSetUserService(database)
-	setUserEndpoint := endpoint.MakeSetUserEndpoint(setUserSvc)
-
-	getUserSvc := service.NewGetUserService(database)
-	getUserEndpoint := endpoint.MakeGetUserEndpoint(getUserSvc)
+	googleLoginEndpoint := endpoint.MakeGoogleLoginEndpoint(usvc)
+	kakoLoginEndpoint := endpoint.MakeKakaoLoginEndpoint(usvc)
+	autoLoginEndpoint := endpoint.MakeAutoLoginEndpoint(usvc)
+	setUserEndpoint := endpoint.MakeSetUserEndpoint(usvc)
+	getUserEndpoint := endpoint.MakeGetUserEndpoint(usvc)
 
 	router := gin.Default()
-
+	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 5)
+	router.Use(rateLimiter.Middleware())
 	router.POST("/google-login", transport.GoogleLoginHandler(googleLoginEndpoint))
 	router.POST("/kakao-login", transport.KakaoLoginHandler(kakoLoginEndpoint))
 	router.POST("/auto-login", transport.AutoLoginHandler(autoLoginEndpoint))

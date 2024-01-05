@@ -148,7 +148,7 @@ func SetUserHandler(setUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 
 // @Summary 유저 조회
 // @Tags 회원조회(본인)
-// @Description 유저 상태영구변경시 호출
+// @Description 내 정보 조회시 호출
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"

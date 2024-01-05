@@ -51,11 +51,11 @@ type Notification struct {
 }
 
 type Inquire struct {
-	Id      int `gorm:"primaryKey;autoIncrement"`
-	Uid     int //user 아이디
-	Email   string
-	Title   string
-	Content string
+	Id      int       `gorm:"primaryKey;autoIncrement"`
+	Uid     int       `gorm:"not null"` //user 아이디
+	Email   string    `gorm:"size:40;not null"`
+	Title   string    `gorm:"size:255;not null"`
+	Content string    `gorm:"type:text;not null"`
 	Created time.Time `gorm:"type:datetime;default:CURRENT_TIMESTAMP" json:"-"`
 	Updated time.Time `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"-"`
 }
@@ -65,7 +65,7 @@ type InquireReply struct {
 	Uid       int       `gorm:"not null"`
 	InquireId int       `gorm:"not null"`
 	Content   string    `gorm:"type:text;not null"`
-	replyType bool      `gorm:"not null"`
+	ReplyType bool      `gorm:"not null"`
 	Created   time.Time `gorm:"type:datetime;default:CURRENT_TIMESTAMP" json:"-"`
 	Updated   time.Time `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"-"`
 }

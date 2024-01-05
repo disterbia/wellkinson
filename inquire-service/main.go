@@ -3,6 +3,7 @@
 package main
 
 import (
+	"common/util"
 	"inquire-service/db"
 	"inquire-service/endpoint"
 	"inquire-service/service"
@@ -14,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"golang.org/x/time/rate"
 
 	_ "inquire-service/docs"
 
@@ -49,11 +51,20 @@ func main() {
 		log.Println("Database connection error:", err)
 	}
 
-	answerSvc := service.NewAnswerService(database)
-	answerEndpoint := endpoint.AnswerEndpoint(answerSvc)
+	inquireSvc := service.NewInquireService(database)
+	answerEndpoint := endpoint.AnswerEndpoint(inquireSvc)
+	sendEndpoint := endpoint.SendEndpoint(inquireSvc)
+	getEndpoint := endpoint.GetEndpoint(inquireSvc)
 
 	router := gin.Default()
+
+	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 10)
+	router.Use(rateLimiter.Middleware())
+
 	router.POST("/inquire-answer", transport.AnswerHandler(answerEndpoint))
+	router.POST("/send-inquire", transport.SendHandler(sendEndpoint))
+	router.GET("/get-inquires", transport.GetHandler(getEndpoint))
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Run(":44444")

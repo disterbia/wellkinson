@@ -10,6 +10,20 @@ definitions:
         description: wwwwww
         type: string
     type: object
+  transport.Inquire:
+    properties:
+      content:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      uid:
+        description: user 아이디
+        type: integer
+    type: object
   transport.InquireReply:
     properties:
       content:
@@ -31,6 +45,31 @@ definitions:
 info:
   contact: {}
 paths:
+  /get-inquires:
+    get:
+      consumes:
+      - application/json
+      description: 나의문의보기시 호출
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 문의내역 배열 반환
+          schema:
+            items:
+              $ref: '#/definitions/transport.Inquire'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: 문의관련
+      tags:
+      - 문의조회(본인)
   /inquire-answer:
     post:
       consumes:
@@ -58,7 +97,37 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/transport.ErrorResponse'
-      summary: 알람설정
+      summary: 문의관련
       tags:
-      - 알람생성
+      - 답변하기
+  /send-inquire:
+    post:
+      consumes:
+      - application/json
+      description: 문의등록시 호출
+      parameters:
+      - description: 요청 DTO - 문의데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/transport.InquireReply'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/transport.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: 문의관련
+      tags:
+      - 문의하기
 swagger: "2.0"

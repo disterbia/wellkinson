@@ -9,6 +9,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
 )
 
 // JWT secret key
@@ -91,4 +92,26 @@ func ValidateTime(timeStr string) error {
 		return errors.New("invalid time format, should be HH:MM")
 	}
 	return nil
+}
+
+type RateLimiter struct {
+	limiter *rate.Limiter
+}
+
+func NewRateLimiter(r rate.Limit, b int) *RateLimiter {
+	return &RateLimiter{
+		limiter: rate.NewLimiter(r, b),
+	}
+}
+
+func (rl *RateLimiter) Middleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !rl.limiter.Allow() {
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
+				"error": "too many requests",
+			})
+			return
+		}
+		c.Next()
+	}
 }
