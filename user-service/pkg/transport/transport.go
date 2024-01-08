@@ -130,10 +130,7 @@ func SetUserHandler(setUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		if id != req.Id {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "잘못된 id"})
-			return
-		}
+		req.Id = id
 
 		response, err := setUserEndpoint(c.Request.Context(), req)
 		if err != nil {

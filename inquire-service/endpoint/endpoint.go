@@ -5,6 +5,7 @@ package endpoint
 import (
 	"common/model"
 	"context"
+	"inquire-service/dto"
 	"inquire-service/service"
 
 	"github.com/go-kit/kit/endpoint"
@@ -34,8 +35,10 @@ func SendEndpoint(s service.InquireService) endpoint.Endpoint {
 
 func GetEndpoint(s service.InquireService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		id := request.(int)
-		inquires, err := s.GetMyInquires(id)
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(int)
+		queryParams := reqMap["queryParams"].(dto.GetInquireParams)
+		inquires, err := s.GetMyInquires(id, queryParams.Page, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {
 			return model.BasicResponse{Code: err.Error()}, err
 		}

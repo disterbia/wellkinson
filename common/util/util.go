@@ -23,7 +23,6 @@ func VerifyJWT(c *gin.Context) (int, string, error) {
 	// 헤더에서 JWT 토큰 추출
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 		return 0, "", errors.New("authorization header is required")
 	}
 

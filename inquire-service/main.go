@@ -16,6 +16,8 @@ import (
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/time/rate"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	_ "inquire-service/docs"
 
@@ -51,14 +53,21 @@ func main() {
 		log.Println("Database connection error:", err)
 	}
 
-	inquireSvc := service.NewInquireService(database)
+	// gRPC 클라이언트 연결 생성
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to connect to email service: %v", err)
+	}
+	defer conn.Close()
+
+	inquireSvc := service.NewInquireService(database, conn)
 	answerEndpoint := endpoint.AnswerEndpoint(inquireSvc)
 	sendEndpoint := endpoint.SendEndpoint(inquireSvc)
 	getEndpoint := endpoint.GetEndpoint(inquireSvc)
 
 	router := gin.Default()
 
-	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 10)
+	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 20)
 	router.Use(rateLimiter.Middleware())
 
 	router.POST("/inquire-answer", transport.AnswerHandler(answerEndpoint))

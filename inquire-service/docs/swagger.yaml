@@ -14,6 +14,8 @@ definitions:
     properties:
       content:
         type: string
+      created:
+        type: string
       email:
         type: string
       id:
@@ -23,33 +25,45 @@ definitions:
       uid:
         description: user 아이디
         type: integer
+      updated:
+        type: string
     type: object
   transport.InquireReply:
     properties:
       content:
         type: string
-      date:
+      created:
         type: string
       id:
         type: integer
-      inquireId:
-        description: Inquire 아이디
+      inquire_id:
         type: integer
-      type:
-        description: 답변 또는 추가 문의
+      reply_type:
         type: boolean
       uid:
-        description: user 아이디
         type: integer
+      updated:
+        type: string
     type: object
 info:
   contact: {}
 paths:
   /get-inquires:
     get:
-      consumes:
-      - application/json
-      description: 나의문의보기시 호출
+      description: 관리자 문의내역 확인시 호출
+      parameters:
+      - description: 페이지 번호 default 0
+        in: query
+        name: page
+        type: integer
+      - description: 시작날짜 yyyy-mm-dd
+        in: query
+        name: start_date
+        type: string
+      - description: 종료날짜 yyyy-mm-dd
+        in: query
+        name: end_date
+        type: string
       produces:
       - application/json
       responses:
@@ -69,7 +83,7 @@ paths:
             $ref: '#/definitions/transport.ErrorResponse'
       summary: 문의관련
       tags:
-      - 문의조회(본인)
+      - 문의조회(관리자)
   /inquire-answer:
     post:
       consumes:
@@ -111,7 +125,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/transport.InquireReply'
+          $ref: '#/definitions/transport.Inquire'
       produces:
       - application/json
       responses:

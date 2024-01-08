@@ -17,17 +17,34 @@ const docTemplate = `{
     "paths": {
         "/get-inquires": {
             "get": {
-                "description": "나의문의보기시 호출",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "관리자 문의내역 확인시 호출",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "문의조회(본인)"
+                    "문의조회(관리자)"
                 ],
                 "summary": "문의관련",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "페이지 번호 default 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "시작날짜 yyyy-mm-dd",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "종료날짜 yyyy-mm-dd",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "문의내역 배열 반환",
@@ -119,7 +136,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transport.InquireReply"
+                            "$ref": "#/definitions/transport.Inquire"
                         }
                     }
                 ],
@@ -170,6 +187,9 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
+                "created": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -182,6 +202,9 @@ const docTemplate = `{
                 "uid": {
                     "description": "user 아이디",
                     "type": "integer"
+                },
+                "updated": {
+                    "type": "string"
                 }
             }
         },
@@ -191,23 +214,23 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
-                "date": {
+                "created": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "inquireId": {
-                    "description": "Inquire 아이디",
+                "inquire_id": {
                     "type": "integer"
                 },
-                "type": {
-                    "description": "답변 또는 추가 문의",
+                "reply_type": {
                     "type": "boolean"
                 },
                 "uid": {
-                    "description": "user 아이디",
                     "type": "integer"
+                },
+                "updated": {
+                    "type": "string"
                 }
             }
         }
