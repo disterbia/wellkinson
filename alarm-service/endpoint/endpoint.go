@@ -3,8 +3,8 @@
 package endpoint
 
 import (
+	"alarm-service/dto"
 	"alarm-service/service"
-	"common/model"
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
@@ -12,22 +12,24 @@ import (
 
 func SaveAlarmEndpoint(s service.AlarmService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		alarm := request.(model.Alarm)
+		alarm := request.(dto.AlarmRequest)
 		code, err := s.SaveAlarm(alarm)
 		if err != nil {
-			return model.BasicResponse{Code: err.Error()}, err
+			return dto.BasicResponse{Code: err.Error()}, err
 		}
-		return model.BasicResponse{Code: code}, nil
+		return dto.BasicResponse{Code: code}, nil
 	}
 }
 
 func RemoveAlarmEndpoint(s service.AlarmService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		alarm := request.(model.Alarm)
-		code, err := s.RemoveAlarm(alarm)
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(int)
+		uid := reqMap["uid"].(int)
+		code, err := s.RemoveAlarm(id, uid)
 		if err != nil {
-			return model.BasicResponse{Code: err.Error()}, err
+			return dto.BasicResponse{Code: err.Error()}, err
 		}
-		return model.BasicResponse{Code: code}, nil
+		return dto.BasicResponse{Code: code}, nil
 	}
 }

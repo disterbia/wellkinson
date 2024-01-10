@@ -46,13 +46,13 @@ const docTemplate = `{
                     "200": {
                         "description": "성공시 JWT 토큰 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.SuccessResponse"
+                            "$ref": "#/definitions/dto.SuccessResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -60,7 +60,7 @@ const docTemplate = `{
         },
         "/get-user": {
             "post": {
-                "description": "유저 상태영구변경시 호출",
+                "description": "내 정보 조회시 호출",
                 "consumes": [
                     "application/json"
                 ],
@@ -84,19 +84,19 @@ const docTemplate = `{
                     "200": {
                         "description": "성공시 유저 객체 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.User"
+                            "$ref": "#/definitions/dto.UserResponse"
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -122,7 +122,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transport.LoginRequest"
+                            "$ref": "#/definitions/dto.LoginRequest"
                         }
                     }
                 ],
@@ -130,19 +130,19 @@ const docTemplate = `{
                     "200": {
                         "description": "성공시 JWT 토큰 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.SuccessResponse"
+                            "$ref": "#/definitions/dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -168,7 +168,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transport.LoginRequest"
+                            "$ref": "#/definitions/dto.LoginRequest"
                         }
                     }
                 ],
@@ -176,19 +176,19 @@ const docTemplate = `{
                     "200": {
                         "description": "성공시 JWT 토큰 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.SuccessResponse"
+                            "$ref": "#/definitions/dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -221,7 +221,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transport.User"
+                            "$ref": "#/definitions/dto.UserRequest"
                         }
                     }
                 ],
@@ -229,19 +229,19 @@ const docTemplate = `{
                     "200": {
                         "description": "성공시 200 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.BasicResponse"
+                            "$ref": "#/definitions/dto.BasicResponse"
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -249,7 +249,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "transport.BasicResponse": {
+        "dto.BasicResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -257,28 +257,26 @@ const docTemplate = `{
                 }
             }
         },
-        "transport.ErrorResponse": {
+        "dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "err": {
-                    "description": "wwwwww",
-                    "type": "string",
-                    "example": "account name"
+                    "type": "string"
                 }
             }
         },
-        "transport.LoginRequest": {
+        "dto.LoginRequest": {
             "type": "object",
             "properties": {
-                "idToken": {
+                "id_token": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/transport.User"
+                    "$ref": "#/definitions/dto.UserRequest"
                 }
             }
         },
-        "transport.SuccessResponse": {
+        "dto.SuccessResponse": {
             "type": "object",
             "properties": {
                 "jwt": {
@@ -286,16 +284,59 @@ const docTemplate = `{
                 }
             }
         },
-        "transport.User": {
+        "dto.UserRequest": {
+            "description": "Birthday: 사용자의 생일, Gender: 사용자의 성별 (true: 남성, false: 여성)",
             "type": "object",
             "properties": {
                 "birthday": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "device_id": {
                     "type": "string"
+                },
+                "fcm_token": {
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "true:남 false: 여",
+                    "type": "boolean"
+                },
+                "is_first": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone_num": {
+                    "type": "string",
+                    "example": "01000000000"
+                },
+                "use_auto_login": {
+                    "type": "boolean"
+                },
+                "use_sleep_tracking": {
+                    "type": "boolean"
+                },
+                "user_privacy_protection": {
+                    "type": "boolean"
+                },
+                "user_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserResponse": {
+            "type": "object",
+            "properties": {
+                "birthday": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
                 },
                 "created": {
                     "type": "string"
                 },
-                "deviceID": {
+                "device_id": {
                     "type": "string"
                 },
                 "email": {
@@ -305,33 +346,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "description": "true:남 false: 여",
+                    "type": "boolean"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "isFirst": {
+                "is_first": {
                     "type": "boolean"
                 },
                 "name": {
                     "type": "string"
                 },
                 "phone_num": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "01000000000"
                 },
                 "updated": {
                     "type": "string"
                 },
-                "useAutoLogin": {
+                "use_auto_login": {
                     "type": "boolean"
                 },
-                "usePrivacyProtection": {
+                "use_sleep_tracking": {
                     "type": "boolean"
                 },
-                "useSleepTracking": {
+                "user_privacy_protection": {
                     "type": "boolean"
                 },
-                "userType": {
+                "user_type": {
                     "type": "string"
                 }
             }

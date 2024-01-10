@@ -1,34 +1,25 @@
 definitions:
-  transport.BasicResponse:
+  dto.BasicResponse:
     properties:
       code:
         type: string
     type: object
-  transport.ErrorResponse:
+  dto.ErrorResponse:
     properties:
       err:
         description: wwwwww
         type: string
     type: object
-  transport.Inquire:
+  dto.InquireReplyRequest:
     properties:
       content:
         type: string
-      created:
-        type: string
-      email:
-        type: string
-      id:
+      inquire_id:
         type: integer
-      title:
-        type: string
-      uid:
-        description: user 아이디
-        type: integer
-      updated:
-        type: string
+      reply_type:
+        type: boolean
     type: object
-  transport.InquireReply:
+  dto.InquireReplyResponse:
     properties:
       content:
         type: string
@@ -40,15 +31,41 @@ definitions:
         type: integer
       reply_type:
         type: boolean
-      uid:
+      updated:
+        type: string
+    type: object
+  dto.InquireRequest:
+    properties:
+      content:
+        type: string
+      email:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.InquireResponse:
+    properties:
+      content:
+        type: string
+      created:
+        type: string
+      email:
+        type: string
+      id:
         type: integer
+      replies:
+        items:
+          $ref: '#/definitions/dto.InquireReplyResponse'
+        type: array
+      title:
+        type: string
       updated:
         type: string
     type: object
 info:
   contact: {}
 paths:
-  /get-inquires:
+  /all-inquires:
     get:
       description: 관리자 문의내역 확인시 호출
       parameters:
@@ -71,19 +88,57 @@ paths:
           description: 문의내역 배열 반환
           schema:
             items:
-              $ref: '#/definitions/transport.Inquire'
+              $ref: '#/definitions/dto.InquireResponse'
             type: array
         "400":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: 문의관련
       tags:
       - 문의조회(관리자)
+  /get-inquires:
+    get:
+      consumes:
+      - application/json
+      description: 나의문의보기시 호출
+      parameters:
+      - description: 페이지 번호 default 0
+        in: query
+        name: page
+        type: integer
+      - description: 시작날짜 yyyy-mm-dd
+        in: query
+        name: start_date
+        type: string
+      - description: 종료날짜 yyyy-mm-dd
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 문의내역 배열 반환
+          schema:
+            items:
+              $ref: '#/definitions/dto.InquireResponse'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 문의관련
+      tags:
+      - 문의조회(본인)
   /inquire-answer:
     post:
       consumes:
@@ -95,22 +150,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/transport.InquireReply'
+          $ref: '#/definitions/dto.InquireReplyRequest'
       produces:
       - application/json
       responses:
         "200":
           description: 성공시 200 반환
           schema:
-            $ref: '#/definitions/transport.BasicResponse'
+            $ref: '#/definitions/dto.BasicResponse'
         "400":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: 문의관련
       tags:
       - 답변하기
@@ -125,22 +180,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/transport.Inquire'
+          $ref: '#/definitions/dto.InquireRequest'
       produces:
       - application/json
       responses:
         "200":
           description: 성공시 200 반환
           schema:
-            $ref: '#/definitions/transport.BasicResponse'
+            $ref: '#/definitions/dto.BasicResponse'
         "400":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: 문의관련
       tags:
       - 문의하기

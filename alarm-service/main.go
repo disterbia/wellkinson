@@ -17,7 +17,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/time/rate"
 
-	_ "fcm-service/docs"
+	_ "alarm-service/docs"
 
 	swaggerFiles "github.com/swaggo/files"
 )
@@ -40,11 +40,11 @@ func main() {
 
 	router := gin.Default()
 
-	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 5)
+	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 100)
 	router.Use(rateLimiter.Middleware())
 
 	router.POST("/save-alarm", transport.SaveAlarmHandler(saveAlarmEndpoint))
-	router.POST("/remove-alarm", transport.RemoveAlarmHandler(removeeAlarmEndpoint))
+	router.POST("/remove-alarm/:id", transport.RemoveAlarmHandler(removeeAlarmEndpoint))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Run(":44444")

@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 	"time"
-	"user-service/pkg/db"
-	"user-service/pkg/endpoint"
-	"user-service/pkg/service"
-	"user-service/pkg/transport"
+	"user-service/db"
+	"user-service/endpoint"
+	"user-service/service"
+	"user-service/transport"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -50,7 +50,7 @@ func main() {
 	router.POST("/kakao-login", transport.KakaoLoginHandler(kakoLoginEndpoint))
 	router.POST("/auto-login", transport.AutoLoginHandler(autoLoginEndpoint))
 	router.POST("/set-user", transport.SetUserHandler(setUserEndpoint))
-	router.POST("/get-user", transport.GetUserHandler(getUserEndpoint))
+	router.GET("/get-user", transport.GetUserHandler(getUserEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":44444")

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"common/model"
+	"alarm-service/dto"
 	"common/util"
 	"errors"
 	"regexp"
@@ -34,7 +34,7 @@ func validateWeek(week string) error {
 	return nil
 }
 
-func validateAlarm(alarm model.Alarm) error {
+func validateAlarm(alarm dto.AlarmRequest) error {
 	if err := util.ValidateDate(alarm.StartAt); err != nil {
 		return err
 	}

@@ -1,59 +1,87 @@
 definitions:
-  transport.BasicResponse:
+  dto.BasicResponse:
     properties:
       code:
         type: string
     type: object
-  transport.ErrorResponse:
+  dto.ErrorResponse:
     properties:
       err:
-        description: wwwwww
-        example: account name
         type: string
     type: object
-  transport.LoginRequest:
+  dto.LoginRequest:
     properties:
-      idToken:
+      id_token:
         type: string
       user:
-        $ref: '#/definitions/transport.User'
+        $ref: '#/definitions/dto.UserRequest'
     type: object
-  transport.SuccessResponse:
+  dto.SuccessResponse:
     properties:
       jwt:
         type: string
     type: object
-  transport.User:
+  dto.UserRequest:
+    description: 'Birthday: 사용자의 생일, Gender: 사용자의 성별 (true: 남성, false: 여성)'
     properties:
       birthday:
+        example: YYYY-MM-DD
+        type: string
+      device_id:
+        type: string
+      fcm_token:
+        type: string
+      gender:
+        description: 'true:남 false: 여'
+        type: boolean
+      is_first:
+        type: boolean
+      name:
+        type: string
+      phone_num:
+        example: "01000000000"
+        type: string
+      use_auto_login:
+        type: boolean
+      use_sleep_tracking:
+        type: boolean
+      user_privacy_protection:
+        type: boolean
+      user_type:
+        type: string
+    type: object
+  dto.UserResponse:
+    properties:
+      birthday:
+        example: YYYY-MM-DD
         type: string
       created:
         type: string
-      deviceID:
+      device_id:
         type: string
       email:
         type: string
       fcm_token:
         type: string
       gender:
-        type: string
-      id:
-        type: integer
-      isFirst:
+        description: 'true:남 false: 여'
+        type: boolean
+      is_first:
         type: boolean
       name:
         type: string
       phone_num:
+        example: "01000000000"
         type: string
       updated:
         type: string
-      useAutoLogin:
+      use_auto_login:
         type: boolean
-      usePrivacyProtection:
+      use_sleep_tracking:
         type: boolean
-      useSleepTracking:
+      user_privacy_protection:
         type: boolean
-      userType:
+      user_type:
         type: string
     type: object
 info:
@@ -76,11 +104,11 @@ paths:
         "200":
           description: 성공시 JWT 토큰 반환
           schema:
-            $ref: '#/definitions/transport.SuccessResponse'
+            $ref: '#/definitions/dto.SuccessResponse'
         "500":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - jwt: []
       summary: 자동로그인
@@ -90,7 +118,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 유저 상태영구변경시 호출
+      description: 내 정보 조회시 호출
       parameters:
       - description: Bearer {jwt_token}
         in: header
@@ -103,15 +131,15 @@ paths:
         "200":
           description: 성공시 유저 객체 반환
           schema:
-            $ref: '#/definitions/transport.User'
+            $ref: '#/definitions/dto.UserResponse'
         "400":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: 유저 조회
       tags:
       - 회원조회(본인)
@@ -126,22 +154,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/transport.LoginRequest'
+          $ref: '#/definitions/dto.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: 성공시 JWT 토큰 반환
           schema:
-            $ref: '#/definitions/transport.SuccessResponse'
+            $ref: '#/definitions/dto.SuccessResponse'
         "400":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: 구글로그인
       tags:
       - 로그인
@@ -156,22 +184,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/transport.LoginRequest'
+          $ref: '#/definitions/dto.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: 성공시 JWT 토큰 반환
           schema:
-            $ref: '#/definitions/transport.SuccessResponse'
+            $ref: '#/definitions/dto.SuccessResponse'
         "400":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: 카카오로그인
       tags:
       - 로그인
@@ -191,22 +219,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/transport.User'
+          $ref: '#/definitions/dto.UserRequest'
       produces:
       - application/json
       responses:
         "200":
           description: 성공시 200 반환
           schema:
-            $ref: '#/definitions/transport.BasicResponse'
+            $ref: '#/definitions/dto.BasicResponse'
         "400":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
-            $ref: '#/definitions/transport.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: 유저 데이터 변경
       tags:
       - 회원상태 변경(본인)

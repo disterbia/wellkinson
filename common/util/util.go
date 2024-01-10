@@ -2,8 +2,10 @@ package util
 
 import (
 	"common/model"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -61,22 +63,6 @@ func GenerateJWT(user model.User) (string, error) {
 	return tokenString, nil
 }
 
-func ParseCustomDateTime(input string) (time.Time, error) {
-	// "YYYY-MM-DD HH:MM:SS" 형식 파싱
-	if t, err := time.Parse("2006-01-02 15:04:05", input); err == nil {
-		return t, nil
-	}
-	// "YYYY-MM-DD" 형식 파싱
-	if t, err := time.Parse("2006-01-02", input); err == nil {
-		return t, nil
-	}
-	// "YYYY/MM/DD HH-MM-SS" 형식 파싱
-	if t, err := time.Parse("2006/01/02 15-04-05", input); err == nil {
-		return t, nil
-	}
-	return time.Time{}, errors.New("invalid date format")
-}
-
 func ValidateDate(dateStr string) error {
 	_, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
@@ -89,6 +75,16 @@ func ValidateTime(timeStr string) error {
 	_, err := time.Parse("15:04", timeStr)
 	if err != nil {
 		return errors.New("invalid time format, should be HH:MM")
+	}
+	return nil
+}
+
+func ValidatePhoneNumber(phone string) error {
+	// 정규 표현식 패턴: 010으로 시작하며 총 11자리 숫자
+	pattern := `^010\d{8}$`
+	matched, err := regexp.MatchString(pattern, phone)
+	if err != nil || !matched {
+		return errors.New("invalid phone format, should be 01000000000")
 	}
 	return nil
 }
@@ -113,4 +109,18 @@ func (rl *RateLimiter) Middleware() gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+func CopyStruct(input interface{}, output interface{}) error {
+	jsonData, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(jsonData, output)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

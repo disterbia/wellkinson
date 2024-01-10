@@ -1,26 +1,24 @@
-// /user-service/pkg/endpoint/endpoint.go
+// /user-service/endpoint/endpoint.go
 
 package endpoint
 
 import (
 	"common/model"
 	"context"
-	"log"
-	"user-service/pkg/service"
+	"user-service/dto"
+	"user-service/service"
 
 	"github.com/go-kit/kit/endpoint"
 )
 
 func MakeAutoLoginEndpoint(s service.UserService) endpoint.Endpoint {
-	log.Println("endpoint: 호출")
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		email := request.(string)
 		token, err := s.AutoLogin(email, model.User{})
 		if err != nil {
-			return model.LoginResponse{Err: err.Error()}, err
+			return dto.LoginResponse{Err: err.Error()}, err
 		}
-		log.Println("endpoint: 완료")
-		return model.LoginResponse{Jwt: token}, nil
+		return dto.LoginResponse{Jwt: token}, nil
 	}
 }
 
@@ -29,42 +27,38 @@ func MakeGetUserEndpoint(s service.UserService) endpoint.Endpoint {
 		id := request.(int)
 		result, err := s.GetUser(id)
 		if err != nil {
-			return model.BasicResponse{Code: err.Error()}, err
+			return dto.BasicResponse{Code: err.Error()}, err
 		}
 		return result, nil
 	}
 }
 func MakeGoogleLoginEndpoint(s service.UserService) endpoint.Endpoint {
-	log.Println("endpoint: 호출")
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(model.LoginRequest)
-		token, err := s.GoogleLogin(req.IdToken, req.User)
+		req := request.(dto.LoginRequest)
+		token, err := s.GoogleLogin(req.IdToken, req.UserRequest)
 		if err != nil {
-			return model.LoginResponse{Err: err.Error()}, err
+			return dto.LoginResponse{Err: err.Error()}, err
 		}
-		log.Println("endpoint: 완료")
-		return model.LoginResponse{Jwt: token}, nil
+		return dto.LoginResponse{Jwt: token}, nil
 	}
 }
 func MakeKakaoLoginEndpoint(s service.UserService) endpoint.Endpoint {
-	log.Println("endpoint: 호출")
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(model.LoginRequest)
-		token, err := s.KakaoLogin(req.IdToken, req.User)
+		req := request.(dto.LoginRequest)
+		token, err := s.KakaoLogin(req.IdToken, req.UserRequest)
 		if err != nil {
-			return model.LoginResponse{Err: err.Error()}, err
+			return dto.LoginResponse{Err: err.Error()}, err
 		}
-		log.Println("endpoint: 완료")
-		return model.LoginResponse{Jwt: token}, nil
+		return dto.LoginResponse{Jwt: token}, nil
 	}
 }
 func MakeSetUserEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		user := request.(model.User)
+		user := request.(dto.UserRequest)
 		code, err := s.SetUser(user)
 		if err != nil {
-			return model.BasicResponse{Code: err.Error()}, err
+			return dto.BasicResponse{Code: err.Error()}, err
 		}
-		return model.BasicResponse{Code: code}, nil
+		return dto.BasicResponse{Code: code}, nil
 	}
 }

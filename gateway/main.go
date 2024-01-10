@@ -44,7 +44,7 @@ func main() {
 	setupSwaggerUIProxy(router, "/alarm-service/swagger/*proxyPath", "http://localhost:44441/swagger/")
 	setupSwaggerUIProxy(router, "/inquire-service/swagger/*proxyPath", "http://localhost:44442/swagger/")
 	// API 게이트웨이 서버 시작
-	router.Run(":44444")
+	router.Run(":50000")
 }
 
 // Swagger 문서에 대한 리버스 프록시를 설정

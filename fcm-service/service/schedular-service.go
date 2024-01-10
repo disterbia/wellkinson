@@ -59,6 +59,7 @@ func sendPendingNotifications(db *gorm.DB) {
 }
 
 func shouldSendNotification(now time.Time, alarm model.Alarm) bool {
+	// sunday = 0, ...
 	currentWeekday := int(now.Weekday())
 	alarmWeekdays := strings.Split(alarm.Week, ",")
 	alarmTime, _ := time.Parse("15:04", alarm.Timestamp)
@@ -83,8 +84,8 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 
 	message := &messaging.Message{
 		Data: map[string]string{
-			"startAt":            alarm.StartAt,
-			"endAt":              alarm.EndAt,
+			"start_at":           alarm.StartAt,
+			"end_at":             alarm.EndAt,
 			"uid":                strconv.Itoa(alarm.Uid),
 			"type":               alarm.Type,
 			"notification_count": strconv.Itoa(notification_count),

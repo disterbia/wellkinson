@@ -9,6 +9,7 @@ import (
 	"errors"
 	"log"
 
+	"inquire-service/dto"
 	pb "inquire-service/proto"
 
 	"google.golang.org/grpc"
@@ -16,9 +17,10 @@ import (
 )
 
 type InquireService interface {
-	AnswerInquire(answer model.InquireReply) (string, error)
-	SendInquire(inquire model.Inquire) (string, error)
-	GetMyInquires(id int, page int, startDate, endDate string) ([]model.Inquire, error)
+	AnswerInquire(answer dto.InquireReplyRequest) (string, error)
+	SendInquire(inquire dto.InquireRequest) (string, error)
+	GetMyInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error)
+	GetAllInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error)
 }
 
 type inquireService struct {
@@ -33,7 +35,7 @@ func NewInquireService(db *gorm.DB, conn *grpc.ClientConn) InquireService {
 		emailClient: emailClient,
 	}
 }
-func (service *inquireService) GetMyInquires(id int, page int, startDate, endDate string) ([]model.Inquire, error) {
+func (service *inquireService) GetMyInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error) {
 
 	if startDate != "" {
 		if err := util.ValidateDate(startDate); err != nil {
@@ -57,17 +59,80 @@ func (service *inquireService) GetMyInquires(id int, page int, startDate, endDat
 	if endDate != "" {
 		query = query.Where("created <= ?", endDate)
 	}
-
+	query = query.Order("id DESC")
 	result := query.Offset(offset).Limit(pageSize).Preload("Replies").Find(&inquires)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return inquires, nil
+	var inquireResponses []dto.InquireResponse
+
+	if err := util.CopyStruct(inquires, &inquireResponses); err != nil {
+		return []dto.InquireResponse{}, err
+	}
+
+	return inquireResponses, nil
 }
 
-func (service *inquireService) SendInquire(inquire model.Inquire) (string, error) {
+func (service *inquireService) GetAllInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error) {
+
+	if startDate != "" {
+		if err := util.ValidateDate(startDate); err != nil {
+			return nil, err
+		}
+	}
+	if endDate != "" {
+		if err := util.ValidateDate(endDate); err != nil {
+			return nil, err
+		}
+	}
+
+	pageSize := 10
+	var inquires []model.Inquire
+	offset := page * pageSize
+
+	var user model.User
+	result := service.db.First(&user, id)
+
+	if result.Error != nil {
+		return nil, errors.New("db error")
+	}
+
+	if !user.IsAdmin {
+		return nil, errors.New("unauthorized: user is not an admin")
+	}
+
+	query := service.db.Model(&model.Inquire{})
+
+	if startDate != "" {
+		query = query.Where("created >= ?", startDate)
+	}
+	if endDate != "" {
+		query = query.Where("created <= ?", endDate)
+	}
+	query = query.Order("id DESC")
+	result = query.Offset(offset).Limit(pageSize).Preload("Replies").Find(&inquires)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var inquireResponses []dto.InquireResponse
+	if err := util.CopyStruct(inquires, &inquireResponses); err != nil {
+		return []dto.InquireResponse{}, err
+	}
+
+	return inquireResponses, nil
+}
+
+func (service *inquireService) SendInquire(inquireRequest dto.InquireRequest) (string, error) {
+	var inquire model.Inquire
+	if err := util.CopyStruct(inquireRequest, &inquire); err != nil {
+		return "", err
+	}
+
+	inquire.Uid = inquireRequest.Uid
 	result := service.db.Save(&inquire)
 
 	if result.Error != nil {
@@ -76,23 +141,24 @@ func (service *inquireService) SendInquire(inquire model.Inquire) (string, error
 	return "200", nil
 }
 
-func (service *inquireService) AnswerInquire(answer model.InquireReply) (string, error) {
+func (service *inquireService) AnswerInquire(inquireReplyRequest dto.InquireReplyRequest) (string, error) {
 	var user model.User
 	var inquire model.Inquire
+	var inquireReply model.InquireReply
 
-	result := service.db.First(&user, answer.Uid)
+	result := service.db.First(&user, inquireReplyRequest.Uid)
 
 	if result.Error != nil {
 		return "", errors.New("db error")
 	}
 
-	result2 := service.db.First(&inquire, answer.InquireId)
+	result2 := service.db.First(&inquire, inquireReplyRequest.InquireId)
 
 	if result2.Error != nil {
 		return "", errors.New("db error2")
 	}
 
-	if answer.ReplyType { // true = 답변
+	if inquireReplyRequest.ReplyType { // true = 답변
 		if !user.IsAdmin {
 			return "", errors.New("unauthorized: user is not an admin")
 		}
@@ -102,8 +168,11 @@ func (service *inquireService) AnswerInquire(answer model.InquireReply) (string,
 		}
 	}
 
-	answer.Id = 0
-	result = service.db.Save(&answer)
+	if err := util.CopyStruct(inquireReplyRequest, &inquireReply); err != nil {
+		return "", err
+	}
+	inquireReply.Uid = inquireReplyRequest.Uid
+	result = service.db.Save(&inquireReply)
 
 	if result.Error != nil {
 		return "", errors.New("db error")
@@ -111,12 +180,12 @@ func (service *inquireService) AnswerInquire(answer model.InquireReply) (string,
 
 	go func() {
 		reponse, err := service.emailClient.SendEmail(context.Background(), &pb.EmailRequest{
-			Email:        inquire.Email,                                       // 받는 사람의 이메일
-			Created:      inquire.Created.Format("2006년 01월 02일 15시 04분 05초"), // 문의 생성 날짜
-			Title:        inquire.Title,                                       // 이메일 제목
-			Content:      inquire.Content,                                     // 문의 내용
-			ReplyContent: answer.Content,                                      // 답변 내용
-			ReplyCreated: answer.Created.Format("2006년 01월 02일 15시 04분 05초"),  // 답변 생성 날짜
+			Email:        inquire.Email,        // 받는 사람의 이메일
+			Created:      inquire.Created,      // 문의 생성 날짜
+			Title:        inquire.Title,        // 이메일 제목
+			Content:      inquire.Content,      // 문의 내용
+			ReplyContent: inquireReply.Content, // 답변 내용
+			ReplyCreated: inquireReply.Created, // 답변 생성 날짜
 		})
 		if err != nil {
 			log.Printf("Failed to send email: %v", err)

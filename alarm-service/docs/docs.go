@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/remove-alarm": {
+        "/remove-alarm/{id}": {
             "post": {
                 "description": "알람삭제시 호출",
                 "consumes": [
@@ -30,32 +30,29 @@ const docTemplate = `{
                 "summary": "알람설정",
                 "parameters": [
                     {
-                        "description": "요청 DTO - 알람데이터",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/transport.Alarm"
-                        }
+                        "type": "string",
+                        "description": "알람ID",
+                        "name": "id",
+                        "in": "path"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "성공시 200 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.BasicResponse"
+                            "$ref": "#/definitions/dto.BasicResponse"
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -81,7 +78,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transport.Alarm"
+                            "$ref": "#/definitions/dto.AlarmRequest"
                         }
                     }
                 ],
@@ -89,19 +86,19 @@ const docTemplate = `{
                     "200": {
                         "description": "성공시 200 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.BasicResponse"
+                            "$ref": "#/definitions/dto.BasicResponse"
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -109,41 +106,37 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "transport.Alarm": {
+        "dto.AlarmRequest": {
             "type": "object",
             "properties": {
                 "body": {
                     "type": "string"
                 },
-                "endAt": {
+                "end_at": {
                     "type": "string",
                     "example": "yyyy-mm-dd"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "startAt": {
+                "start_at": {
                     "type": "string",
                     "example": "yyyy-mm-dd"
                 },
                 "timestamp": {
                     "type": "string",
-                    "example": "hh:mm"
+                    "example": "HH:mm"
                 },
                 "type": {
                     "type": "string"
                 },
-                "uid": {
-                    "description": "User ID의 외래키",
-                    "type": "integer"
-                },
                 "week": {
-                    "description": "\"3,4,5,6\" 형식",
-                    "type": "string"
+                    "type": "string",
+                    "example": "0,4,6 (sunday:0,...)"
                 }
             }
         },
-        "transport.BasicResponse": {
+        "dto.BasicResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -151,13 +144,11 @@ const docTemplate = `{
                 }
             }
         },
-        "transport.ErrorResponse": {
+        "dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "err": {
-                    "description": "wwwwww",
-                    "type": "string",
-                    "example": "account name"
+                    "type": "string"
                 }
             }
         }

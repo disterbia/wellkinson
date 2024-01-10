@@ -1,0 +1,63 @@
+definitions:
+  dto.BasicResponse:
+    properties:
+      code:
+        type: string
+    type: object
+  dto.DietPresetRequest:
+    properties:
+      foods:
+        items:
+          $ref: '#/definitions/dto.FoodRequest'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.ErrorResponse:
+    properties:
+      err:
+        type: string
+    type: object
+  dto.FoodRequest:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      preset_id:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /save-preset:
+    post:
+      description: 식단생성시 Id 생략
+      parameters:
+      - description: 요청 DTO - 답변데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DietPresetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 식단
+      tags:
+      - 식단생성/수정
+swagger: "2.0"

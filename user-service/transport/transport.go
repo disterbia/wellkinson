@@ -1,11 +1,11 @@
-// /user-service/pkg/transport/transport.go
+// /user-service/transport/transport.go
 
 package transport
 
 import (
-	"common/model"
 	"common/util"
 	"net/http"
+	"user-service/dto"
 
 	kitEndpoint "github.com/go-kit/kit/endpoint"
 
@@ -17,14 +17,14 @@ import (
 // @Description 구글로그인 성공시 호출
 // @Accept  json
 // @Produce  json
-// @Param request body LoginRequest true "요청 DTO - idToken,기본값 데이터"
-// @Success 200 {object} SuccessResponse "성공시 JWT 토큰 반환"
-// @Failure 400 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Failure 500 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터"
+// @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /google-login [post]
 func GoogleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req model.LoginRequest
+		var req dto.LoginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -36,7 +36,7 @@ func GoogleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.(model.LoginResponse)
+		resp := response.(dto.LoginResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }
@@ -46,15 +46,15 @@ func GoogleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 카카오로그인 성공시 호출
 // @Accept  json
 // @Produce  json
-// @Param request body LoginRequest true "요청 DTO - dToken,기본값 데이터"
-// @Success 200 {object} SuccessResponse "성공시 JWT 토큰 반환"
-// @Failure 400 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Failure 500 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Param request body dto.LoginRequest true "요청 DTO - dToken,기본값 데이터"
+// @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /kakao-login [post]
 func KakaoLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-		var req model.LoginRequest
+		var req dto.LoginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -66,7 +66,7 @@ func KakaoLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.(model.LoginResponse)
+		resp := response.(dto.LoginResponse)
 		c.JSON(http.StatusOK, resp)
 
 	}
@@ -78,8 +78,8 @@ func KakaoLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Success 200 {object} SuccessResponse "성공시 JWT 토큰 반환"
-// @Failure 500 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Security jwt
 // @Router /auto-login [post]
 func AutoLoginHandler(autoLoginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
@@ -98,7 +98,7 @@ func AutoLoginHandler(autoLoginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.(model.LoginResponse)
+		resp := response.(dto.LoginResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }
@@ -109,10 +109,10 @@ func AutoLoginHandler(autoLoginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param request body User true "요청 DTO - 업데이트 할 데이터"
-// @Success 200 {object} BasicResponse "성공시 200 반환"
-// @Failure 400 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Failure 500 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Param request body dto.UserRequest true "요청 DTO - 업데이트 할 데이터/ ture:남성"
+// @Success 200 {object} dto.BasicResponse "성공시 200 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /set-user [post]
 func SetUserHandler(setUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -123,7 +123,7 @@ func SetUserHandler(setUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		var req model.User
+		var req dto.UserRequest
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -138,7 +138,7 @@ func SetUserHandler(setUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.(model.BasicResponse)
+		resp := response.(dto.BasicResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }
@@ -149,9 +149,9 @@ func SetUserHandler(setUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Success 200 {object} User "성공시 유저 객체 반환"
-// @Failure 400 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Failure 500 {object} ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Success 200 {object} dto.UserResponse "성공시 유저 객체 반환/ ture:남성"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /get-user [post]
 func GetUserHandler(getUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -168,7 +168,7 @@ func GetUserHandler(getUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.(model.User)
+		resp := response.(dto.UserResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }

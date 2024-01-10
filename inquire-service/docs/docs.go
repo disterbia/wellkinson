@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/get-inquires": {
+        "/all-inquires": {
             "get": {
                 "description": "관리자 문의내역 확인시 호출",
                 "produces": [
@@ -51,20 +51,78 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/transport.Inquire"
+                                "$ref": "#/definitions/dto.InquireResponse"
                             }
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/get-inquires": {
+            "get": {
+                "description": "나의문의보기시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "문의조회(본인)"
+                ],
+                "summary": "문의관련",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "페이지 번호 default 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "시작날짜 yyyy-mm-dd",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "종료날짜 yyyy-mm-dd",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "문의내역 배열 반환",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.InquireResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -90,7 +148,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transport.InquireReply"
+                            "$ref": "#/definitions/dto.InquireReplyRequest"
                         }
                     }
                 ],
@@ -98,19 +156,19 @@ const docTemplate = `{
                     "200": {
                         "description": "성공시 200 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.BasicResponse"
+                            "$ref": "#/definitions/dto.BasicResponse"
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -136,7 +194,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transport.Inquire"
+                            "$ref": "#/definitions/dto.InquireRequest"
                         }
                     }
                 ],
@@ -144,19 +202,19 @@ const docTemplate = `{
                     "200": {
                         "description": "성공시 200 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.BasicResponse"
+                            "$ref": "#/definitions/dto.BasicResponse"
                         }
                     },
                     "400": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "요청 처리 실패시 오류 메시지 반환",
                         "schema": {
-                            "$ref": "#/definitions/transport.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -164,7 +222,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "transport.BasicResponse": {
+        "dto.BasicResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -172,7 +230,7 @@ const docTemplate = `{
                 }
             }
         },
-        "transport.ErrorResponse": {
+        "dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "err": {
@@ -181,34 +239,21 @@ const docTemplate = `{
                 }
             }
         },
-        "transport.Inquire": {
+        "dto.InquireReplyRequest": {
             "type": "object",
             "properties": {
                 "content": {
                     "type": "string"
                 },
-                "created": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
+                "inquire_id": {
                     "type": "integer"
                 },
-                "title": {
-                    "type": "string"
-                },
-                "uid": {
-                    "description": "user 아이디",
-                    "type": "integer"
-                },
-                "updated": {
-                    "type": "string"
+                "reply_type": {
+                    "type": "boolean"
                 }
             }
         },
-        "transport.InquireReply": {
+        "dto.InquireReplyResponse": {
             "type": "object",
             "properties": {
                 "content": {
@@ -226,8 +271,48 @@ const docTemplate = `{
                 "reply_type": {
                     "type": "boolean"
                 },
-                "uid": {
+                "updated": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.InquireRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.InquireResponse": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "created": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer"
+                },
+                "replies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.InquireReplyResponse"
+                    }
+                },
+                "title": {
+                    "type": "string"
                 },
                 "updated": {
                     "type": "string"
