@@ -1,6 +1,9 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -73,14 +76,34 @@ type DietPreset struct {
 	Id    int
 	Uid   int
 	Name  string
-	Foods []Food
+	Foods FoodSlice `gorm:"type:json"`
 }
 
-type Food struct {
-	TimestampModel
-	Id       int
-	PresetId int `json:"preset_id"`
-	Name     string
+type FoodSlice []string
+
+// Scan - sql.Scanner 구현
+func (f *FoodSlice) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("failed to unmarshal JSONB value")
+	}
+
+	result := []string{}
+	err := json.Unmarshal(bytes, &result)
+	if err != nil {
+		return err
+	}
+
+	*f = result
+	return nil
+}
+
+// Value - driver.Valuer 구현
+func (f FoodSlice) Value() (driver.Value, error) {
+	if f == nil {
+		return nil, nil
+	}
+	return json.Marshal(f)
 }
 
 func (tm *TimestampModel) BeforeCreate(tx *gorm.DB) (err error) {
@@ -89,10 +112,5 @@ func (tm *TimestampModel) BeforeCreate(tx *gorm.DB) (err error) {
 		tm.Created = now
 	}
 	tm.Updated = now
-	return
-}
-
-func (tm *TimestampModel) BeforeSave(tx *gorm.DB) (err error) {
-	tm.Updated = time.Now().Format("2006-01-02 15:04:05")
 	return
 }

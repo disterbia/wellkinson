@@ -37,6 +37,7 @@ func main() {
 
 	saveAlarmEndpoint := endpoint.SaveAlarmEndpoint(alarmSvc)
 	removeeAlarmEndpoint := endpoint.RemoveAlarmEndpoint(alarmSvc)
+	getAlarmEndpoint := endpoint.GetEndpoint(alarmSvc)
 
 	router := gin.Default()
 
@@ -45,6 +46,7 @@ func main() {
 
 	router.POST("/save-alarm", transport.SaveAlarmHandler(saveAlarmEndpoint))
 	router.POST("/remove-alarm/:id", transport.RemoveAlarmHandler(removeeAlarmEndpoint))
+	router.GET("/get-alarms", transport.GetHandler(getAlarmEndpoint))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Run(":44444")

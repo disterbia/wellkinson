@@ -74,7 +74,7 @@ const docTemplate = `{
                 "foods": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.FoodRequest"
+                        "type": "string"
                     }
                 },
                 "id": {
@@ -90,20 +90,6 @@ const docTemplate = `{
             "properties": {
                 "err": {
                     "type": "string"
-                }
-            }
-        },
-        "dto.FoodRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "preset_id": {
-                    "type": "integer"
                 }
             }
         }

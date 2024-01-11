@@ -21,6 +21,8 @@ type InquireService interface {
 	SendInquire(inquire dto.InquireRequest) (string, error)
 	GetMyInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error)
 	GetAllInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error)
+	RemoveInquire(id int, uid int) (string, error)
+	RemoveReply(id int, uid int) (string, error)
 }
 
 type inquireService struct {
@@ -52,7 +54,7 @@ func (service *inquireService) GetMyInquires(id int, page int, startDate, endDat
 	var inquires []model.Inquire
 	offset := page * pageSize
 
-	query := service.db.Where("uid = ?", id)
+	query := service.db.Where("uid = ? AND level = 0", id)
 	if startDate != "" {
 		query = query.Where("created >= ?", startDate)
 	}
@@ -112,7 +114,7 @@ func (service *inquireService) GetAllInquires(id int, page int, startDate, endDa
 		query = query.Where("created <= ?", endDate)
 	}
 	query = query.Order("id DESC")
-	result = query.Offset(offset).Limit(pageSize).Preload("Replies").Find(&inquires)
+	result = query.Offset(offset).Limit(pageSize).Preload("Replies", "level= 0").Find(&inquires)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -133,7 +135,7 @@ func (service *inquireService) SendInquire(inquireRequest dto.InquireRequest) (s
 	}
 
 	inquire.Uid = inquireRequest.Uid
-	result := service.db.Save(&inquire)
+	result := service.db.Create(&inquire)
 
 	if result.Error != nil {
 		return "", errors.New("db error")
@@ -172,7 +174,7 @@ func (service *inquireService) AnswerInquire(inquireReplyRequest dto.InquireRepl
 		return "", err
 	}
 	inquireReply.Uid = inquireReplyRequest.Uid
-	result = service.db.Save(&inquireReply)
+	result = service.db.Create(&inquireReply)
 
 	if result.Error != nil {
 		return "", errors.New("db error")
@@ -193,5 +195,26 @@ func (service *inquireService) AnswerInquire(inquireReplyRequest dto.InquireRepl
 		log.Printf(" send email: %v", reponse)
 	}()
 
+	return "200", nil
+}
+
+func (service *inquireService) RemoveInquire(id int, uid int) (string, error) {
+
+	var inquire model.Inquire
+	result := service.db.Model(&inquire).Where("id = ? AND uid = ?", id, uid).Select("level").Updates(map[string]interface{}{"level": 10})
+	if result.Error != nil {
+		return "", errors.New("db error")
+	}
+	return "200", nil
+}
+
+func (service *inquireService) RemoveReply(id int, uid int) (string, error) {
+
+	var inquireReply model.InquireReply
+	result := service.db.Model(&inquireReply).Where("id = ? AND uid = ?", id, uid).Select("level").Updates(map[string]interface{}{"level": 10})
+
+	if result.Error != nil {
+		return "", errors.New("db error")
+	}
 	return "200", nil
 }

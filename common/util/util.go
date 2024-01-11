@@ -4,6 +4,7 @@ import (
 	"common/model"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -114,11 +115,13 @@ func (rl *RateLimiter) Middleware() gin.HandlerFunc {
 func CopyStruct(input interface{}, output interface{}) error {
 	jsonData, err := json.Marshal(input)
 	if err != nil {
+		log.Println("aaaaa")
 		return err
 	}
 
 	err = json.Unmarshal(jsonData, output)
 	if err != nil {
+		log.Println("vvvvv")
 		return err
 	}
 

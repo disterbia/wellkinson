@@ -19,3 +19,16 @@ func SavePresetEndpoint(s service.DietPresetService) endpoint.Endpoint {
 		return dto.BasicResponse{Code: code}, nil
 	}
 }
+
+func GetPresetsEndpoint(s service.DietPresetService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(int)
+		page := reqMap["page"].(int)
+		inquires, err := s.GetDietPresets(id, page)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return inquires, nil
+	}
+}

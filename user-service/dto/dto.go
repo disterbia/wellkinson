@@ -1,6 +1,6 @@
+// /user-service/dto/dto.go
 package dto
 
-// @Description Birthday: 사용자의 생일, Gender: 사용자의 성별 (true: 남성, false: 여성)
 type UserRequest struct {
 	Id                   int    `json:"-"`
 	Email                string `json:"-"`

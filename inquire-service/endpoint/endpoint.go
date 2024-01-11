@@ -32,6 +32,31 @@ func SendEndpoint(s service.InquireService) endpoint.Endpoint {
 	}
 }
 
+func RemoveInquireEndpoint(s service.InquireService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(int)
+		uid := reqMap["uid"].(int)
+		code, err := s.RemoveInquire(id, uid)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+func RemoveReplyEndpoint(s service.InquireService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(int)
+		uid := reqMap["uid"].(int)
+		code, err := s.RemoveReply(id, uid)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
 func GetEndpoint(s service.InquireService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})

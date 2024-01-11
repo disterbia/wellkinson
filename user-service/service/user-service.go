@@ -106,7 +106,7 @@ func (service *userService) GoogleLogin(idToken string, userRequest dto.UserRequ
 
 	var user model.User
 
-	if err := util.CopyStruct(userRequest, user); err != nil {
+	if err := util.CopyStruct(userRequest, &user); err != nil {
 		return "", err
 	}
 

@@ -47,14 +47,18 @@ func main() {
 	sendEndpoint := endpoint.SendEndpoint(inquireSvc)
 	getEndpoint := endpoint.GetEndpoint(inquireSvc)
 	allEndpoint := endpoint.GetAllEndpoint(inquireSvc)
+	removeInquireEndpoint := endpoint.RemoveInquireEndpoint(inquireSvc)
+	reomoveReplyEndpoint := endpoint.RemoveReplyEndpoint(inquireSvc)
 
 	router := gin.Default()
 
 	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 20)
 	router.Use(rateLimiter.Middleware())
 
-	router.POST("/inquire-answer", transport.AnswerHandler(answerEndpoint))
+	router.POST("/inquire-reply", transport.AnswerHandler(answerEndpoint))
 	router.POST("/send-inquire", transport.SendHandler(sendEndpoint))
+	router.POST("/remove-inquire/:id", transport.RemoveInquireHandler(removeInquireEndpoint))
+	router.POST("/remove-reply/:id", transport.RemoveReplyHandler(reomoveReplyEndpoint))
 	router.GET("/get-inquires", transport.GetHandler(getEndpoint))
 	router.GET("/all-inquires", transport.GetAllHandler(allEndpoint))
 

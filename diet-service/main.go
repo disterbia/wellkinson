@@ -1,3 +1,4 @@
+// /diet-service/main.go
 package main
 
 import (
@@ -33,12 +34,14 @@ func main() {
 	svc := service.NewDietPresetService(database)
 
 	savePresetEndpoint := endpoint.SavePresetEndpoint(svc)
+	getPresetsEndpoint := endpoint.GetPresetsEndpoint(svc)
 
 	router := gin.Default()
 	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 100)
 	router.Use(rateLimiter.Middleware())
 
-	router.POST("/google-login", transport.SavePresetHandler(savePresetEndpoint))
+	router.POST("/save-preset", transport.SavePresetHandler(savePresetEndpoint))
+	router.GET("/get-preset", transport.GetPresetsHandler(getPresetsEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":44444")
