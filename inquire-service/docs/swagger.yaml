@@ -67,7 +67,7 @@ info:
 paths:
   /all-inquires:
     get:
-      description: 관리자 문의내역 확인시 호출
+      description: 관리자 문의내역 확인시 호출 (10개씩)
       parameters:
       - description: 페이지 번호 default 0
         in: query
@@ -98,9 +98,9 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 문의관련
+      summary: 문의조회(관리자)
       tags:
-      - 문의조회(관리자)
+      - 문의
   /get-inquires:
     get:
       consumes:
@@ -136,14 +136,14 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 문의관련
+      summary: 문의조회(본인)
       tags:
-      - 문의조회(본인)
-  /inquire-answer:
+      - 문의
+  /inquire-reply:
     post:
       consumes:
       - application/json
-      description: 답변등록시 호출
+      description: 답변/추가문의 등록시 호출
       parameters:
       - description: 요청 DTO - 답변데이터
         in: body
@@ -166,9 +166,65 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 문의관련
+      summary: 답변/추가문의
       tags:
-      - 답변하기
+      - 문의
+  /remove-inquire/{id}:
+    post:
+      consumes:
+      - application/json
+      description: 문의삭제시 호출
+      parameters:
+      - description: 문의ID
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 문의삭제
+      tags:
+      - 문의
+  /remove-reply/{id}:
+    post:
+      consumes:
+      - application/json
+      description: 문의답변/추가문의 삭제시 호출
+      parameters:
+      - description: 답변/추가문의ID
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 문의답변/추가문의 삭제
+      tags:
+      - 문의
   /send-inquire:
     post:
       consumes:
@@ -196,7 +252,7 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 문의관련
+      summary: 문의하기
       tags:
-      - 문의하기
+      - 문의
 swagger: "2.0"

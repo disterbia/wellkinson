@@ -20,6 +20,31 @@ definitions:
         example: 0,4,6 (sunday:0,...)
         type: string
     type: object
+  dto.AlarmResponse:
+    properties:
+      body:
+        type: string
+      created:
+        type: string
+      end_at:
+        example: yyyy-mm-dd
+        type: string
+      id:
+        type: integer
+      start_at:
+        example: yyyy-mm-dd
+        type: string
+      timestamp:
+        example: HH:mm
+        type: string
+      type:
+        type: string
+      updated:
+        type: string
+      week:
+        example: 0,4,6 (sunday:0,...)
+        type: string
+    type: object
   dto.BasicResponse:
     properties:
       code:
@@ -33,6 +58,34 @@ definitions:
 info:
   contact: {}
 paths:
+  /get-presets:
+    get:
+      description: 알람조회시 호출 (10개씩)
+      parameters:
+      - description: 페이지 번호 default 0
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            items:
+              $ref: '#/definitions/dto.AlarmResponse'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 알람조회
+      tags:
+      - 알람
   /remove-alarm/{id}:
     post:
       consumes:
@@ -58,14 +111,14 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 알람설정
+      summary: 알람삭제
       tags:
-      - 알람삭제
+      - 알람
   /save-alarm:
     post:
       consumes:
       - application/json
-      description: 알람생성시 호출
+      description: 알람생성시 id생략 / 알람수정시 id 포함
       parameters:
       - description: 요청 DTO - 알람데이터
         in: body
@@ -88,7 +141,7 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 알람설정
+      summary: 알람생성/수정
       tags:
-      - 알람생성
+      - 알람
 swagger: "2.0"

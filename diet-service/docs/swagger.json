@@ -4,6 +4,92 @@
         "contact": {}
     },
     "paths": {
+        "/get-presets": {
+            "get": {
+                "description": "식단조회시 호출 (10개씩)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "식단"
+                ],
+                "summary": "식단조회",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "페이지 번호 default 0",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.DietPresetResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/remove-preset/{id}": {
+            "post": {
+                "description": "식단삭제시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "식단"
+                ],
+                "summary": "식단삭제",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "식단ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/save-preset": {
             "post": {
                 "description": "식단생성시 Id 생략",
@@ -11,9 +97,9 @@
                     "application/json"
                 ],
                 "tags": [
-                    "식단생성/수정"
+                    "식단"
                 ],
-                "summary": "식단",
+                "summary": "식단생성/수정",
                 "parameters": [
                     {
                         "description": "요청 DTO - 답변데이터",
@@ -70,6 +156,29 @@
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.DietPresetResponse": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "foods": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated": {
                     "type": "string"
                 }
             }

@@ -12,8 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary 구글로그인
 // @Tags 로그인
+// @Summary 구글로그인
 // @Description 구글로그인 성공시 호출
 // @Accept  json
 // @Produce  json
@@ -41,8 +41,8 @@ func GoogleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 카카오로그인
 // @Tags 로그인
+// @Summary 카카오로그인
 // @Description 카카오로그인 성공시 호출
 // @Accept  json
 // @Produce  json
@@ -103,8 +103,8 @@ func AutoLoginHandler(autoLoginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 유저 데이터 변경
 // @Tags 회원상태 변경(본인)
+// @Summary 유저 데이터 변경
 // @Description 유저 상태영구변경시 호출
 // @Accept  json
 // @Produce  json
@@ -143,8 +143,8 @@ func SetUserHandler(setUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 유저 조회
 // @Tags 회원조회(본인)
+// @Summary 유저 조회
 // @Description 내 정보 조회시 호출
 // @Accept  json
 // @Produce  json

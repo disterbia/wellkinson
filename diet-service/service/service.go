@@ -13,6 +13,7 @@ import (
 type DietPresetService interface {
 	SaveDietPreset(presetRequest dto.DietPresetRequest) (string, error)
 	GetDietPresets(id int, page int) ([]dto.DietPresetResponse, error)
+	RemovePreset(id int, uid int) (string, error)
 }
 
 type dietPresetService struct {
@@ -66,5 +67,15 @@ func (service *dietPresetService) SaveDietPreset(presetRequest dto.DietPresetReq
 		}
 	}
 
+	return "200", nil
+}
+
+func (service *dietPresetService) RemovePreset(id int, uid int) (string, error) {
+
+	result := service.db.Where("id=? AND uid= ?", id, uid).Delete(&model.DietPreset{})
+
+	if result.Error != nil {
+		return "", errors.New("db error")
+	}
 	return "200", nil
 }

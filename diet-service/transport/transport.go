@@ -11,8 +11,8 @@ import (
 	kitEndpoint "github.com/go-kit/kit/endpoint"
 )
 
-// @Summary 식단
-// @Tags 식단생성/수정
+// @Tags 식단
+// @Summary 식단생성/수정
 // @Description 식단생성시 Id 생략
 // @Produce  json
 // @Param request body dto.DietPresetRequest true "요청 DTO - 답변데이터"
@@ -45,8 +45,8 @@ func SavePresetHandler(savePresetEndpoint kitEndpoint.Endpoint) gin.HandlerFunc 
 	}
 }
 
-// @Summary 식단
-// @Tags 식단조회
+// @Tags 식단
+// @Summary 식단조회
 // @Description 식단조회시 호출 (10개씩)
 // @Produce  json
 // @Param  page  query int false  "페이지 번호 default 0"
@@ -82,5 +82,43 @@ func GetPresetsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 
 		resp := response.([]dto.DietPresetResponse)
 		c.JSON(http.StatusOK, resp)
+	}
+}
+
+// @Tags 식단
+// @Summary 식단삭제
+// @Description 식단삭제시 호출
+// @Accept  json
+// @Produce  json
+// @Param id path string ture "식단ID"
+// @Success 200 {object} dto.BasicResponse "성공시 200 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Router /remove-preset/{id} [post]
+func RemovePresetHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uid, _, err := util.VerifyJWT(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		alarmId := c.Param("id")
+		id, err := strconv.Atoi(alarmId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		response, err := removeEndpoint(c.Request.Context(), map[string]interface{}{
+			"uid": uid,
+			"id":  id,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.(dto.BasicResponse)
+		c.JSON(http.StatusOK, resp)
+
 	}
 }

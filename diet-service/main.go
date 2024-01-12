@@ -35,6 +35,7 @@ func main() {
 
 	savePresetEndpoint := endpoint.SavePresetEndpoint(svc)
 	getPresetsEndpoint := endpoint.GetPresetsEndpoint(svc)
+	removePresetsEndpoint := endpoint.RemovePresetEndpoint(svc)
 
 	router := gin.Default()
 	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 100)
@@ -42,6 +43,7 @@ func main() {
 
 	router.POST("/save-preset", transport.SavePresetHandler(savePresetEndpoint))
 	router.GET("/get-preset", transport.GetPresetsHandler(getPresetsEndpoint))
+	router.POST("/remove-preset/:id", transport.RemovePresetHandler(removePresetsEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":44444")

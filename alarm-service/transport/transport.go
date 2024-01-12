@@ -13,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary 알람설정
-// @Tags 알람생성/알람수정
+// @Tags 알람
+// @Summary  알람생성/수정
 // @Description 알람생성시 id생략 / 알람수정시 id 포함
 // @Accept  json
 // @Produce  json
@@ -48,8 +48,8 @@ func SaveAlarmHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 알람설정
-// @Tags 알람삭제
+// @Tags 알람
+// @Summary 알람삭제
 // @Description 알람삭제시 호출
 // @Accept  json
 // @Produce  json
@@ -86,8 +86,8 @@ func RemoveAlarmHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 알람
-// @Tags 알람조회
+// @Tags 알람
+// @Summary 알람조회
 // @Description 알람조회시 호출 (10개씩)
 // @Produce  json
 // @Param  page  query int false  "페이지 번호 default 0"

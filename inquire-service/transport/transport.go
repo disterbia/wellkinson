@@ -13,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary 문의관련
-// @Tags 답변/추가문의
+// @Tags 문의
+// @Summary 답변/추가문의
 // @Description 답변/추가문의 등록시 호출
 // @Accept  json
 // @Produce  json
@@ -48,8 +48,8 @@ func AnswerHandler(answerEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 문의관련
-// @Tags 문의하기
+// @Tags 문의
+// @Summary 문의하기
 // @Description 문의등록시 호출
 // @Accept  json
 // @Produce  json
@@ -83,8 +83,8 @@ func SendHandler(sendEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 문의관련
-// @Tags 문의조회(본인)
+// @Tags 문의
+// @Summary 문의조회(본인)
 // @Description 나의문의보기시 호출
 // @Accept  json
 // @Produce  json
@@ -123,8 +123,8 @@ func GetHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 문의관련
-// @Tags 문의조회(관리자)
+// @Tags 문의
+// @Summary 문의조회(관리자)
 // @Description 관리자 문의내역 확인시 호출 (10개씩)
 // @Produce  json
 // @Param  page  query  int  false  "페이지 번호 default 0"
@@ -162,8 +162,8 @@ func GetAllHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 문의관련
-// @Tags 문의삭제
+// @Tags 문의
+// @Summary 문의삭제
 // @Description 문의삭제시 호출
 // @Accept  json
 // @Produce  json
@@ -199,8 +199,8 @@ func RemoveInquireHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Summary 문의관련
-// @Tags 문의답변/추가문의 삭제
+// @Tags 문의
+// @Summary 문의답변/추가문의 삭제
 // @Description 문의답변/추가문의 삭제시 호출
 // @Accept  json
 // @Produce  json

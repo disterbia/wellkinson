@@ -17,14 +17,14 @@ const docTemplate = `{
     "paths": {
         "/all-inquires": {
             "get": {
-                "description": "관리자 문의내역 확인시 호출",
+                "description": "관리자 문의내역 확인시 호출 (10개씩)",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "문의조회(관리자)"
+                    "문의"
                 ],
-                "summary": "문의관련",
+                "summary": "문의조회(관리자)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -80,9 +80,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "문의조회(본인)"
+                    "문의"
                 ],
-                "summary": "문의관련",
+                "summary": "문의조회(본인)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -128,9 +128,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/inquire-answer": {
+        "/inquire-reply": {
             "post": {
-                "description": "답변등록시 호출",
+                "description": "답변/추가문의 등록시 호출",
                 "consumes": [
                     "application/json"
                 ],
@@ -138,9 +138,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "답변하기"
+                    "문의"
                 ],
-                "summary": "문의관련",
+                "summary": "답변/추가문의",
                 "parameters": [
                     {
                         "description": "요청 DTO - 답변데이터",
@@ -150,6 +150,92 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.InquireReplyRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/remove-inquire/{id}": {
+            "post": {
+                "description": "문의삭제시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "문의"
+                ],
+                "summary": "문의삭제",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "문의ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/remove-reply/{id}": {
+            "post": {
+                "description": "문의답변/추가문의 삭제시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "문의"
+                ],
+                "summary": "문의답변/추가문의 삭제",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "답변/추가문의ID",
+                        "name": "id",
+                        "in": "path"
                     }
                 ],
                 "responses": {
@@ -184,9 +270,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "문의하기"
+                    "문의"
                 ],
-                "summary": "문의관련",
+                "summary": "문의하기",
                 "parameters": [
                     {
                         "description": "요청 DTO - 문의데이터",

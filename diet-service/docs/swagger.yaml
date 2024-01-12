@@ -15,6 +15,21 @@ definitions:
       name:
         type: string
     type: object
+  dto.DietPresetResponse:
+    properties:
+      created:
+        type: string
+      foods:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      updated:
+        type: string
+    type: object
   dto.ErrorResponse:
     properties:
       err:
@@ -23,6 +38,62 @@ definitions:
 info:
   contact: {}
 paths:
+  /get-presets:
+    get:
+      description: 식단조회시 호출 (10개씩)
+      parameters:
+      - description: 페이지 번호 default 0
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            items:
+              $ref: '#/definitions/dto.DietPresetResponse'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 식단조회
+      tags:
+      - 식단
+  /remove-preset/{id}:
+    post:
+      consumes:
+      - application/json
+      description: 식단삭제시 호출
+      parameters:
+      - description: 식단ID
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 식단삭제
+      tags:
+      - 식단
   /save-preset:
     post:
       description: 식단생성시 Id 생략
@@ -48,7 +119,7 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 식단
+      summary: 식단생성/수정
       tags:
-      - 식단생성/수정
+      - 식단
 swagger: "2.0"
