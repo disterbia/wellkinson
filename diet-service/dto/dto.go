@@ -1,6 +1,12 @@
 // /diet-service/dto/dto.go
 package dto
 
+type GetPresetParams struct {
+	Page      int    `form:"page"`
+	StartDate string `form:"start_date"`
+	EndDate   string `form:"end_date"`
+}
+
 type DietPresetRequest struct {
 	Id    int
 	Uid   int `json:"-"`
@@ -8,14 +14,30 @@ type DietPresetRequest struct {
 	Foods []string
 }
 
-type DietPresetUpdate struct {
-	Name  string
-	Foods string
-}
-
 type DietPresetResponse struct {
 	Id      int
 	Name    string
+	Foods   []string
+	Created string
+	Updated string
+}
+
+type DietRequest struct {
+	Id     int
+	Uid    int `json:"-"`
+	Name   string
+	Time   string `example:"HH:mm"`
+	Type   int
+	Images []string `example:"base64 encoding string"`
+	Foods  []string
+}
+
+type DietResponse struct {
+	Id      int
+	Name    string
+	Time    string
+	Type    int
+	Images  []string
 	Foods   []string
 	Created string
 	Updated string

@@ -9,10 +9,10 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
-func SavePresetEndpoint(s service.DietPresetService) endpoint.Endpoint {
+func SavePresetEndpoint(s service.DietService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		dietPreset := request.(dto.DietPresetRequest)
-		code, err := s.SaveDietPreset(dietPreset)
+		code, err := s.SavePreset(dietPreset)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
@@ -20,12 +20,12 @@ func SavePresetEndpoint(s service.DietPresetService) endpoint.Endpoint {
 	}
 }
 
-func GetPresetsEndpoint(s service.DietPresetService) endpoint.Endpoint {
+func GetPresetsEndpoint(s service.DietService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
 		id := reqMap["id"].(int)
-		page := reqMap["page"].(int)
-		inquires, err := s.GetDietPresets(id, page)
+		queryParams := reqMap["queryParams"].(dto.GetPresetParams)
+		inquires, err := s.GetPresets(id, queryParams.Page, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
@@ -33,12 +33,23 @@ func GetPresetsEndpoint(s service.DietPresetService) endpoint.Endpoint {
 	}
 }
 
-func RemovePresetEndpoint(s service.DietPresetService) endpoint.Endpoint {
+func RemovePresetEndpoint(s service.DietService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
 		id := reqMap["id"].(int)
 		uid := reqMap["uid"].(int)
 		code, err := s.RemovePreset(id, uid)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
+func SaveDietEndpoint(s service.DietService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		diet := request.(dto.DietRequest)
+		code, err := s.SaveDiet(diet)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}

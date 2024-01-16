@@ -12,6 +12,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
@@ -24,18 +28,37 @@ func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
+		return
 	}
+
 	dbPath := os.Getenv("DB_PATH")
 	database, err := db.NewDB(dbPath)
 	if err != nil {
 		log.Println("Database connection error:", err)
+		return
 	}
 
-	svc := service.NewDietPresetService(database)
+	accessKey := os.Getenv("S3_ACCESS_KEY")
+	secretKey := os.Getenv("S3_SECRET_KEY")
+	bucket := os.Getenv("S3_BUCKET")
+	bucketUrl := os.Getenv("S3_BUCKET_URL")
+	s3sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("ap-northeast-2"),
+		Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
+	})
+
+	if err != nil {
+		log.Println("Database connection error:", err)
+		return
+	}
+
+	s3svc := s3.New(s3sess)
+	svc := service.NewDietService(database, s3svc, bucket, bucketUrl)
 
 	savePresetEndpoint := endpoint.SavePresetEndpoint(svc)
 	getPresetsEndpoint := endpoint.GetPresetsEndpoint(svc)
 	removePresetsEndpoint := endpoint.RemovePresetEndpoint(svc)
+	saveDietEndpoint := endpoint.SaveDietEndpoint(svc)
 
 	router := gin.Default()
 	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 100)
@@ -44,6 +67,7 @@ func main() {
 	router.POST("/save-preset", transport.SavePresetHandler(savePresetEndpoint))
 	router.GET("/get-preset", transport.GetPresetsHandler(getPresetsEndpoint))
 	router.POST("/remove-preset/:id", transport.RemovePresetHandler(removePresetsEndpoint))
+	router.POST("/save-diet", transport.SaveDietHandler(saveDietEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":44444")
