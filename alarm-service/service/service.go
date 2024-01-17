@@ -48,7 +48,7 @@ func (service *alarmService) SaveAlarm(alarmRequest dto.AlarmRequest) (string, e
 		return "", err
 	}
 	var alarm model.Alarm
-	result := service.db.First(&alarm, alarmRequest.Id)
+	result := service.db.Where("id=? AND uid=?", alarmRequest.Id, alarmRequest.Uid).First(&alarm)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		// 레코드가 존재하지 않으면 새 레코드 생성

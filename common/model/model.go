@@ -79,6 +79,31 @@ type DietPreset struct {
 	Foods FoodSlice `gorm:"type:json"`
 }
 
+type Diet struct {
+	TimestampModel
+	Id     int
+	Uid    int
+	Name   string
+	Time   string
+	Type   int
+	Images []Image
+	Foods  FoodSlice `gorm:"type:json"`
+}
+
+type Image struct {
+	TimestampModel
+	Id  int
+	Uid int
+
+	//부모 아이디
+	DietId int `json:"diet_id"`
+
+	//부모아이디 끝
+
+	Url          string
+	ThumbnailUrl string `json:"thumbnail_url"`
+}
+
 type FoodSlice []string
 
 // Scan - sql.Scanner 구현

@@ -2,23 +2,19 @@
 package service
 
 import (
-	"bytes"
 	"common/model"
 	"common/util"
 	"diet-service/dto"
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"image"
-	"image/jpeg"
 	"log"
-	"strings"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/google/uuid"
-	"github.com/nfnt/resize"
 
 	"gorm.io/gorm"
 )
@@ -28,6 +24,8 @@ type DietService interface {
 	GetPresets(id int, page int, startDate, endDate string) ([]dto.DietPresetResponse, error)
 	RemovePreset(id int, uid int) (string, error)
 	SaveDiet(diet dto.DietRequest) (string, error)
+	GetDiets(id int, page int, startDate, endDate string) ([]dto.DietResponse, error)
+	RemoveDiet(id int, uid int) (string, error)
 }
 
 type dietService struct {
@@ -39,6 +37,59 @@ type dietService struct {
 
 func NewDietService(db *gorm.DB, s3svc *s3.S3, bucket string, bucketUrl string) DietService {
 	return &dietService{db: db, s3svc: s3svc, bucket: bucket, bucketUrl: bucketUrl}
+}
+
+func (service *dietService) GetDiets(id int, page int, startDate, endDate string) ([]dto.DietResponse, error) {
+	pageSize := 10
+	var diet []model.Diet
+	offset := page * pageSize
+
+	query := service.db.Where("uid = ?", id)
+	if startDate != "" {
+		query = query.Where("created >= ?", startDate)
+	}
+	if endDate != "" {
+		query = query.Where("created <= ?", endDate+" 23:59:59")
+	}
+	query = query.Order("id DESC")
+	result := query.Offset(offset).Limit(pageSize).Preload("Images").Find(&diet)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var dietResponses []dto.DietResponse
+	if err := util.CopyStruct(diet, &dietResponses); err != nil {
+		return nil, err
+	}
+
+	for i := range dietResponses {
+		for j := range dietResponses[i].Images {
+			// S3 객체 키를 추출 (URL에서)
+			urlkey := extractKeyFromUrl(dietResponses[i].Images[j].Url, service.bucket, service.bucketUrl)
+			thumbnailUrlkey := extractKeyFromUrl(dietResponses[i].Images[j].ThumbnailUrl, service.bucket, service.bucketUrl)
+			// 사전 서명된 URL을 생성
+			url, _ := service.s3svc.GetObjectRequest(&s3.GetObjectInput{
+				Bucket: aws.String(service.bucket),
+				Key:    aws.String(urlkey),
+			})
+			thumbnailUrl, _ := service.s3svc.GetObjectRequest(&s3.GetObjectInput{
+				Bucket: aws.String(service.bucket),
+				Key:    aws.String(thumbnailUrlkey),
+			})
+			urlStr, err := url.Presign(1 * time.Second) // URL은 1초 동안 유효
+			if err != nil {
+				return nil, err
+			}
+			thumbnailUrlStr, err := thumbnailUrl.Presign(5 * time.Minute)
+			if err != nil {
+				return nil, err
+			}
+			dietResponses[i].Images[j].Url = urlStr // 사전 서명된 URL로 업데이트
+			dietResponses[i].Images[j].ThumbnailUrl = thumbnailUrlStr
+		}
+	}
+	return dietResponses, nil
 }
 
 func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error) {
@@ -62,7 +113,7 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 
 	// DietRequest의 복사본 생성
 	dietRequestCopy := dietRequest
-	dietRequestCopy.Images = []string{} // Images 필드 초기화
+	dietRequestCopy.Images = []string{}
 
 	// DietRequest 복사본에서 Diet으로 필드 복사
 	if err := util.CopyStruct(dietRequestCopy, &diet); err != nil {
@@ -83,6 +134,8 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	images := make([]model.Image, len(dietRequest.Images))
 	errorsChan := make(chan error, len(dietRequest.Images))
 	uploadedFiles := make(chan string, len(dietRequest.Images)*2)
+
+	uidString := strconv.Itoa(diet.Uid)
 
 	for i, imgStr := range dietRequest.Images {
 		wg.Add(1)
@@ -118,7 +171,7 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 			}
 
 			// S3에 이미지 및 썸네일 업로드
-			fileName, thumbnailFileName, err := uploadImagesToS3(imgData, thumbnailData, contentType, ext, service.s3svc, service.bucket, service.bucketUrl)
+			fileName, thumbnailFileName, err := uploadImagesToS3(imgData, thumbnailData, contentType, ext, service.s3svc, service.bucket, service.bucketUrl, uidString)
 			if err != nil {
 				errorsChan <- fmt.Errorf("error uploading images to S3: %v", err)
 				return
@@ -148,7 +201,7 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 		// 이미 업로드된 파일들을 S3에서 삭제
 		go func() {
 			for file := range uploadedFiles {
-				deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
+				deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl, uidString)
 			}
 		}()
 		return "", fmt.Errorf("error occurred during image upload")
@@ -166,19 +219,24 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 			// 이미 업로드된 파일들을 S3에서 삭제
 			go func() {
 				for file := range uploadedFiles {
-					deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
+					deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl, uidString)
 				}
 			}()
 			return "", err
 		}
 	} else {
+		// 기존 이미지 레코드 삭제
+		if err := tx.Where("diet_id = ?", diet.Id).Delete(&model.Image{}).Error; err != nil {
+			tx.Rollback()
+			return "", err
+		}
 		// 기존 레코드 업데이트
 		if err := tx.Model(&diet).Updates(diet).Error; err != nil {
 			tx.Rollback()
 			// 이미 업로드된 파일들을 S3에서 삭제
 			go func() {
 				for file := range uploadedFiles {
-					deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
+					deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl, uidString)
 				}
 			}()
 			return "", err
@@ -191,131 +249,14 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	return "200", nil
 }
 
-func deleteFromS3(fileKey string, s3Client *s3.S3, bucket string, bucketUrl string) error {
+func (service *dietService) RemoveDiet(id int, uid int) (string, error) {
 
-	// URL에서 객체 키 추출
-	key := extractKeyFromUrl(fileKey, bucket, bucketUrl)
-	log.Println("key", fileKey)
+	result := service.db.Where("id=? AND uid= ?", id, uid).Delete(&model.Diet{})
 
-	_, err := s3Client.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(bucket), // 실제 S3 버킷 이름으로 대체
-		Key:    aws.String(key),
-	})
-
-	// 에러 발생 시 처리 로직
-	if err != nil {
-		fmt.Printf("Failed to delete object from S3: %s, error: %v\n", fileKey, err)
+	if result.Error != nil {
+		return "", errors.New("db error")
 	}
-
-	return err
-}
-
-// URL에서 S3 객체 키를 추출하는 함수
-func extractKeyFromUrl(url, bucket string, bucketUrl string) string {
-	prefix := fmt.Sprintf("https://%s.%s/", bucket, bucketUrl)
-	return strings.TrimPrefix(url, prefix)
-}
-func uploadImagesToS3(imgData []byte, thumbnailData []byte, contentType string, ext string, s3Client *s3.S3, bucket string, bucketUrl string) (string, string, error) {
-	// 이미지 파일 이름과 썸네일 파일 이름 생성
-	imgFileName := "images/diet/" + uuid.New().String() + ext
-	thumbnailFileName := "images/diet/thumbnail/" + uuid.New().String() + ext
-
-	// S3에 이미지 업로드
-	_, err := s3Client.PutObject(&s3.PutObjectInput{
-		Bucket:      aws.String(bucket),
-		Key:         aws.String(imgFileName),
-		Body:        bytes.NewReader(imgData),
-		ContentType: aws.String(contentType),
-	})
-	if err != nil {
-		return "", "", err
-	}
-
-	// S3에 썸네일 업로드
-	_, err = s3Client.PutObject(&s3.PutObjectInput{
-		Bucket:      aws.String(bucket),
-		Key:         aws.String(thumbnailFileName),
-		Body:        bytes.NewReader(thumbnailData),
-		ContentType: aws.String(contentType),
-	})
-	if err != nil {
-		return "", "", err
-	}
-
-	// 업로드된 이미지와 썸네일의 URL 생성 및 반환
-	imgURL := "https://" + bucket + "." + bucketUrl + "/" + imgFileName
-	thumbnailURL := "https://" + bucket + "." + bucketUrl + "/" + thumbnailFileName
-
-	return imgURL, thumbnailURL, nil
-}
-func reduceImageSize(data []byte) ([]byte, error) {
-	img, _, err := image.Decode(bytes.NewReader(data))
-	if err != nil {
-		return nil, err
-	}
-	log.Println("image size: ", len(data))
-	// 원본 이미지의 크기를 절반씩 줄이면서 10MB 이하로 만듦
-	for len(data) > 10*1024*1024 {
-		newWidth := img.Bounds().Dx() / 2
-		newHeight := img.Bounds().Dy() / 2
-
-		resizedImg := resize.Resize(uint(newWidth), uint(newHeight), img, resize.Lanczos3)
-
-		var buf bytes.Buffer
-		err := jpeg.Encode(&buf, resizedImg, nil)
-		if err != nil {
-			return nil, err
-		}
-
-		data = buf.Bytes()
-		img = resizedImg
-	}
-
-	return data, nil
-}
-
-func createThumbnail(data []byte) ([]byte, error) {
-	img, _, err := image.Decode(bytes.NewReader(data))
-	if err != nil {
-		return nil, err
-	}
-
-	// 썸네일의 크기를 절반씩 줄이면서 1MB 이하로 만듦
-	for {
-		newWidth := img.Bounds().Dx() / 2
-		newHeight := img.Bounds().Dy() / 2
-
-		thumbnail := resize.Resize(uint(newWidth), uint(newHeight), img, resize.Lanczos3)
-
-		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, thumbnail, nil)
-		if err != nil {
-			return nil, err
-		}
-
-		thumbnailData := buf.Bytes()
-		log.Println("thumbnailData size: ", len(thumbnailData))
-		if len(thumbnailData) < 1024*1024 {
-			return thumbnailData, nil
-		}
-
-		img = thumbnail
-	}
-}
-
-func getImageFormat(imgData []byte) (contentType, extension string, err error) {
-	_, format, err := image.DecodeConfig(bytes.NewReader(imgData))
-	if err != nil {
-		return "", "", err
-	}
-
-	contentType = "image/" + format
-	extension = "." + format
-	if format == "jpeg" {
-		extension = ".jpg"
-	}
-
-	return contentType, extension, nil
+	return "200", nil
 }
 
 func (service *dietService) GetPresets(id int, page int, startDate, endDate string) ([]dto.DietPresetResponse, error) {

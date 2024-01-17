@@ -56,3 +56,29 @@ func SaveDietEndpoint(s service.DietService) endpoint.Endpoint {
 		return dto.BasicResponse{Code: code}, nil
 	}
 }
+
+func GetDietsEndpoint(s service.DietService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(int)
+		queryParams := reqMap["queryParams"].(dto.GetPresetParams)
+		inquires, err := s.GetDiets(id, queryParams.Page, queryParams.StartDate, queryParams.EndDate)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return inquires, nil
+	}
+}
+
+func RemoveDietEndpoint(s service.DietService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(int)
+		uid := reqMap["uid"].(int)
+		code, err := s.RemoveDiet(id, uid)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}

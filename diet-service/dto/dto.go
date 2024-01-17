@@ -37,10 +37,15 @@ type DietResponse struct {
 	Name    string
 	Time    string
 	Type    int
-	Images  []string
+	Images  []ImageResponse
 	Foods   []string
 	Created string
 	Updated string
+}
+
+type ImageResponse struct {
+	Url          string
+	ThumbnailUrl string `json:"thumbnail_url"`
 }
 
 type SuccessResponse struct {

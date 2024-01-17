@@ -59,7 +59,7 @@ func (service *inquireService) GetMyInquires(id int, page int, startDate, endDat
 		query = query.Where("created >= ?", startDate)
 	}
 	if endDate != "" {
-		query = query.Where("created <= ?", endDate)
+		query = query.Where("created <= ?", endDate+" 23:59:59")
 	}
 	query = query.Order("id DESC")
 	result := query.Offset(offset).Limit(pageSize).Preload("Replies").Find(&inquires)
