@@ -30,8 +30,8 @@ type UserResponse struct {
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
 	UserType             string `json:"user_type"`
 	Email                string `json:"email"`
-	Created              string `json:"created"`
-	Updated              string `json:"updated"`
+	Created              string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Updated              string `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 }
 
 type LoginRequest struct {

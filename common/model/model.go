@@ -104,6 +104,14 @@ type Image struct {
 	ThumbnailUrl string `json:"thumbnail_url"`
 }
 
+type Emotion struct {
+	TimestampModel
+	Id      int
+	Uid     int
+	Emotion string
+	State   string
+}
+
 type FoodSlice []string
 
 // Scan - sql.Scanner 구현

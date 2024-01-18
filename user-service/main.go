@@ -3,10 +3,8 @@
 package main
 
 import (
-	"common/util"
 	"log"
 	"os"
-	"time"
 	"user-service/db"
 	"user-service/endpoint"
 	"user-service/service"
@@ -14,7 +12,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"golang.org/x/time/rate"
 
 	_ "user-service/docs"
 
@@ -44,8 +41,7 @@ func main() {
 	getUserEndpoint := endpoint.MakeGetUserEndpoint(usvc)
 
 	router := gin.Default()
-	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 5)
-	router.Use(rateLimiter.Middleware())
+
 	router.POST("/google-login", transport.GoogleLoginHandler(googleLoginEndpoint))
 	router.POST("/kakao-login", transport.KakaoLoginHandler(kakoLoginEndpoint))
 	router.POST("/auto-login", transport.AutoLoginHandler(autoLoginEndpoint))

@@ -125,7 +125,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/remove-diet/{id}": {
+        "/remove-diet": {
             "post": {
                 "description": "추가한 식단 삭제시 호출",
                 "consumes": [
@@ -140,10 +140,16 @@ const docTemplate = `{
                 "summary": "추가한 식단 삭제",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "추가한 식단ID",
-                        "name": "id",
-                        "in": "path"
+                        "description": "삭제할 id 배열",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
                     }
                 ],
                 "responses": {
@@ -168,7 +174,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/remove-preset/{id}": {
+        "/remove-preset": {
             "post": {
                 "description": "추가한 식단 삭제시 호출",
                 "consumes": [
@@ -183,10 +189,16 @@ const docTemplate = `{
                 "summary": "추가한 식단 삭제",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "추가한 식단ID",
-                        "name": "id",
-                        "in": "path"
+                        "description": "삭제할 id 배열",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
                     }
                 ],
                 "responses": {
@@ -328,7 +340,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "foods": {
                     "type": "array",
@@ -343,7 +356,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 }
             }
         },
@@ -384,7 +398,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "foods": {
                     "type": "array",
@@ -411,7 +426,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 }
             }
         },

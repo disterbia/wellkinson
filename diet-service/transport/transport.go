@@ -5,7 +5,6 @@ import (
 	"common/util"
 	"diet-service/dto"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	kitEndpoint "github.com/go-kit/kit/endpoint"
@@ -90,11 +89,11 @@ func GetPresetsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 추가한 식단 삭제시 호출
 // @Accept  json
 // @Produce  json
-// @Param id path string ture "추가한 식단ID"
+// @Param request body []int true "삭제할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /remove-preset/{id} [post]
+// @Router /remove-preset [post]
 func RemovePresetHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, _, err := util.VerifyJWT(c)
@@ -102,15 +101,14 @@ func RemovePresetHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		alarmId := c.Param("id")
-		id, err := strconv.Atoi(alarmId)
-		if err != nil {
+		var ids []int // 삭제할 ID 배열
+		if err := c.ShouldBindJSON(&ids); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		response, err := removeEndpoint(c.Request.Context(), map[string]interface{}{
 			"uid": uid,
-			"id":  id,
+			"ids": ids,
 		})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -161,7 +159,6 @@ func SaveDietHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Summary 식단 조회
 // @Description 식단 조회시 호출 (10개씩)
 // @Produce  json
-// @Param  page  query  int  false  "페이지 번호 default 0" (10개씩)
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
 // @Success 200 {object} []dto.DietResponse "성공시 200 반환"
@@ -202,11 +199,11 @@ func GetDietsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 추가한 식단 삭제시 호출
 // @Accept  json
 // @Produce  json
-// @Param id path string ture "추가한 식단ID"
+// @Param request body []int true "삭제할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /remove-diet/{id} [post]
+// @Router /remove-diet [post]
 func RemoveDietHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, _, err := util.VerifyJWT(c)
@@ -214,15 +211,16 @@ func RemoveDietHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		alarmId := c.Param("id")
-		id, err := strconv.Atoi(alarmId)
-		if err != nil {
+
+		var ids []int // 삭제할 ID 배열
+		if err := c.ShouldBindJSON(&ids); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+
 		response, err := removeEndpoint(c.Request.Context(), map[string]interface{}{
 			"uid": uid,
-			"id":  id,
+			"ids": ids,
 		})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

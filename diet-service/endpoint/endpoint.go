@@ -33,12 +33,12 @@ func GetPresetsEndpoint(s service.DietService) endpoint.Endpoint {
 	}
 }
 
-func RemovePresetEndpoint(s service.DietService) endpoint.Endpoint {
+func RemovePresetsEndpoint(s service.DietService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		ids := reqMap["ids"].([]int)
 		uid := reqMap["uid"].(int)
-		code, err := s.RemovePreset(id, uid)
+		code, err := s.RemovePreset(ids, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
@@ -62,7 +62,7 @@ func GetDietsEndpoint(s service.DietService) endpoint.Endpoint {
 		reqMap := request.(map[string]interface{})
 		id := reqMap["id"].(int)
 		queryParams := reqMap["queryParams"].(dto.GetPresetParams)
-		inquires, err := s.GetDiets(id, queryParams.Page, queryParams.StartDate, queryParams.EndDate)
+		inquires, err := s.GetDiets(id, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
@@ -70,12 +70,12 @@ func GetDietsEndpoint(s service.DietService) endpoint.Endpoint {
 	}
 }
 
-func RemoveDietEndpoint(s service.DietService) endpoint.Endpoint {
+func RemoveDietsEndpoint(s service.DietService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		ids := reqMap["ids"].([]int)
 		uid := reqMap["uid"].(int)
-		code, err := s.RemoveDiet(id, uid)
+		code, err := s.RemoveDiet(ids, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}

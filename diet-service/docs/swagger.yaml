@@ -18,6 +18,7 @@ definitions:
   dto.DietPresetResponse:
     properties:
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       foods:
         items:
@@ -28,6 +29,7 @@ definitions:
       name:
         type: string
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
     type: object
   dto.DietRequest:
@@ -55,6 +57,7 @@ definitions:
   dto.DietResponse:
     properties:
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       foods:
         items:
@@ -73,6 +76,7 @@ definitions:
       type:
         type: integer
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
     type: object
   dto.ErrorResponse:
@@ -162,16 +166,20 @@ paths:
       summary: 추가한 식단 조회
       tags:
       - 식단
-  /remove-diet/{id}:
+  /remove-diet:
     post:
       consumes:
       - application/json
       description: 추가한 식단 삭제시 호출
       parameters:
-      - description: 추가한 식단ID
-        in: path
-        name: id
-        type: string
+      - description: 삭제할 id 배열
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
       produces:
       - application/json
       responses:
@@ -190,16 +198,20 @@ paths:
       summary: 추가한 식단 삭제
       tags:
       - 식단
-  /remove-preset/{id}:
+  /remove-preset:
     post:
       consumes:
       - application/json
       description: 추가한 식단 삭제시 호출
       parameters:
-      - description: 추가한 식단ID
-        in: path
-        name: id
-        type: string
+      - description: 삭제할 id 배열
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
       produces:
       - application/json
       responses:

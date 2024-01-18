@@ -6,15 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"net/http"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/time/rate"
 )
 
 // JWT secret key
@@ -90,52 +87,6 @@ func ValidatePhoneNumber(phone string) error {
 		return errors.New("invalid phone format, should be 01000000000")
 	}
 	return nil
-}
-
-type RateLimiter struct {
-	Limiter *rate.Limiter
-}
-
-type UserRateLimiter struct {
-	limiterMap map[int]*RateLimiter
-	mu         sync.Mutex
-}
-
-func NewRateLimiter(r rate.Limit, b int) *RateLimiter {
-	return &RateLimiter{
-		Limiter: rate.NewLimiter(r, b),
-	}
-}
-
-func NewUserRateLimiter() *UserRateLimiter {
-	return &UserRateLimiter{
-		limiterMap: make(map[int]*RateLimiter),
-	}
-}
-
-func (url *UserRateLimiter) GetUserLimiter(uid int, r rate.Limit, b int) *RateLimiter {
-	url.mu.Lock()
-	defer url.mu.Unlock()
-
-	if limiter, exists := url.limiterMap[uid]; exists {
-		return limiter
-	}
-
-	limiter := NewRateLimiter(r, b)
-	url.limiterMap[uid] = limiter
-	return limiter
-}
-
-func (rl *RateLimiter) Middleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if !rl.Limiter.Allow() {
-			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
-				"error": "too many requests",
-			})
-			return
-		}
-		c.Next()
-	}
 }
 
 func CopyStruct(input interface{}, output interface{}) error {

@@ -5,6 +5,7 @@ use (
 	./common
 	./diet-service
 	./email-service
+	./emotion-service
 	./fcm-service
 	./gateway
 	./inquire-service

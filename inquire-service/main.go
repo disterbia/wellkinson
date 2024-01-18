@@ -3,19 +3,16 @@
 package main
 
 import (
-	"common/util"
 	"inquire-service/db"
 	"inquire-service/endpoint"
 	"inquire-service/service"
 	"inquire-service/transport"
 	"log"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -51,9 +48,6 @@ func main() {
 	reomoveReplyEndpoint := endpoint.RemoveReplyEndpoint(inquireSvc)
 
 	router := gin.Default()
-
-	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 20)
-	router.Use(rateLimiter.Middleware())
 
 	router.POST("/inquire-reply", transport.AnswerHandler(answerEndpoint))
 	router.POST("/send-inquire", transport.SendHandler(sendEndpoint))

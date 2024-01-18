@@ -22,10 +22,10 @@ import (
 type DietService interface {
 	SavePreset(presetRequest dto.DietPresetRequest) (string, error)
 	GetPresets(id int, page int, startDate, endDate string) ([]dto.DietPresetResponse, error)
-	RemovePreset(id int, uid int) (string, error)
+	RemovePreset(ids []int, uid int) (string, error)
 	SaveDiet(diet dto.DietRequest) (string, error)
-	GetDiets(id int, page int, startDate, endDate string) ([]dto.DietResponse, error)
-	RemoveDiet(id int, uid int) (string, error)
+	GetDiets(id int, startDate, endDate string) ([]dto.DietResponse, error)
+	RemoveDiet(ids []int, uid int) (string, error)
 }
 
 type dietService struct {
@@ -39,10 +39,9 @@ func NewDietService(db *gorm.DB, s3svc *s3.S3, bucket string, bucketUrl string) 
 	return &dietService{db: db, s3svc: s3svc, bucket: bucket, bucketUrl: bucketUrl}
 }
 
-func (service *dietService) GetDiets(id int, page int, startDate, endDate string) ([]dto.DietResponse, error) {
-	pageSize := 10
+func (service *dietService) GetDiets(id int, startDate, endDate string) ([]dto.DietResponse, error) {
+
 	var diet []model.Diet
-	offset := page * pageSize
 
 	query := service.db.Where("uid = ?", id)
 	if startDate != "" {
@@ -52,7 +51,7 @@ func (service *dietService) GetDiets(id int, page int, startDate, endDate string
 		query = query.Where("created <= ?", endDate+" 23:59:59")
 	}
 	query = query.Order("id DESC")
-	result := query.Offset(offset).Limit(pageSize).Preload("Images").Find(&diet)
+	result := query.Preload("Images", "level!= 10").Find(&diet)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -81,7 +80,7 @@ func (service *dietService) GetDiets(id int, page int, startDate, endDate string
 			if err != nil {
 				return nil, err
 			}
-			thumbnailUrlStr, err := thumbnailUrl.Presign(5 * time.Minute)
+			thumbnailUrlStr, err := thumbnailUrl.Presign(1 * time.Second) // URL은 1초 동안 유효
 			if err != nil {
 				return nil, err
 			}
@@ -108,6 +107,7 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	// 데이터베이스에서 기존 Diet 레코드 조회
 	result := tx.Where("id=? AND uid=?", dietRequest.Id, dietRequest.Uid).First(&model.Diet{})
 	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		tx.Rollback()
 		return "", result.Error
 	}
 
@@ -225,10 +225,11 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 			return "", err
 		}
 	} else {
-		// 기존 이미지 레코드 삭제
-		if err := tx.Where("diet_id = ?", diet.Id).Delete(&model.Image{}).Error; err != nil {
+		// 기존 이미지 레코드 논리삭제
+		result := service.db.Model(&model.Image{}).Where("diet_id = ?", diet.Id).Select("level").Updates(map[string]interface{}{"level": 10})
+		if result.Error != nil {
 			tx.Rollback()
-			return "", err
+			return "", errors.New("db error")
 		}
 		// 기존 레코드 업데이트
 		if err := tx.Model(&diet).Updates(diet).Error; err != nil {
@@ -249,13 +250,23 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	return "200", nil
 }
 
-func (service *dietService) RemoveDiet(id int, uid int) (string, error) {
-
-	result := service.db.Where("id=? AND uid= ?", id, uid).Delete(&model.Diet{})
+func (service *dietService) RemoveDiet(ids []int, uid int) (string, error) {
+	tx := service.db.Begin()
+	result := tx.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.Diet{})
 
 	if result.Error != nil {
+		tx.Rollback()
 		return "", errors.New("db error")
 	}
+
+	result = tx.Model(&model.Image{}).Where("diet_id =IN (?)", ids).Select("level").Updates(map[string]interface{}{"level": 10})
+
+	if result.Error != nil {
+		tx.Rollback()
+		return "", errors.New("db error2")
+	}
+
+	tx.Commit()
 	return "200", nil
 }
 
@@ -314,9 +325,8 @@ func (service *dietService) SavePreset(presetRequest dto.DietPresetRequest) (str
 	return "200", nil
 }
 
-func (service *dietService) RemovePreset(id int, uid int) (string, error) {
-
-	result := service.db.Where("id=? AND uid= ?", id, uid).Delete(&model.DietPreset{})
+func (service *dietService) RemovePreset(ids []int, uid int) (string, error) {
+	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.DietPreset{})
 
 	if result.Error != nil {
 		return "", errors.New("db error")

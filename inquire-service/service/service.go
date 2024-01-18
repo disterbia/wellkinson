@@ -1,4 +1,4 @@
-// /inquire-service/service/inquire-service.go
+// /inquire-service/service/service.go
 
 package service
 

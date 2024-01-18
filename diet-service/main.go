@@ -2,16 +2,13 @@
 package main
 
 import (
-	"common/util"
 	_ "diet-service/docs"
 	"diet-service/endpoint"
 	"diet-service/service"
 	"diet-service/transport"
 	"fcm-service/db"
 	"log"
-	"net/http"
 	"os"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -21,7 +18,6 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"golang.org/x/time/rate"
 )
 
 func main() {
@@ -56,36 +52,18 @@ func main() {
 	s3svc := s3.New(s3sess)
 	svc := service.NewDietService(database, s3svc, bucket, bucketUrl)
 
-	userRateLimiter := util.NewUserRateLimiter()
-
 	savePresetEndpoint := endpoint.SavePresetEndpoint(svc)
 	getPresetsEndpoint := endpoint.GetPresetsEndpoint(svc)
-	removePresetsEndpoint := endpoint.RemovePresetEndpoint(svc)
+	removePresetsEndpoint := endpoint.RemovePresetsEndpoint(svc)
 	saveDietEndpoint := endpoint.SaveDietEndpoint(svc)
 	getDietsEndpoint := endpoint.GetDietsEndpoint(svc)
+	removeDietsEndpoint := endpoint.RemoveDietsEndpoint(svc)
 
 	router := gin.Default()
-	router.Use(func(c *gin.Context) {
-		id, _, err := util.VerifyJWT(c)
-		if err != nil {
-			// ip별 Rate Limiter 가 들어가야함.
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		// 사용자별 Rate Limiter 확인
-		userLimiter := userRateLimiter.GetUserLimiter(id, rate.Every(1*time.Minute), 10)
-
-		if !userLimiter.Limiter.Allow() {
-			c.JSON(http.StatusTooManyRequests, gin.H{"error": "too many requests"})
-			return
-		}
-		c.Next()
-	})
-
 	router.POST("/save-preset", transport.SavePresetHandler(savePresetEndpoint))
-	router.POST("/remove-preset/:id", transport.RemovePresetHandler(removePresetsEndpoint))
+	router.POST("/remove-presets", transport.RemovePresetHandler(removePresetsEndpoint))
 	router.POST("/save-diet", transport.SaveDietHandler(saveDietEndpoint))
+	router.POST("/remove-diets", transport.RemoveDietHandler(removeDietsEndpoint))
 
 	router.GET("/get-presets", transport.GetPresetsHandler(getPresetsEndpoint))
 	router.GET("/get-diets", transport.GetDietsHandler(getDietsEndpoint))

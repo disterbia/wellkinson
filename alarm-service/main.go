@@ -7,15 +7,12 @@ import (
 	"alarm-service/endpoint"
 	"alarm-service/service"
 	"alarm-service/transport"
-	"common/util"
 	"log"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"golang.org/x/time/rate"
 
 	_ "alarm-service/docs"
 
@@ -40,9 +37,6 @@ func main() {
 	getAlarmEndpoint := endpoint.GetEndpoint(alarmSvc)
 
 	router := gin.Default()
-
-	rateLimiter := util.NewRateLimiter(rate.Every(1*time.Minute), 100)
-	router.Use(rateLimiter.Middleware())
 
 	router.POST("/save-alarm", transport.SaveAlarmHandler(saveAlarmEndpoint))
 	router.POST("/remove-alarm/:id", transport.RemoveAlarmHandler(removeeAlarmEndpoint))
