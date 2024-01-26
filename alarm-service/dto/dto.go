@@ -8,7 +8,7 @@ type AlarmRequest struct {
 	StartAt   string `json:"start_at" example:"yyyy-mm-dd"`
 	EndAt     string `json:"end_at" example:"yyyy-mm-dd"`
 	Timestamp string `json:"timestamp" example:"HH:mm"`
-	Week      string `json:"week" example:"0,4,6 (sunday:0,...)"`
+	Week      []int  `json:"week"`
 }
 
 type AlarmResponse struct {
@@ -18,7 +18,7 @@ type AlarmResponse struct {
 	StartAt   string `json:"start_at" example:"yyyy-mm-dd"`
 	EndAt     string `json:"end_at" example:"yyyy-mm-dd"`
 	Timestamp string `json:"timestamp" example:"HH:mm"`
-	Week      string `json:"week" example:"0,4,6 (sunday:0,...)"`
+	Week      []int  `json:"week"`
 	Created   string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	Updated   string `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 }

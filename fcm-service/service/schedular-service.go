@@ -5,9 +5,9 @@ package service
 import (
 	"common/model"
 	"context"
+	"encoding/json"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	firebase "firebase.google.com/go"
@@ -61,7 +61,21 @@ func sendPendingNotifications(db *gorm.DB) {
 func shouldSendNotification(now time.Time, alarm model.Alarm) bool {
 	// sunday = 0, ...
 	currentWeekday := int(now.Weekday())
-	alarmWeekdays := strings.Split(alarm.Week, ",")
+
+	// alarm.Week를 []int로 언마샬링
+	var alarmWeekdaysInts []int
+	err := json.Unmarshal(alarm.Week, &alarmWeekdaysInts)
+	if err != nil {
+		// 언마샬링 에러 처리
+		return false
+	}
+
+	// []int를 []string으로 변환
+	alarmWeekdays := make([]string, len(alarmWeekdaysInts))
+	for i, w := range alarmWeekdaysInts {
+		alarmWeekdays[i] = strconv.Itoa(w)
+	}
+
 	alarmTime, _ := time.Parse("15:04", alarm.Timestamp)
 
 	for _, w := range alarmWeekdays {

@@ -1,4 +1,4 @@
-// /diet-service/endpoint/endpoint.go
+// /emotion-service/endpoint/endpoint.go
 package endpoint
 
 import (

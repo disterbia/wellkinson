@@ -38,7 +38,7 @@ func RemovePresetsEndpoint(s service.DietService) endpoint.Endpoint {
 		reqMap := request.(map[string]interface{})
 		ids := reqMap["ids"].([]int)
 		uid := reqMap["uid"].(int)
-		code, err := s.RemovePreset(ids, uid)
+		code, err := s.RemovePresets(ids, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
@@ -75,7 +75,7 @@ func RemoveDietsEndpoint(s service.DietService) endpoint.Endpoint {
 		reqMap := request.(map[string]interface{})
 		ids := reqMap["ids"].([]int)
 		uid := reqMap["uid"].(int)
-		code, err := s.RemoveDiet(ids, uid)
+		code, err := s.RemoveDiets(ids, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}

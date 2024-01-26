@@ -51,7 +51,7 @@ func SavePresetHandler(savePresetEndpoint kitEndpoint.Endpoint) gin.HandlerFunc 
 // @Param  page  query  int  false  "페이지 번호 default 0" (10개씩)
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
-// @Success 200 {object} []dto.DietPresetResponse "성공시 200 반환"
+// @Success 200 {object} []dto.DietPresetResponse "식단정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /get-presets [get]
@@ -157,11 +157,11 @@ func SaveDietHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 
 // @Tags 식단
 // @Summary 식단 조회
-// @Description 식단 조회시 호출 (10개씩)
+// @Description 식단 조회시 호출
 // @Produce  json
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
-// @Success 200 {object} []dto.DietResponse "성공시 200 반환"
+// @Success 200 {object} []dto.DietResponse "식단정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /get-diets [get]

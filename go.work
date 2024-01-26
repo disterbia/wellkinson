@@ -6,6 +6,7 @@ use (
 	./diet-service
 	./email-service
 	./emotion-service
+	./exercise-service
 	./fcm-service
 	./gateway
 	./inquire-service

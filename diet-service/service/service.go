@@ -22,10 +22,10 @@ import (
 type DietService interface {
 	SavePreset(presetRequest dto.DietPresetRequest) (string, error)
 	GetPresets(id int, page int, startDate, endDate string) ([]dto.DietPresetResponse, error)
-	RemovePreset(ids []int, uid int) (string, error)
+	RemovePresets(ids []int, uid int) (string, error)
 	SaveDiet(diet dto.DietRequest) (string, error)
 	GetDiets(id int, startDate, endDate string) ([]dto.DietResponse, error)
-	RemoveDiet(ids []int, uid int) (string, error)
+	RemoveDiets(ids []int, uid int) (string, error)
 }
 
 type dietService struct {
@@ -250,7 +250,7 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	return "200", nil
 }
 
-func (service *dietService) RemoveDiet(ids []int, uid int) (string, error) {
+func (service *dietService) RemoveDiets(ids []int, uid int) (string, error) {
 	tx := service.db.Begin()
 	result := tx.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.Diet{})
 
@@ -325,7 +325,7 @@ func (service *dietService) SavePreset(presetRequest dto.DietPresetRequest) (str
 	return "200", nil
 }
 
-func (service *dietService) RemovePreset(ids []int, uid int) (string, error) {
+func (service *dietService) RemovePresets(ids []int, uid int) (string, error) {
 	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.DietPreset{})
 
 	if result.Error != nil {

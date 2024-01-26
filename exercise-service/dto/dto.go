@@ -1,0 +1,58 @@
+// /exercise-service/dto/dto.go
+package dto
+
+type GetParams struct {
+	StartDate string `form:"start_date"`
+	EndDate   string `form:"end_date"`
+}
+
+type ExerciseRequest struct {
+	Id              int    `json:"id"`
+	Uid             int    `json:"-"`
+	Title           string `json:"title"`
+	ExerciseStartAt string `json:"exercise_start_at" example:"HH:mm"`
+	ExerciseEndAt   string `json:"exercise_end_at" example:"HH:mm"`
+	PlanStartAt     string `json:"plan_start_at" example:"YYYY-MM-DD"`
+	PlanEndAt       string `json:"plan_end_at" example:"YYYY-MM-DD"`
+	UseAlarm        bool   `json:"use_alarm"`
+	Weekdays        []int  `json:"weekdays"`
+}
+
+type ExerciseResponse struct {
+	Id              int    `json:"id"`
+	ExerciseStartAt string `json:"exercise_start_at" example:"HH:mm"`
+	ExerciseEndAt   string `json:"exercise_end_at"  example:"HH:mm"`
+	PlanStartAt     string `json:"plan_start_at"  example:"YYYY-MM-DD"`
+	PlanEndAt       string `json:"plan_end_at"  example:"YYYY-MM-DD"`
+	UseAlarm        bool   `json:"use_alarm"`
+	Weekdays        []int  `json:"weekdays"`
+	Created         string `json:"created"`
+	Updated         string `json:"updated"`
+}
+
+type ExerciseDateInfo struct {
+	Date      string             `json:"date" example:"YYYY-MM-DD"`
+	Exercises []ExerciseDoneInfo `json:"exercises"`
+}
+
+type ExerciseDoneInfo struct {
+	Exercise ExerciseResponse `json:"exercise"`
+	Done     bool             `json:"done"`
+}
+
+type ExerciseDo struct {
+	Uid           int    `json:"-"`
+	ExerciseId    int    `json:"exercise_id"`
+	PerformedDate string `json:"performed_date"  example:"YYYY-MM-DD"`
+}
+
+type SuccessResponse struct {
+	Jwt string `json:"jwt"`
+}
+type ErrorResponse struct {
+	Err string `json:"err"`
+}
+
+type BasicResponse struct {
+	Code string `json:"code"`
+}

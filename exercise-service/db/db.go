@@ -1,4 +1,4 @@
-// /emotion-service/db/db.go
+// /exercise-service/db/db.go
 package db
 
 import (

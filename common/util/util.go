@@ -5,7 +5,6 @@ import (
 	"common/model"
 	"encoding/json"
 	"errors"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -92,13 +91,11 @@ func ValidatePhoneNumber(phone string) error {
 func CopyStruct(input interface{}, output interface{}) error {
 	jsonData, err := json.Marshal(input)
 	if err != nil {
-		log.Println("aaaaa")
 		return err
 	}
 
 	err = json.Unmarshal(jsonData, output)
 	if err != nil {
-		log.Println("vvvvv")
 		return err
 	}
 

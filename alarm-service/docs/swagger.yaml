@@ -17,14 +17,16 @@ definitions:
       type:
         type: string
       week:
-        example: 0,4,6 (sunday:0,...)
-        type: string
+        items:
+          type: integer
+        type: array
     type: object
   dto.AlarmResponse:
     properties:
       body:
         type: string
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       end_at:
         example: yyyy-mm-dd
@@ -40,10 +42,12 @@ definitions:
       type:
         type: string
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       week:
-        example: 0,4,6 (sunday:0,...)
-        type: string
+        items:
+          type: integer
+        type: array
     type: object
   dto.BasicResponse:
     properties:
@@ -70,7 +74,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 성공시 200 반환
+          description: 알람정보
           schema:
             items:
               $ref: '#/definitions/dto.AlarmResponse'
@@ -86,16 +90,20 @@ paths:
       summary: 알람조회
       tags:
       - 알람
-  /remove-alarm/{id}:
+  /remove-alarms:
     post:
       consumes:
       - application/json
       description: 알람삭제시 호출
       parameters:
-      - description: 알람ID
-        in: path
-        name: id
-        type: string
+      - description: 삭제할 id 배열
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
       produces:
       - application/json
       responses:

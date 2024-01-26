@@ -1,9 +1,7 @@
 package model
 
 import (
-	"database/sql/driver"
 	"encoding/json"
-	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -33,14 +31,14 @@ type User struct {
 
 type Alarm struct {
 	TimestampModel
-	Id        int    `gorm:"primaryKey;autoIncrement"`
-	Uid       int    `gorm:"not null"`
-	Type      string `gorm:"size:255;not null"`
-	Body      string `gorm:"type:text;not null"`
-	StartAt   string `gorm:"size:255;not null" json:"start_at"`
-	EndAt     string `gorm:"size:255;not null" json:"end_at"`
-	Timestamp string `gorm:"size:255;not null"`
-	Week      string `gorm:"size:255;not null"`
+	Id        int             `gorm:"primaryKey;autoIncrement"`
+	Uid       int             `gorm:"not null"`
+	Type      string          `gorm:"size:255;not null"`
+	Body      string          `gorm:"type:text;not null"`
+	StartAt   string          `gorm:"size:255;not null" json:"start_at"`
+	EndAt     string          `gorm:"size:255;not null" json:"end_at"`
+	Timestamp string          `gorm:"size:255;not null"`
+	Week      json.RawMessage `gorm:"type:json"`
 }
 
 type Notification struct {
@@ -76,7 +74,7 @@ type DietPreset struct {
 	Id    int
 	Uid   int
 	Name  string
-	Foods FoodSlice `gorm:"type:json"`
+	Foods json.RawMessage `gorm:"type:json"`
 }
 
 type Diet struct {
@@ -87,7 +85,7 @@ type Diet struct {
 	Time   string
 	Type   int
 	Images []Image
-	Foods  FoodSlice `gorm:"type:json"`
+	Foods  json.RawMessage `gorm:"type:json"`
 }
 
 type Image struct {
@@ -112,31 +110,25 @@ type Emotion struct {
 	State   string
 }
 
-type FoodSlice []string
-
-// Scan - sql.Scanner 구현
-func (f *FoodSlice) Scan(value interface{}) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return errors.New("failed to unmarshal JSONB value")
-	}
-
-	result := []string{}
-	err := json.Unmarshal(bytes, &result)
-	if err != nil {
-		return err
-	}
-
-	*f = result
-	return nil
+type Exercise struct {
+	TimestampModel
+	Id              int
+	Uid             int
+	Title           string          `json:"title"`
+	ExerciseStartAt string          `json:"exercise_start_at"`
+	ExerciseEndAt   string          `json:"exercise_end_at"`
+	PlanStartAt     string          `json:"plan_start_at"`
+	PlanEndAt       string          `json:"plan_end_at"`
+	UseAlarm        bool            `json:"use_alarm"`
+	Weekdays        json.RawMessage `gorm:"type:json"`
 }
 
-// Value - driver.Valuer 구현
-func (f FoodSlice) Value() (driver.Value, error) {
-	if f == nil {
-		return nil, nil
-	}
-	return json.Marshal(f)
+type ExerciseInfo struct {
+	TimestampModel
+	Id            int
+	Uid           int
+	DatePerformed string `json:"date_performed"`
+	ExerciseId    int    `json:"exercise_id"`
 }
 
 func (tm *TimestampModel) BeforeCreate(tx *gorm.DB) (err error) {

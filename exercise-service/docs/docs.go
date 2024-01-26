@@ -15,31 +15,83 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/get-presets": {
-            "get": {
-                "description": "알람조회시 호출 (10개씩)",
+        "/do-exercises": {
+            "post": {
+                "description": "운동 완료/취소시 호출",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "알람"
+                    "운동"
                 ],
-                "summary": "알람조회",
+                "summary": "운동 기록",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "페이지 번호 default 0",
-                        "name": "page",
+                        "description": "운동 완료/취소 데이터",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ExerciseDo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/get-exercises": {
+            "get": {
+                "description": "운동 조회시 호출",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "운동"
+                ],
+                "summary": "운동 조회",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "시작날짜 yyyy-mm-dd",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "종료날짜 yyyy-mm-dd",
+                        "name": "end_date",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "알람정보",
+                        "description": "운동정보",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.AlarmResponse"
+                                "$ref": "#/definitions/dto.ExerciseDateInfo"
                             }
                         }
                     },
@@ -58,9 +110,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/remove-alarms": {
+        "/remove-exercise": {
             "post": {
-                "description": "알람삭제시 호출",
+                "description": "운동 삭제시 호출",
                 "consumes": [
                     "application/json"
                 ],
@@ -68,9 +120,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "알람"
+                    "운동"
                 ],
-                "summary": "알람삭제",
+                "summary": "운동 삭제",
                 "parameters": [
                     {
                         "description": "삭제할 id 배열",
@@ -107,27 +159,24 @@ const docTemplate = `{
                 }
             }
         },
-        "/save-alarm": {
+        "/save-exercise": {
             "post": {
-                "description": "알람생성시 id생략 / 알람수정시 id 포함",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "운동 생성시 Id 생략",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "알람"
+                    "운동"
                 ],
-                "summary": "알람생성/수정",
+                "summary": "운동 생성/수정",
                 "parameters": [
                     {
-                        "description": "요청 DTO - 알람데이터",
+                        "description": "요청 DTO - 운동 데이터",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AlarmRequest"
+                            "$ref": "#/definitions/dto.ExerciseRequest"
                         }
                     }
                 ],
@@ -155,78 +204,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.AlarmRequest": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "end_at": {
-                    "type": "string",
-                    "example": "yyyy-mm-dd"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "start_at": {
-                    "type": "string",
-                    "example": "yyyy-mm-dd"
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "HH:mm"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "week": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                }
-            }
-        },
-        "dto.AlarmResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "created": {
-                    "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
-                },
-                "end_at": {
-                    "type": "string",
-                    "example": "yyyy-mm-dd"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "start_at": {
-                    "type": "string",
-                    "example": "yyyy-mm-dd"
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "HH:mm"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "updated": {
-                    "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
-                },
-                "week": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                }
-            }
-        },
         "dto.BasicResponse": {
             "type": "object",
             "properties": {
@@ -240,6 +217,119 @@ const docTemplate = `{
             "properties": {
                 "err": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ExerciseDateInfo": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "exercises": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ExerciseDoneInfo"
+                    }
+                }
+            }
+        },
+        "dto.ExerciseDo": {
+            "type": "object",
+            "properties": {
+                "exercise_id": {
+                    "type": "integer"
+                },
+                "performed_date": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                }
+            }
+        },
+        "dto.ExerciseDoneInfo": {
+            "type": "object",
+            "properties": {
+                "done": {
+                    "type": "boolean"
+                },
+                "exercise": {
+                    "$ref": "#/definitions/dto.ExerciseResponse"
+                }
+            }
+        },
+        "dto.ExerciseRequest": {
+            "type": "object",
+            "properties": {
+                "exercise_end_at": {
+                    "type": "string",
+                    "example": "HH:mm"
+                },
+                "exercise_start_at": {
+                    "type": "string",
+                    "example": "HH:mm"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "plan_end_at": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "plan_start_at": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "use_alarm": {
+                    "type": "boolean"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.ExerciseResponse": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "exercise_end_at": {
+                    "type": "string",
+                    "example": "HH:mm"
+                },
+                "exercise_start_at": {
+                    "type": "string",
+                    "example": "HH:mm"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "plan_end_at": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "plan_start_at": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "updated": {
+                    "type": "string"
+                },
+                "use_alarm": {
+                    "type": "boolean"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         }

@@ -13,7 +13,7 @@ import (
 
 type AlarmService interface {
 	SaveAlarm(alarmRequest dto.AlarmRequest) (string, error)
-	RemoveAlarm(id int, uid int) (string, error)
+	RemoveAlarm(ids []int, uid int) (string, error)
 	GetAlarms(id int, page int) ([]dto.AlarmResponse, error)
 }
 
@@ -58,23 +58,23 @@ func (service *alarmService) SaveAlarm(alarmRequest dto.AlarmRequest) (string, e
 		}
 		alarm.Uid = alarmRequest.Uid
 		if err := service.db.Create(&alarm).Error; err != nil {
-			return "", err
+			return "", errors.New("db error")
 		}
 	} else if result.Error != nil {
-		return "", errors.New("db error")
+		return "", errors.New("db error2")
 	} else {
 		// 레코드가 존재하면 업데이트
 		if err := service.db.Model(&alarm).Updates(alarmRequest).Error; err != nil {
-			return "", err
+			return "", errors.New("db error3")
 		}
 	}
 
 	return "200", nil
 }
 
-func (ra *alarmService) RemoveAlarm(id int, uid int) (string, error) {
+func (ra *alarmService) RemoveAlarm(ids []int, uid int) (string, error) {
 
-	result := ra.db.Where("id=? AND uid= ?", id, uid).Delete(&model.Alarm{})
+	result := ra.db.Where("id IN ? AND uid= ?", ids, uid).Delete(&model.Alarm{})
 
 	if result.Error != nil {
 		return "", errors.New("db error")

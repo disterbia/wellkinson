@@ -53,27 +53,26 @@ func SaveAlarmHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 알람삭제시 호출
 // @Accept  json
 // @Produce  json
-// @Param id path string ture "알람ID"
+// @Param request body []int true "삭제할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /remove-alarm/{id} [post]
-func RemoveAlarmHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+// @Router /remove-alarms [post]
+func RemoveAlarmsHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, _, err := util.VerifyJWT(c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		alarmId := c.Param("id")
-		id, err := strconv.Atoi(alarmId)
-		if err != nil {
+		var ids []int // 삭제할 ID 배열
+		if err := c.ShouldBindJSON(&ids); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		response, err := removeEndpoint(c.Request.Context(), map[string]interface{}{
 			"uid": uid,
-			"id":  id,
+			"ids": ids,
 		})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -91,7 +90,7 @@ func RemoveAlarmHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 알람조회시 호출 (10개씩)
 // @Produce  json
 // @Param  page  query int false  "페이지 번호 default 0"
-// @Success 200 {object} []dto.AlarmResponse "성공시 200 반환"
+// @Success 200 {object} []dto.AlarmResponse "알람정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /get-presets [get]
