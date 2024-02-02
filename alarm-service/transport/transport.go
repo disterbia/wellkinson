@@ -7,17 +7,21 @@ import (
 	"common/util"
 	"net/http"
 	"strconv"
+	"sync"
 
 	kitEndpoint "github.com/go-kit/kit/endpoint"
 
 	"github.com/gin-gonic/gin"
 )
 
+var userLocks sync.Map
+
 // @Tags 알람
 // @Summary  알람생성/수정
 // @Description 알람생성시 id생략 / 알람수정시 id 포함
 // @Accept  json
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param request body dto.AlarmRequest true "요청 DTO - 알람데이터"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -30,6 +34,12 @@ func SaveAlarmHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		// 사용자별 잠금 시작
+		if _, loaded := userLocks.LoadOrStore(id, true); loaded {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Concurrent request detected"})
+			return
+		}
+		defer userLocks.Delete(id)
 
 		var req dto.AlarmRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -53,6 +63,7 @@ func SaveAlarmHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 알람삭제시 호출
 // @Accept  json
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param request body []int true "삭제할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -89,6 +100,7 @@ func RemoveAlarmsHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Summary 알람조회
 // @Description 알람조회시 호출 (10개씩)
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param  page  query int false  "페이지 번호 default 0"
 // @Success 200 {object} []dto.AlarmResponse "알람정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"

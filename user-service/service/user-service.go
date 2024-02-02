@@ -20,6 +20,7 @@ type UserService interface {
 	findOrCreateUser(user model.User) (model.User, error)                    //로그인처리
 	SetUser(user dto.UserRequest) (string, error)                            //유저업데이트
 	GetUser(id int) (dto.UserResponse, error)                                //유저조회
+	AdminLogin(email string, password string) (string, error)
 }
 
 type userService struct {
@@ -38,6 +39,26 @@ type JWKS struct {
 
 func NewUserService(db *gorm.DB) UserService {
 	return &userService{db: db}
+}
+func (service *userService) AdminLogin(email string, password string) (string, error) {
+	log.Println("fff")
+	var u model.User
+	if err := service.db.Where(model.User{Email: email, PhoneNum: password}).First(&u).Error; err != nil {
+		return "", err
+	}
+
+	if !u.IsAdmin {
+		return "", errors.New("not admin")
+	}
+
+	// 새로운 JWT 토큰 생성
+	tokenString, err := util.GenerateJWT(u)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+
 }
 
 func (service *userService) AutoLogin(email string, user model.User) (string, error) {

@@ -142,18 +142,41 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 	}
 	var exercise model.Exercise
 
-	result := service.db.First(&model.Exercise{}, exerciseRequest.Id)
+	result := service.db.Where("id=? AND uid=?", exerciseRequest.Id, exerciseRequest.Uid).First(&model.Exercise{})
 
 	if err := util.CopyStruct(exerciseRequest, &exercise); err != nil {
 		return "", err
 	}
-	exercise.Uid = exerciseRequest.Uid
+
+	exercise.Uid = exerciseRequest.Uid //  json: "-" 이라서
+
 	// JSON 배열을 Go 슬라이스로 변환
 	var weekdaySlice []int32
 	err := json.Unmarshal(exercise.Weekdays, &weekdaySlice)
 	if err != nil {
 		return "", err
 	}
+
+	seen := make(map[int32]bool)
+	unique := []int32{}
+
+	for _, v := range weekdaySlice {
+		// 숫자가 0과 6 사이인지 확인
+		if v >= 0 && v <= 6 {
+			// 중복되지 않은 경우, 결과 슬라이스에 추가
+			if !seen[v] {
+				seen[v] = true
+				unique = append(unique, v)
+			}
+		}
+	}
+
+	newWeekdays, err := json.Marshal(unique)
+	if err != nil {
+		return "", err
+	}
+	exercise.Weekdays = newWeekdays
+
 	ar := &pb.AlarmRequest{
 		Id:        int32(exercise.Id),
 		Uid:       int32(exercise.Uid),
@@ -162,12 +185,13 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 		StartAt:   exercise.PlanStartAt,
 		EndAt:     exercise.PlanEndAt,
 		Timestamp: exercise.ExerciseStartAt,
-		Week:      weekdaySlice,
+		Week:      unique,
 		UseAlarm:  exercise.UseAlarm,
 	}
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		// 레코드가 존재하지 않으면 새 레코드 생성
 		exercise.Id = 0
+
 		if err := service.db.Create(&exercise).Error; err != nil {
 			return "", err
 		}

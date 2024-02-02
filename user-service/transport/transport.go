@@ -4,6 +4,7 @@ package transport
 
 import (
 	"common/util"
+	"log"
 	"net/http"
 	"user-service/dto"
 
@@ -11,6 +12,43 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+// @Tags 로그인
+// @Summary 관리자 로그인
+// @Description 관리자 로그인시 호출
+// @Accept  json
+// @Produce  json
+// @Param email body string true "email"
+// @Param password body string true "password"
+// @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Security jwt
+// @Router /admin-login [post]
+func AdminLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		log.Printf("ddd")
+		var requestData map[string]interface{}
+		if err := c.BindJSON(&requestData); err != nil {
+			log.Printf("Errord")
+			log.Printf("Error in BindJSON: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		email := requestData["email"].(string)
+		password := requestData["password"].(string)
+		response, err := loginEndpoint(c.Request.Context(), map[string]interface{}{
+			"email":    email,
+			"password": password,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.(dto.LoginResponse)
+		c.JSON(http.StatusOK, resp)
+	}
+}
 
 // @Tags 로그인
 // @Summary 구글로그인

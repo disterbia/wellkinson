@@ -10,10 +10,11 @@ import (
 	"user-service/service"
 	"user-service/transport"
 
+	_ "user-service/docs"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-
-	_ "user-service/docs"
 
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -34,6 +35,7 @@ func main() {
 
 	usvc := service.NewUserService(database)
 
+	adminLoginEndpoint := endpoint.MakeAdminLoginEndpoint(usvc)
 	googleLoginEndpoint := endpoint.MakeGoogleLoginEndpoint(usvc)
 	kakoLoginEndpoint := endpoint.MakeKakaoLoginEndpoint(usvc)
 	autoLoginEndpoint := endpoint.MakeAutoLoginEndpoint(usvc)
@@ -41,7 +43,9 @@ func main() {
 	getUserEndpoint := endpoint.MakeGetUserEndpoint(usvc)
 
 	router := gin.Default()
+	router.Use(cors.Default())
 
+	router.POST("/admin-login", transport.AdminLoginHandler(adminLoginEndpoint))
 	router.POST("/google-login", transport.GoogleLoginHandler(googleLoginEndpoint))
 	router.POST("/kakao-login", transport.KakaoLoginHandler(kakoLoginEndpoint))
 	router.POST("/auto-login", transport.AutoLoginHandler(autoLoginEndpoint))

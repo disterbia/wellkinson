@@ -131,6 +131,33 @@ type ExerciseInfo struct {
 	ExerciseId    int    `json:"exercise_id"`
 }
 
+type FaceScores struct {
+	TimestampModel
+	Id    int
+	Uid   int
+	Score int
+	Type  int
+}
+
+type FaceExams struct {
+	TimestampModel
+	Id      int
+	Type    int
+	Title   string
+	VideoId string `json:"video_id"`
+}
+
+type Videos struct {
+	TimestampModel
+	Id           int
+	ProjectName  string `json:"project_name"`
+	Name         string
+	Duration     int
+	ProjectId    string `json:"project_id"`
+	VideoId      string `json:"video_id"`
+	ThumbnailUrl string `json:"thumbnail_url"`
+}
+
 func (tm *TimestampModel) BeforeCreate(tx *gorm.DB) (err error) {
 	now := time.Now().Format("2006-01-02 15:04:05")
 	if tm.Created == "" {

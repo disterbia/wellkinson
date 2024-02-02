@@ -5,15 +5,19 @@ import (
 	"common/util"
 	"diet-service/dto"
 	"net/http"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	kitEndpoint "github.com/go-kit/kit/endpoint"
 )
 
+var userLocks sync.Map
+
 // @Tags 식단
 // @Summary 추가한 식단 생성/수정
 // @Description 추가한 식단 생성시 Id 생략
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param request body dto.DietPresetRequest true "요청 DTO - 추가한 식단 데이터"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -26,6 +30,14 @@ func SavePresetHandler(savePresetEndpoint kitEndpoint.Endpoint) gin.HandlerFunc 
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
+		// 사용자별 잠금 시작
+		if _, loaded := userLocks.LoadOrStore(id, true); loaded {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Concurrent request detected"})
+			return
+		}
+		defer userLocks.Delete(id)
+
 		var req dto.DietPresetRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -48,6 +60,7 @@ func SavePresetHandler(savePresetEndpoint kitEndpoint.Endpoint) gin.HandlerFunc 
 // @Summary 추가한 식단 조회
 // @Description 추가한 식단 조회시 호출 (10개씩)
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param  page  query  int  false  "페이지 번호 default 0" (10개씩)
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
@@ -89,6 +102,7 @@ func GetPresetsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 추가한 식단 삭제시 호출
 // @Accept  json
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param request body []int true "삭제할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -125,6 +139,7 @@ func RemovePresetHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Summary 식단생성/수정
 // @Description 식단생성시 Id 생략
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param request body dto.DietRequest true "요청 DTO - 식단데이터"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -137,6 +152,14 @@ func SaveDietHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
+		// 사용자별 잠금 시작
+		if _, loaded := userLocks.LoadOrStore(id, true); loaded {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Concurrent request detected"})
+			return
+		}
+		defer userLocks.Delete(id)
+
 		var req dto.DietRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -159,6 +182,7 @@ func SaveDietHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Summary 식단 조회
 // @Description 식단 조회시 호출
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
 // @Success 200 {object} []dto.DietResponse "식단정보"
@@ -199,6 +223,7 @@ func GetDietsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 추가한 식단 삭제시 호출
 // @Accept  json
 // @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
 // @Param request body []int true "삭제할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"

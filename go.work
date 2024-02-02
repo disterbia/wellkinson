@@ -1,12 +1,14 @@
 go 1.21.5
 
 use (
+	./admin-video-service
 	./alarm-service
 	./common
 	./diet-service
 	./email-service
 	./emotion-service
 	./exercise-service
+	./face-service
 	./fcm-service
 	./gateway
 	./inquire-service

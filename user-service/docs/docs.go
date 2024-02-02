@@ -15,6 +15,60 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin-login": {
+            "post": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "관리자 로그인시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "로그인"
+                ],
+                "summary": "관리자 로그인",
+                "parameters": [
+                    {
+                        "description": "email",
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "password",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 JWT 토큰 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auto-login": {
             "post": {
                 "security": [
@@ -82,7 +136,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "성공시 유저 객체 반환",
+                        "description": "성공시 유저 객체 반환/ ture:남성",
                         "schema": {
                             "$ref": "#/definitions/dto.UserResponse"
                         }
@@ -216,7 +270,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "요청 DTO - 업데이트 할 데이터",
+                        "description": "요청 DTO - 업데이트 할 데이터/ ture:남성",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -285,7 +339,6 @@ const docTemplate = `{
             }
         },
         "dto.UserRequest": {
-            "description": "Birthday: 사용자의 생일, Gender: 사용자의 성별 (true: 남성, false: 여성)",
             "type": "object",
             "properties": {
                 "birthday": {
@@ -334,7 +387,8 @@ const docTemplate = `{
                     "example": "YYYY-MM-DD"
                 },
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "device_id": {
                     "type": "string"
@@ -360,7 +414,8 @@ const docTemplate = `{
                     "example": "01000000000"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "use_auto_login": {
                     "type": "boolean"

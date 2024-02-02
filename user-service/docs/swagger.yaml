@@ -22,7 +22,6 @@ definitions:
         type: string
     type: object
   dto.UserRequest:
-    description: 'Birthday: 사용자의 생일, Gender: 사용자의 성별 (true: 남성, false: 여성)'
     properties:
       birthday:
         example: YYYY-MM-DD
@@ -56,6 +55,7 @@ definitions:
         example: YYYY-MM-DD
         type: string
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       device_id:
         type: string
@@ -74,6 +74,7 @@ definitions:
         example: "01000000000"
         type: string
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       use_auto_login:
         type: boolean
@@ -87,6 +88,40 @@ definitions:
 info:
   contact: {}
 paths:
+  /admin-login:
+    post:
+      consumes:
+      - application/json
+      description: 관리자 로그인시 호출
+      parameters:
+      - description: email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 JWT 토큰 반환
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - jwt: []
+      summary: 관리자 로그인
+      tags:
+      - 로그인
   /auto-login:
     post:
       consumes:
@@ -129,7 +164,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 성공시 유저 객체 반환
+          description: 성공시 유저 객체 반환/ ture:남성
           schema:
             $ref: '#/definitions/dto.UserResponse'
         "400":
@@ -214,7 +249,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: 요청 DTO - 업데이트 할 데이터
+      - description: 요청 DTO - 업데이트 할 데이터/ ture:남성
         in: body
         name: request
         required: true

@@ -11,6 +11,21 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
+func MakeAdminLoginEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		email := reqMap["email"].(string)
+		password := reqMap["password"].(string)
+
+		token, err := s.AdminLogin(email, password)
+
+		if err != nil {
+			return dto.LoginResponse{Err: err.Error()}, err
+		}
+		return dto.LoginResponse{Jwt: token}, nil
+	}
+}
+
 func MakeAutoLoginEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		email := request.(string)
