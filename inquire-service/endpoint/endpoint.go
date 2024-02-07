@@ -35,8 +35,8 @@ func SendEndpoint(s service.InquireService) endpoint.Endpoint {
 func RemoveInquireEndpoint(s service.InquireService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
-		uid := reqMap["uid"].(int)
+		id := reqMap["id"].(uint)
+		uid := reqMap["uid"].(uint)
 		code, err := s.RemoveInquire(id, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
@@ -47,8 +47,8 @@ func RemoveInquireEndpoint(s service.InquireService) endpoint.Endpoint {
 func RemoveReplyEndpoint(s service.InquireService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
-		uid := reqMap["uid"].(int)
+		id := reqMap["id"].(uint)
+		uid := reqMap["uid"].(uint)
 		code, err := s.RemoveReply(id, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
@@ -60,7 +60,7 @@ func RemoveReplyEndpoint(s service.InquireService) endpoint.Endpoint {
 func GetEndpoint(s service.InquireService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		id := reqMap["id"].(uint)
 		queryParams := reqMap["queryParams"].(dto.GetInquireParams)
 		inquires, err := s.GetMyInquires(id, queryParams.Page, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {
@@ -73,7 +73,7 @@ func GetEndpoint(s service.InquireService) endpoint.Endpoint {
 func GetAllEndpoint(s service.InquireService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		id := reqMap["id"].(uint)
 		queryParams := reqMap["queryParams"].(dto.GetInquireParams)
 		inquires, err := s.GetAllInquires(id, queryParams.Page, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {

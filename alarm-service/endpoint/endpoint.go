@@ -24,8 +24,8 @@ func SaveAlarmEndpoint(s service.AlarmService) endpoint.Endpoint {
 func RemoveAlarmEndpoint(s service.AlarmService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		ids := reqMap["ids"].([]int)
-		uid := reqMap["uid"].(int)
+		ids := reqMap["ids"].([]uint)
+		uid := reqMap["uid"].(uint)
 		code, err := s.RemoveAlarm(ids, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
@@ -37,8 +37,8 @@ func RemoveAlarmEndpoint(s service.AlarmService) endpoint.Endpoint {
 func GetEndpoint(s service.AlarmService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
-		page := reqMap["page"].(int)
+		id := reqMap["id"].(uint)
+		page := reqMap["page"].(uint)
 		inquires, err := s.GetAlarms(id, page)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err

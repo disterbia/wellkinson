@@ -1,0 +1,229 @@
+definitions:
+  dto.BasicResponse:
+    properties:
+      code:
+        type: string
+    type: object
+  dto.ErrorResponse:
+    properties:
+      err:
+        type: string
+    type: object
+  dto.MedicineDateInfo:
+    properties:
+      date:
+        example: YYYY-MM-DD
+        type: string
+      medicines:
+        items:
+          $ref: '#/definitions/dto.MedicineTakenInfo'
+        type: array
+    type: object
+  dto.MedicineRequest:
+    properties:
+      custom_medicine_type:
+        type: string
+      dose:
+        type: number
+      end_at:
+        example: YYYY-MM:dd
+        type: string
+      id:
+        type: integer
+      interval_type:
+        type: integer
+      is_active:
+        type: boolean
+      least_store:
+        type: number
+      medicine_type:
+        type: string
+      name:
+        type: string
+      start_at:
+        example: YYYY-MM-dd
+        type: string
+      store:
+        type: number
+      timestamp:
+        example:
+        - HH:mm
+        - HH:mm
+        items:
+          type: string
+        type: array
+      use_least_store:
+        type: boolean
+      use_privacy:
+        type: boolean
+      weekdays:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.MedicineResponse:
+    properties:
+      created:
+        type: string
+      custom_medicine_type:
+        type: string
+      dose:
+        type: number
+      end_at:
+        example: YYYY-MM:dd
+        type: string
+      id:
+        type: integer
+      interval_type:
+        type: integer
+      is_active:
+        type: boolean
+      least_store:
+        type: number
+      medicine_type:
+        type: string
+      name:
+        type: string
+      start_at:
+        example: YYYY-MM-dd
+        type: string
+      store:
+        type: number
+      timestamp:
+        example:
+        - HH:mm
+        - HH:mm
+        items:
+          type: string
+        type: array
+      updated:
+        type: string
+      use_least_store:
+        type: boolean
+      use_privacy:
+        type: boolean
+      weekdays:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.MedicineTakenInfo:
+    properties:
+      medicine:
+        $ref: '#/definitions/dto.MedicineResponse'
+      taken:
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /get-takens:
+    get:
+      description: 약물 복용내역 조회시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 시작날짜 yyyy-mm-dd
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: 종료날짜 yyyy-mm-dd
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 운동정보
+          schema:
+            items:
+              $ref: '#/definitions/dto.MedicineDateInfo'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 약물 복용내역 조회
+      tags:
+      - 약물
+  /remove-medicines:
+    post:
+      consumes:
+      - application/json
+      description: 약물 삭제시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 삭제할 id 배열
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 약물 삭제
+      tags:
+      - 약물
+  /save-medicine:
+    post:
+      description: 약물등록 및 수정시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 요청 DTO - 약물데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.MedicineRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 약물 저장
+      tags:
+      - 약물
+swagger: "2.0"

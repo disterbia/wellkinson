@@ -21,11 +21,11 @@ import (
 
 type DietService interface {
 	SavePreset(presetRequest dto.DietPresetRequest) (string, error)
-	GetPresets(id int, page int, startDate, endDate string) ([]dto.DietPresetResponse, error)
-	RemovePresets(ids []int, uid int) (string, error)
+	GetPresets(id uint, page uint, startDate, endDate string) ([]dto.DietPresetResponse, error)
+	RemovePresets(ids []uint, uid uint) (string, error)
 	SaveDiet(diet dto.DietRequest) (string, error)
-	GetDiets(id int, startDate, endDate string) ([]dto.DietResponse, error)
-	RemoveDiets(ids []int, uid int) (string, error)
+	GetDiets(id uint, startDate, endDate string) ([]dto.DietResponse, error)
+	RemoveDiets(ids []uint, uid uint) (string, error)
 }
 
 type dietService struct {
@@ -39,7 +39,7 @@ func NewDietService(db *gorm.DB, s3svc *s3.S3, bucket string, bucketUrl string) 
 	return &dietService{db: db, s3svc: s3svc, bucket: bucket, bucketUrl: bucketUrl}
 }
 
-func (service *dietService) GetDiets(id int, startDate, endDate string) ([]dto.DietResponse, error) {
+func (service *dietService) GetDiets(id uint, startDate, endDate string) ([]dto.DietResponse, error) {
 
 	var diet []model.Diet
 
@@ -135,7 +135,7 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	errorsChan := make(chan error, len(dietRequest.Images))
 	uploadedFiles := make(chan string, len(dietRequest.Images)*2)
 
-	uidString := strconv.Itoa(diet.Uid)
+	uidString := strconv.FormatUint(uint64(diet.Uid), 10)
 
 	for i, imgStr := range dietRequest.Images {
 		wg.Add(1)
@@ -250,7 +250,7 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	return "200", nil
 }
 
-func (service *dietService) RemoveDiets(ids []int, uid int) (string, error) {
+func (service *dietService) RemoveDiets(ids []uint, uid uint) (string, error) {
 	tx := service.db.Begin()
 	result := tx.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.Diet{})
 
@@ -270,10 +270,10 @@ func (service *dietService) RemoveDiets(ids []int, uid int) (string, error) {
 	return "200", nil
 }
 
-func (service *dietService) GetPresets(id int, page int, startDate, endDate string) ([]dto.DietPresetResponse, error) {
+func (service *dietService) GetPresets(id uint, page uint, startDate, endDate string) ([]dto.DietPresetResponse, error) {
 	pageSize := 10
 	var dietPresets []model.DietPreset
-	offset := page * pageSize
+	offset := page * uint(pageSize)
 
 	query := service.db.Where("uid = ?", id)
 	if startDate != "" {
@@ -283,7 +283,7 @@ func (service *dietService) GetPresets(id int, page int, startDate, endDate stri
 		query = query.Where("created <= ?", endDate+" 23:59:59")
 	}
 	query = query.Order("id DESC")
-	result := query.Offset(offset).Limit(pageSize).Find(&dietPresets)
+	result := query.Offset(int(offset)).Limit(pageSize).Find(&dietPresets)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -325,7 +325,7 @@ func (service *dietService) SavePreset(presetRequest dto.DietPresetRequest) (str
 	return "200", nil
 }
 
-func (service *dietService) RemovePresets(ids []int, uid int) (string, error) {
+func (service *dietService) RemovePresets(ids []uint, uid uint) (string, error) {
 	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.DietPreset{})
 
 	if result.Error != nil {

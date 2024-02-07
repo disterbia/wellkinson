@@ -19,10 +19,10 @@ import (
 type InquireService interface {
 	AnswerInquire(answer dto.InquireReplyRequest) (string, error)
 	SendInquire(inquire dto.InquireRequest) (string, error)
-	GetMyInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error)
-	GetAllInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error)
-	RemoveInquire(id int, uid int) (string, error)
-	RemoveReply(id int, uid int) (string, error)
+	GetMyInquires(id uint, page uint, startDate, endDate string) ([]dto.InquireResponse, error)
+	GetAllInquires(id uint, page uint, startDate, endDate string) ([]dto.InquireResponse, error)
+	RemoveInquire(id uint, uid uint) (string, error)
+	RemoveReply(id uint, uid uint) (string, error)
 }
 
 type inquireService struct {
@@ -37,7 +37,7 @@ func NewInquireService(db *gorm.DB, conn *grpc.ClientConn) InquireService {
 		emailClient: emailClient,
 	}
 }
-func (service *inquireService) GetMyInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error) {
+func (service *inquireService) GetMyInquires(id uint, page uint, startDate, endDate string) ([]dto.InquireResponse, error) {
 
 	if startDate != "" {
 		if err := util.ValidateDate(startDate); err != nil {
@@ -50,7 +50,7 @@ func (service *inquireService) GetMyInquires(id int, page int, startDate, endDat
 		}
 	}
 
-	pageSize := 10
+	pageSize := uint(10)
 	var inquires []model.Inquire
 	offset := page * pageSize
 
@@ -62,7 +62,7 @@ func (service *inquireService) GetMyInquires(id int, page int, startDate, endDat
 		query = query.Where("created <= ?", endDate+" 23:59:59")
 	}
 	query = query.Order("id DESC")
-	result := query.Offset(offset).Limit(pageSize).Preload("Replies").Find(&inquires)
+	result := query.Offset(int(offset)).Limit(int(pageSize)).Preload("Replies").Find(&inquires)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -77,7 +77,7 @@ func (service *inquireService) GetMyInquires(id int, page int, startDate, endDat
 	return inquireResponses, nil
 }
 
-func (service *inquireService) GetAllInquires(id int, page int, startDate, endDate string) ([]dto.InquireResponse, error) {
+func (service *inquireService) GetAllInquires(id uint, page uint, startDate, endDate string) ([]dto.InquireResponse, error) {
 
 	if startDate != "" {
 		if err := util.ValidateDate(startDate); err != nil {
@@ -90,7 +90,7 @@ func (service *inquireService) GetAllInquires(id int, page int, startDate, endDa
 		}
 	}
 
-	pageSize := 10
+	pageSize := uint(10)
 	var inquires []model.Inquire
 	offset := page * pageSize
 
@@ -114,7 +114,7 @@ func (service *inquireService) GetAllInquires(id int, page int, startDate, endDa
 		query = query.Where("created <= ?", endDate)
 	}
 	query = query.Order("id DESC")
-	result = query.Offset(offset).Limit(pageSize).Preload("Replies", "level= 0").Find(&inquires)
+	result = query.Offset(int(offset)).Limit(int(pageSize)).Preload("Replies", "level= 0").Find(&inquires)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -198,7 +198,7 @@ func (service *inquireService) AnswerInquire(inquireReplyRequest dto.InquireRepl
 	return "200", nil
 }
 
-func (service *inquireService) RemoveInquire(id int, uid int) (string, error) {
+func (service *inquireService) RemoveInquire(id uint, uid uint) (string, error) {
 
 	var inquire model.Inquire
 	result := service.db.Model(&inquire).Where("id = ? AND uid = ?", id, uid).Select("level").Updates(map[string]interface{}{"level": 10})
@@ -208,7 +208,7 @@ func (service *inquireService) RemoveInquire(id int, uid int) (string, error) {
 	return "200", nil
 }
 
-func (service *inquireService) RemoveReply(id int, uid int) (string, error) {
+func (service *inquireService) RemoveReply(id uint, uid uint) (string, error) {
 
 	var inquireReply model.InquireReply
 	result := service.db.Model(&inquireReply).Where("id = ? AND uid = ?", id, uid).Select("level").Updates(map[string]interface{}{"level": 10})

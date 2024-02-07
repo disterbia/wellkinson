@@ -16,9 +16,9 @@ import (
 )
 
 type AdminVideoService interface {
-	GetLevel1s(id int) ([]dto.VimeoLevel1, error)
-	GetLevel2s(id int, projectId string) ([]dto.VimeoLevel2, error)
-	SaveVideos(id int, videoIds []string) (string, error)
+	GetLevel1s(id uint) ([]dto.VimeoLevel1, error)
+	GetLevel2s(id uint, projectId string) ([]dto.VimeoLevel2, error)
+	SaveVideos(id uint, videoIds []string) (string, error)
 }
 
 type adminVideoService struct {
@@ -28,8 +28,7 @@ type adminVideoService struct {
 func NewAdminVideoService(db *gorm.DB) AdminVideoService {
 	return &adminVideoService{db: db}
 }
-
-func (service *adminVideoService) GetLevel1s(id int) ([]dto.VimeoLevel1, error) {
+func (service *adminVideoService) GetLevel1s(id uint) ([]dto.VimeoLevel1, error) {
 	var user model.User
 	err := service.db.Where("id = ?", id).Find(&user).Error
 	if err != nil {
@@ -92,7 +91,7 @@ func (service *adminVideoService) GetLevel1s(id int) ([]dto.VimeoLevel1, error) 
 	return vimeoData, nil // 결과 반환
 }
 
-func (service *adminVideoService) GetLevel2s(id int, projectId string) ([]dto.VimeoLevel2, error) {
+func (service *adminVideoService) GetLevel2s(id uint, projectId string) ([]dto.VimeoLevel2, error) {
 	var user model.User
 	err := service.db.Where("id = ?", id).Find(&user).Error
 	if err != nil {
@@ -138,7 +137,7 @@ func (service *adminVideoService) GetLevel2s(id int, projectId string) ([]dto.Vi
 		return nil, err // 에러 반환
 	}
 
-	var videos []model.Videos
+	var videos []model.Video
 	err = service.db.Where("project_id = ?", projectId).Find(&videos).Error
 	if err != nil {
 		return nil, errors.New("db error")
@@ -166,7 +165,7 @@ func (service *adminVideoService) GetLevel2s(id int, projectId string) ([]dto.Vi
 	return vimeoData, nil // 결과 반환
 }
 
-func (service *adminVideoService) SaveVideos(id int, videoIds []string) (string, error) {
+func (service *adminVideoService) SaveVideos(id uint, videoIds []string) (string, error) {
 	var user model.User
 	err := service.db.Where("id = ?", id).Find(&user).Error
 	if err != nil {
@@ -192,7 +191,7 @@ func (service *adminVideoService) SaveVideos(id int, videoIds []string) (string,
 	client := &http.Client{}
 
 	var wg sync.WaitGroup
-	videosChan := make(chan model.Videos, len(unique))
+	videosChan := make(chan model.Video, len(unique))
 	proIdChan := make(chan string, len(unique))
 
 	for _, item := range unique {
@@ -242,7 +241,7 @@ func (service *adminVideoService) SaveVideos(id int, videoIds []string) (string,
 			splitUri := strings.Split(response.ParentFolder.Uri, "/")
 			projectId := splitUri[len(splitUri)-1]
 
-			videosChan <- model.Videos{
+			videosChan <- model.Video{
 				VideoId:      item,
 				Name:         response.Name,
 				Duration:     response.Duration,
@@ -262,7 +261,7 @@ func (service *adminVideoService) SaveVideos(id int, videoIds []string) (string,
 		return "nothing", nil
 	}
 
-	var videos []model.Videos
+	var videos []model.Video
 	var proIds []string
 	for video := range videosChan {
 		videos = append(videos, video)
@@ -272,7 +271,7 @@ func (service *adminVideoService) SaveVideos(id int, videoIds []string) (string,
 		proIds = append(proIds, proId)
 	}
 
-	if err := service.db.Where("project_id IN ?", proIds).Delete(&model.Videos{}).Error; err != nil {
+	if err := service.db.Where("project_id IN ?", proIds).Delete(&model.Video{}).Error; err != nil {
 		return "", err
 	}
 

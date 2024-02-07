@@ -14,8 +14,8 @@ import (
 
 type AlarmService interface {
 	SaveAlarm(alarmRequest dto.AlarmRequest) (string, error)
-	RemoveAlarm(ids []int, uid int) (string, error)
-	GetAlarms(id int, page int) ([]dto.AlarmResponse, error)
+	RemoveAlarm(ids []uint, uid uint) (string, error)
+	GetAlarms(id uint, page uint) ([]dto.AlarmResponse, error)
 }
 
 type alarmService struct {
@@ -26,10 +26,10 @@ func NewAlarmService(db *gorm.DB) AlarmService {
 	return &alarmService{db: db}
 }
 
-func (service *alarmService) GetAlarms(id int, page int) ([]dto.AlarmResponse, error) {
+func (service *alarmService) GetAlarms(id uint, page uint) ([]dto.AlarmResponse, error) {
 	pageSize := 10
 	var alarms []model.Alarm
-	offset := page * pageSize
+	offset := int(page) * pageSize
 
 	result := service.db.Where("uid = ? ", id).Order("id DESC").Offset(offset).Limit(pageSize).Find(&alarms)
 	if result.Error != nil {
@@ -100,7 +100,7 @@ func (service *alarmService) SaveAlarm(alarmRequest dto.AlarmRequest) (string, e
 	return "200", nil
 }
 
-func (ra *alarmService) RemoveAlarm(ids []int, uid int) (string, error) {
+func (ra *alarmService) RemoveAlarm(ids []uint, uid uint) (string, error) {
 
 	result := ra.db.Where("id IN ? AND uid= ?", ids, uid).Delete(&model.Alarm{})
 

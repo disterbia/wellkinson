@@ -23,7 +23,7 @@ func SaveEmotionEndpoint(s service.EmotionService) endpoint.Endpoint {
 func GetEmotionsEndpoint(s service.EmotionService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		id := reqMap["id"].(uint)
 		queryParams := reqMap["queryParams"].(dto.GetEmotionsParams)
 		inquires, err := s.GetEmotions(id, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {
@@ -36,8 +36,8 @@ func GetEmotionsEndpoint(s service.EmotionService) endpoint.Endpoint {
 func RemoveEmotionsEndpoint(s service.EmotionService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		ids := reqMap["ids"].([]int)
-		uid := reqMap["uid"].(int)
+		ids := reqMap["ids"].([]uint)
+		uid := reqMap["uid"].(uint)
 		code, err := s.RemoveEmotions(ids, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err

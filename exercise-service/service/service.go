@@ -5,7 +5,6 @@ import (
 	"common/model"
 	"common/util"
 	"context"
-	"encoding/json"
 	"errors"
 	"exercise-service/dto"
 	pb "exercise-service/proto"
@@ -18,8 +17,8 @@ import (
 
 type ExerciseService interface {
 	SaveExercise(presetRequest dto.ExerciseRequest) (string, error)
-	GetExercises(id int, startDate, endDate string) ([]dto.ExerciseDateInfo, error)
-	RemoveExercises(ids []int, uid int) (string, error)
+	GetExercises(id uint, startDate, endDate string) ([]dto.ExerciseDateInfo, error)
+	RemoveExercises(ids []uint, uid uint) (string, error)
 	DoExercise(exerciseDo dto.ExerciseDo) (string, error)
 }
 
@@ -33,7 +32,7 @@ func NewExerciseService(db *gorm.DB, conn *grpc.ClientConn) ExerciseService {
 	return &exerciseService{db: db, alarmClient: alarmClient}
 }
 
-func (service *exerciseService) GetExercises(id int, startDateStr, endDateStr string) ([]dto.ExerciseDateInfo, error) {
+func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr string) ([]dto.ExerciseDateInfo, error) {
 
 	// 문자열을 time.Time 타입으로 변환
 	startDate, err := time.Parse("2006-01-02", startDateStr)
@@ -57,18 +56,19 @@ func (service *exerciseService) GetExercises(id int, startDateStr, endDateStr st
 		return nil, err
 	}
 
-	var exerciseIDs []int
+	// 해당 운동 실행내역 조회
+	var exerciseIDs []uint
 	for _, exercise := range exerciseResponse {
 		exerciseIDs = append(exerciseIDs, exercise.Id)
 	}
-
 	var performedExercises []model.ExerciseInfo
 	err = service.db.Where("exercise_id IN (?) AND date_performed BETWEEN ? AND ?", exerciseIDs, startDate, endDate).Find(&performedExercises).Error
 	if err != nil {
 		return nil, err
 	}
 
-	performedMap := make(map[int]map[string]bool)
+	// 운동 실행내역 응답형식으로 가공
+	performedMap := make(map[uint]map[string]bool)
 	for _, pe := range performedExercises {
 		if performedMap[pe.ExerciseId] == nil {
 			performedMap[pe.ExerciseId] = make(map[string]bool)
@@ -78,8 +78,9 @@ func (service *exerciseService) GetExercises(id int, startDateStr, endDateStr st
 
 	// var exerciseDates []dto.ExerciseDateInfo
 	// log.Println(exerciseDates) // 출력: [] 이지만 실제로 nil임
-	exerciseDates := make([]dto.ExerciseDateInfo, 0)
 
+	// 전체 날짜에서 실행한 날짜 체크
+	exerciseDates := make([]dto.ExerciseDateInfo, 0)
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		var dailyExercises []dto.ExerciseDoneInfo
 		for _, e := range exerciseResponse {
@@ -99,9 +100,9 @@ func (service *exerciseService) GetExercises(id int, startDateStr, endDateStr st
 	return exerciseDates, nil
 }
 
-func isExerciseDay(weekdays []int, day time.Weekday) bool {
+func isExerciseDay(weekdays []uint, day time.Weekday) bool {
 	for _, d := range weekdays {
-		if int(day) == d {
+		if uint(day) == d {
 			return true
 		}
 	}
@@ -150,44 +151,9 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 
 	exercise.Uid = exerciseRequest.Uid //  json: "-" 이라서
 
-	// JSON 배열을 Go 슬라이스로 변환
-	var weekdaySlice []int32
-	err := json.Unmarshal(exercise.Weekdays, &weekdaySlice)
-	if err != nil {
-		return "", err
-	}
-
-	seen := make(map[int32]bool)
-	unique := []int32{}
-
-	for _, v := range weekdaySlice {
-		// 숫자가 0과 6 사이인지 확인
-		if v >= 0 && v <= 6 {
-			// 중복되지 않은 경우, 결과 슬라이스에 추가
-			if !seen[v] {
-				seen[v] = true
-				unique = append(unique, v)
-			}
-		}
-	}
-
-	newWeekdays, err := json.Marshal(unique)
-	if err != nil {
-		return "", err
-	}
+	newWeekdays, unique, _ := validateWeek(exercise.Weekdays)
 	exercise.Weekdays = newWeekdays
 
-	ar := &pb.AlarmRequest{
-		Id:        int32(exercise.Id),
-		Uid:       int32(exercise.Uid),
-		Body:      "운동 할 시간입니다.",
-		Type:      "exercise",
-		StartAt:   exercise.PlanStartAt,
-		EndAt:     exercise.PlanEndAt,
-		Timestamp: exercise.ExerciseStartAt,
-		Week:      unique,
-		UseAlarm:  exercise.UseAlarm,
-	}
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		// 레코드가 존재하지 않으면 새 레코드 생성
 		exercise.Id = 0
@@ -195,7 +161,19 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 		if err := service.db.Create(&exercise).Error; err != nil {
 			return "", err
 		}
-
+		ar := &pb.AlarmRequest{
+			ParentId:  int32(exercise.Id),
+			Uid:       int32(exercise.Uid),
+			Body:      "운동 할 시간입니다.",
+			Type:      int32(util.ExerciseType),
+			StartAt:   exercise.PlanStartAt,
+			EndAt:     exercise.PlanEndAt,
+			Timestamp: exercise.ExerciseStartAt,
+			Week:      unique,
+		}
+		if exercise.UseAlarm {
+			sendAlarm(service, ar)
+		}
 	} else if result.Error != nil {
 		return "", errors.New("db error")
 	} else {
@@ -203,25 +181,35 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 		if err := service.db.Model(&exercise).Updates(exercise).Error; err != nil {
 			return "", err
 		}
-	}
-	if exercise.UseAlarm {
-		sendAlarm(service, ar)
-	} else {
-		b := make([]int32, 1)
-
-		b[0] = int32(exercise.Id)
-
-		arr := &pb.AlarmRemoveRequest{
-			Ids: b,
-			Uid: int32(exercise.Uid),
+		ar := &pb.AlarmRequest{
+			ParentId:  int32(exercise.Id),
+			Uid:       int32(exercise.Uid),
+			Body:      "운동 할 시간입니다.",
+			Type:      int32(util.ExerciseType),
+			StartAt:   exercise.PlanStartAt,
+			EndAt:     exercise.PlanEndAt,
+			Timestamp: exercise.ExerciseStartAt,
+			Week:      unique,
 		}
-		removeAlarm(service, arr)
+		if exercise.UseAlarm {
+			updateAlarm(service, ar)
+		} else {
+			b := make([]int32, 1)
+
+			b[0] = int32(exercise.Id)
+
+			arr := &pb.AlarmRemoveRequest{
+				ParentIds: b,
+				Uid:       int32(exercise.Uid),
+			}
+			removeAlarm(service, arr)
+		}
 	}
 
 	return "200", nil
 }
 
-func (service *exerciseService) RemoveExercises(ids []int, uid int) (string, error) {
+func (service *exerciseService) RemoveExercises(ids []uint, uid uint) (string, error) {
 	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.Exercise{})
 
 	if result.Error != nil {
@@ -234,8 +222,9 @@ func (service *exerciseService) RemoveExercises(ids []int, uid int) (string, err
 		b[i] = int32(v)
 	}
 	arr := &pb.AlarmRemoveRequest{
-		Ids: b,
-		Uid: int32(uid),
+		ParentIds: b,
+		Uid:       int32(uid),
+		Type:      int32(util.ExerciseType),
 	}
 
 	removeAlarm(service, arr)
@@ -256,4 +245,12 @@ func removeAlarm(service *exerciseService, arr *pb.AlarmRemoveRequest) {
 		log.Printf("Failed to remove Alarm: %v", err)
 	}
 	log.Printf("remove Alarm: %v", reponse)
+}
+
+func updateAlarm(service *exerciseService, ar *pb.AlarmRequest) {
+	reponse, err := service.alarmClient.UpdateAlarm(context.Background(), ar)
+	if err != nil {
+		log.Printf("Failed to update Alarm: %v", err)
+	}
+	log.Printf("update Alarm: %v", reponse)
 }

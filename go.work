@@ -12,5 +12,6 @@ use (
 	./fcm-service
 	./gateway
 	./inquire-service
+	./medicine-service
 	./user-service
 )

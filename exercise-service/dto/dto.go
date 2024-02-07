@@ -7,25 +7,25 @@ type GetParams struct {
 }
 
 type ExerciseRequest struct {
-	Id              int    `json:"id"`
-	Uid             int    `json:"-"`
+	Id              uint   `json:"id"`
+	Uid             uint   `json:"-"`
 	Title           string `json:"title"`
 	ExerciseStartAt string `json:"exercise_start_at" example:"HH:mm"`
 	ExerciseEndAt   string `json:"exercise_end_at" example:"HH:mm"`
 	PlanStartAt     string `json:"plan_start_at" example:"YYYY-MM-DD"`
 	PlanEndAt       string `json:"plan_end_at" example:"YYYY-MM-DD"`
 	UseAlarm        bool   `json:"use_alarm"`
-	Weekdays        []int  `json:"weekdays"`
+	Weekdays        []uint `json:"weekdays"`
 }
 
 type ExerciseResponse struct {
-	Id              int    `json:"id"`
+	Id              uint   `json:"id"`
 	ExerciseStartAt string `json:"exercise_start_at" example:"HH:mm"`
 	ExerciseEndAt   string `json:"exercise_end_at"  example:"HH:mm"`
 	PlanStartAt     string `json:"plan_start_at"  example:"YYYY-MM-DD"`
 	PlanEndAt       string `json:"plan_end_at"  example:"YYYY-MM-DD"`
 	UseAlarm        bool   `json:"use_alarm"`
-	Weekdays        []int  `json:"weekdays"`
+	Weekdays        []uint `json:"weekdays"`
 	Created         string `json:"created"`
 	Updated         string `json:"updated"`
 }
@@ -41,8 +41,8 @@ type ExerciseDoneInfo struct {
 }
 
 type ExerciseDo struct {
-	Uid           int    `json:"-"`
-	ExerciseId    int    `json:"exercise_id"`
+	Uid           uint   `json:"-"`
+	ExerciseId    uint   `json:"exercise_id"`
 	PerformedDate string `json:"performed_date"  example:"YYYY-MM-DD"`
 }
 

@@ -2,7 +2,7 @@
 package dto
 
 type UserRequest struct {
-	Id                   int    `json:"-"`
+	Id                   uint   `json:"-"`
 	Email                string `json:"-"`
 	Birthday             string `json:"birthday" example:"YYYY-MM-DD"`
 	DeviceID             string `json:"device_id"`

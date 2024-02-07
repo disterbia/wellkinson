@@ -11,7 +11,7 @@ import (
 
 func GetVimeoLevel1sEndpoint(s service.AdminVideoService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		id := request.(int)
+		id := request.(uint)
 		level1s, err := s.GetLevel1s(id)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
@@ -23,7 +23,7 @@ func GetVimeoLevel1sEndpoint(s service.AdminVideoService) endpoint.Endpoint {
 func GetVimeoLevel2sEndpoint(s service.AdminVideoService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		id := reqMap["id"].(uint)
 		projectId := reqMap["projectId"].(string)
 		level1s, err := s.GetLevel2s(id, projectId)
 		if err != nil {
@@ -36,7 +36,7 @@ func GetVimeoLevel2sEndpoint(s service.AdminVideoService) endpoint.Endpoint {
 func SaveEndpoint(s service.AdminVideoService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		id := reqMap["id"].(uint)
 		videoIds := reqMap["videoIds"].([]string)
 		code, err := s.SaveVideos(id, videoIds)
 		if err != nil {

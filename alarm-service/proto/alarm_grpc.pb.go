@@ -19,8 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AlarmService_SetAlarm_FullMethodName    = "/alarmservice.AlarmService/SetAlarm"
-	AlarmService_RemoveAlarm_FullMethodName = "/alarmservice.AlarmService/RemoveAlarm"
+	AlarmService_SetAlarm_FullMethodName         = "/alarmservice.AlarmService/SetAlarm"
+	AlarmService_UpdateAlarm_FullMethodName      = "/alarmservice.AlarmService/UpdateAlarm"
+	AlarmService_RemoveAlarm_FullMethodName      = "/alarmservice.AlarmService/RemoveAlarm"
+	AlarmService_MultiSetAlarm_FullMethodName    = "/alarmservice.AlarmService/MultiSetAlarm"
+	AlarmService_MultiUpdateAlarm_FullMethodName = "/alarmservice.AlarmService/MultiUpdateAlarm"
 )
 
 // AlarmServiceClient is the client API for AlarmService service.
@@ -28,7 +31,10 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AlarmServiceClient interface {
 	SetAlarm(ctx context.Context, in *AlarmRequest, opts ...grpc.CallOption) (*AlarmResponse, error)
+	UpdateAlarm(ctx context.Context, in *AlarmRequest, opts ...grpc.CallOption) (*AlarmResponse, error)
 	RemoveAlarm(ctx context.Context, in *AlarmRemoveRequest, opts ...grpc.CallOption) (*AlarmResponse, error)
+	MultiSetAlarm(ctx context.Context, in *MultiAlarmRequest, opts ...grpc.CallOption) (*AlarmResponse, error)
+	MultiUpdateAlarm(ctx context.Context, in *MultiAlarmRequest, opts ...grpc.CallOption) (*AlarmResponse, error)
 }
 
 type alarmServiceClient struct {
@@ -48,9 +54,36 @@ func (c *alarmServiceClient) SetAlarm(ctx context.Context, in *AlarmRequest, opt
 	return out, nil
 }
 
+func (c *alarmServiceClient) UpdateAlarm(ctx context.Context, in *AlarmRequest, opts ...grpc.CallOption) (*AlarmResponse, error) {
+	out := new(AlarmResponse)
+	err := c.cc.Invoke(ctx, AlarmService_UpdateAlarm_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *alarmServiceClient) RemoveAlarm(ctx context.Context, in *AlarmRemoveRequest, opts ...grpc.CallOption) (*AlarmResponse, error) {
 	out := new(AlarmResponse)
 	err := c.cc.Invoke(ctx, AlarmService_RemoveAlarm_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *alarmServiceClient) MultiSetAlarm(ctx context.Context, in *MultiAlarmRequest, opts ...grpc.CallOption) (*AlarmResponse, error) {
+	out := new(AlarmResponse)
+	err := c.cc.Invoke(ctx, AlarmService_MultiSetAlarm_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *alarmServiceClient) MultiUpdateAlarm(ctx context.Context, in *MultiAlarmRequest, opts ...grpc.CallOption) (*AlarmResponse, error) {
+	out := new(AlarmResponse)
+	err := c.cc.Invoke(ctx, AlarmService_MultiUpdateAlarm_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +95,10 @@ func (c *alarmServiceClient) RemoveAlarm(ctx context.Context, in *AlarmRemoveReq
 // for forward compatibility
 type AlarmServiceServer interface {
 	SetAlarm(context.Context, *AlarmRequest) (*AlarmResponse, error)
+	UpdateAlarm(context.Context, *AlarmRequest) (*AlarmResponse, error)
 	RemoveAlarm(context.Context, *AlarmRemoveRequest) (*AlarmResponse, error)
+	MultiSetAlarm(context.Context, *MultiAlarmRequest) (*AlarmResponse, error)
+	MultiUpdateAlarm(context.Context, *MultiAlarmRequest) (*AlarmResponse, error)
 	mustEmbedUnimplementedAlarmServiceServer()
 }
 
@@ -73,8 +109,17 @@ type UnimplementedAlarmServiceServer struct {
 func (UnimplementedAlarmServiceServer) SetAlarm(context.Context, *AlarmRequest) (*AlarmResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetAlarm not implemented")
 }
+func (UnimplementedAlarmServiceServer) UpdateAlarm(context.Context, *AlarmRequest) (*AlarmResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAlarm not implemented")
+}
 func (UnimplementedAlarmServiceServer) RemoveAlarm(context.Context, *AlarmRemoveRequest) (*AlarmResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveAlarm not implemented")
+}
+func (UnimplementedAlarmServiceServer) MultiSetAlarm(context.Context, *MultiAlarmRequest) (*AlarmResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiSetAlarm not implemented")
+}
+func (UnimplementedAlarmServiceServer) MultiUpdateAlarm(context.Context, *MultiAlarmRequest) (*AlarmResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiUpdateAlarm not implemented")
 }
 func (UnimplementedAlarmServiceServer) mustEmbedUnimplementedAlarmServiceServer() {}
 
@@ -107,6 +152,24 @@ func _AlarmService_SetAlarm_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AlarmService_UpdateAlarm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AlarmRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AlarmServiceServer).UpdateAlarm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AlarmService_UpdateAlarm_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AlarmServiceServer).UpdateAlarm(ctx, req.(*AlarmRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AlarmService_RemoveAlarm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AlarmRemoveRequest)
 	if err := dec(in); err != nil {
@@ -125,6 +188,42 @@ func _AlarmService_RemoveAlarm_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AlarmService_MultiSetAlarm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiAlarmRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AlarmServiceServer).MultiSetAlarm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AlarmService_MultiSetAlarm_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AlarmServiceServer).MultiSetAlarm(ctx, req.(*MultiAlarmRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AlarmService_MultiUpdateAlarm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiAlarmRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AlarmServiceServer).MultiUpdateAlarm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AlarmService_MultiUpdateAlarm_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AlarmServiceServer).MultiUpdateAlarm(ctx, req.(*MultiAlarmRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AlarmService_ServiceDesc is the grpc.ServiceDesc for AlarmService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -137,8 +236,20 @@ var AlarmService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AlarmService_SetAlarm_Handler,
 		},
 		{
+			MethodName: "UpdateAlarm",
+			Handler:    _AlarmService_UpdateAlarm_Handler,
+		},
+		{
 			MethodName: "RemoveAlarm",
 			Handler:    _AlarmService_RemoveAlarm_Handler,
+		},
+		{
+			MethodName: "MultiSetAlarm",
+			Handler:    _AlarmService_MultiSetAlarm_Handler,
+		},
+		{
+			MethodName: "MultiUpdateAlarm",
+			Handler:    _AlarmService_MultiUpdateAlarm_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

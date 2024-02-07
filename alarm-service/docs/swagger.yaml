@@ -15,7 +15,7 @@ definitions:
         example: HH:mm
         type: string
       type:
-        type: string
+        type: integer
       week:
         items:
           type: integer
@@ -40,7 +40,7 @@ definitions:
         example: HH:mm
         type: string
       type:
-        type: string
+        type: integer
       updated:
         example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
@@ -66,6 +66,11 @@ paths:
     get:
       description: 알람조회시 호출 (10개씩)
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 페이지 번호 default 0
         in: query
         name: page
@@ -96,6 +101,11 @@ paths:
       - application/json
       description: 알람삭제시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 삭제할 id 배열
         in: body
         name: request
@@ -128,6 +138,11 @@ paths:
       - application/json
       description: 알람생성시 id생략 / 알람수정시 id 포함
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 요청 DTO - 알람데이터
         in: body
         name: request

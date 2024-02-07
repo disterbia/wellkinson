@@ -12,8 +12,8 @@ import (
 
 type EmotionService interface {
 	SaveEmotion(emotionRequest dto.EmotionRequest) (string, error)
-	GetEmotions(id int, startDate, endDate string) ([]dto.EmotionResponse, error)
-	RemoveEmotions(ids []int, uid int) (string, error)
+	GetEmotions(id uint, startDate, endDate string) ([]dto.EmotionResponse, error)
+	RemoveEmotions(ids []uint, uid uint) (string, error)
 }
 
 type emotionService struct {
@@ -51,7 +51,7 @@ func (service *emotionService) SaveEmotion(emotionRequest dto.EmotionRequest) (s
 
 	return "200", nil
 }
-func (service *emotionService) GetEmotions(id int, startDate, endDate string) ([]dto.EmotionResponse, error) {
+func (service *emotionService) GetEmotions(id uint, startDate, endDate string) ([]dto.EmotionResponse, error) {
 	var emotions []model.Emotion
 
 	query := service.db.Where("uid = ?", id)
@@ -76,7 +76,7 @@ func (service *emotionService) GetEmotions(id int, startDate, endDate string) ([
 	return emotionResponses, nil
 }
 
-func (service *emotionService) RemoveEmotions(ids []int, uid int) (string, error) {
+func (service *emotionService) RemoveEmotions(ids []uint, uid uint) (string, error) {
 	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.Emotion{})
 
 	if result.Error != nil {

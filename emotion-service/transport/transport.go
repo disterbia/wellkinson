@@ -100,7 +100,7 @@ func GetEmotionsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param request body []int true "삭제할 id 배열"
+// @Param request body []uint true "삭제할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -113,7 +113,7 @@ func RemoveEmotionsHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc 
 			return
 		}
 
-		var ids []int // 삭제할 ID 배열
+		var ids []uint // 삭제할 ID 배열
 		if err := c.ShouldBindJSON(&ids); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

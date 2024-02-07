@@ -64,7 +64,7 @@ func SaveAlarmHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param request body []int true "삭제할 id 배열"
+// @Param request body []uint true "삭제할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -76,7 +76,7 @@ func RemoveAlarmsHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		var ids []int // 삭제할 ID 배열
+		var ids []uint // 삭제할 ID 배열
 		if err := c.ShouldBindJSON(&ids); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -101,7 +101,7 @@ func RemoveAlarmsHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 알람조회시 호출 (10개씩)
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param  page  query int false  "페이지 번호 default 0"
+// @Param  page  query uint false  "페이지 번호 default 0"
 // @Success 200 {object} []dto.AlarmResponse "알람정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -115,13 +115,14 @@ func GetHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 
 		pageParam := c.Query("page")
-		var page int
+		var page uint
 		if pageParam != "" {
-			page, err = strconv.Atoi(pageParam)
+			parsed, err := strconv.ParseUint(pageParam, 10, 32)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page parameter"})
 				return
 			}
+			page = uint(parsed)
 		}
 
 		// id와 queryParams를 함께 전달

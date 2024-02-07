@@ -3,7 +3,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -72,38 +71,23 @@ func main() {
 	router := gin.Default()
 	router.Use(IPRateLimitMiddleware())
 	// 유저 서비스로의 리버스 프록시 설정
-	userServiceURL, _ := url.Parse("http://localhost:44444")
+	userServiceURL, _ := url.Parse("http://localhost:44440")
 	userProxy := httputil.NewSingleHostReverseProxy(userServiceURL)
 	router.Any("/user/*path", func(c *gin.Context) {
-		log.Printf("API Gateway: Forwarding request to user service")
 		c.Request.URL.Path = c.Param("path") // '/user' 접두사 제거
 		userProxy.ServeHTTP(c.Writer, c.Request)
-		log.Printf("API Gateway: Request forwarded")
 	})
 
-	// 알람 서비스로의 리버스 프록시 설정
-	alarmrServiceURL, _ := url.Parse("http://localhost:44440")
-	alarmProxy := httputil.NewSingleHostReverseProxy(alarmrServiceURL)
-	router.Any("/alarm/*path", func(c *gin.Context) {
-		log.Printf("API Gateway: Forwarding request to alarm service ")
+	adminServiceURL, _ := url.Parse("http://localhost:44444")
+	adminProxy := httputil.NewSingleHostReverseProxy(adminServiceURL)
+	router.Any("/admin/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")
-		alarmProxy.ServeHTTP(c.Writer, c.Request)
-		log.Printf("API Gateway: Request forwarded")
-	})
-
-	// 문의 서비스로의 리버스 프록시 설정
-	InquireServiceURL, _ := url.Parse("http://localhost:44442")
-	inquireProxy := httputil.NewSingleHostReverseProxy(InquireServiceURL)
-	router.Any("/inquire/*path", func(c *gin.Context) {
-		log.Printf("API Gateway: Forwarding request to inquire service ")
-		c.Request.URL.Path = c.Param("path")
-		inquireProxy.ServeHTTP(c.Writer, c.Request)
-		log.Printf("API Gateway: Request forwarded")
+		adminProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
 	setupSwaggerUIProxy(router, "/user-service/swagger/*proxyPath", "http://localhost:44440/swagger/")
-	setupSwaggerUIProxy(router, "/alarm-service/swagger/*proxyPath", "http://localhost:44441/swagger/")
-	setupSwaggerUIProxy(router, "/inquire-service/swagger/*proxyPath", "http://localhost:44442/swagger/")
+	setupSwaggerUIProxy(router, "/admin-service/swagger/*proxyPath", "http://localhost:44444/swagger/")
+
 	// API 게이트웨이 서버 시작
 	router.Run(":50000")
 }

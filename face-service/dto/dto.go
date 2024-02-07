@@ -7,20 +7,20 @@ type GetParams struct {
 }
 
 type FaceScoreRequest struct {
-	Uid   int `json:"-"`
-	Score int `json:"score"`
-	Type  int `json:"type"`
+	Uid   uint `json:"-"`
+	Score uint `json:"score"`
+	Type  uint `json:"type"`
 }
 
 type FaceScoreResponse struct {
-	Score   int    `json:"score"`
-	Type    int    `json:"type"`
+	Score   uint   `json:"score"`
+	Type    uint   `json:"type"`
 	Created string `json:"created"`
 	Updated string `json:"updated"`
 }
 
 type FaceExamResponse struct {
-	Type    int
+	Type    uint
 	Title   string
 	VideoId string `json:"video_id"`
 }

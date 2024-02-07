@@ -20,7 +20,7 @@ type LoginService interface {
 	Login(token string, user model.User) (string, error)
 }
 
-func VerifyJWT(c *gin.Context) (int, string, error) {
+func VerifyJWT(c *gin.Context) (uint, string, error) {
 	// 헤더에서 JWT 토큰 추출
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {
@@ -39,7 +39,7 @@ func VerifyJWT(c *gin.Context) (int, string, error) {
 		return 0, "", errors.New("invalid token")
 	}
 
-	id := int((*claims)["id"].(float64))
+	id := uint((*claims)["id"].(float64))
 	email := (*claims)["email"].(string)
 	if email == "" || id == 0 {
 		return 0, "", errors.New("id or email not found in token")

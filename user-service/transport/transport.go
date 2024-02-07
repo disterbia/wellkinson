@@ -4,7 +4,6 @@ package transport
 
 import (
 	"common/util"
-	"log"
 	"net/http"
 	"user-service/dto"
 
@@ -26,11 +25,8 @@ import (
 // @Router /admin-login [post]
 func AdminLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Printf("ddd")
 		var requestData map[string]interface{}
 		if err := c.BindJSON(&requestData); err != nil {
-			log.Printf("Errord")
-			log.Printf("Error in BindJSON: %v", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}

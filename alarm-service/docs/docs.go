@@ -27,6 +27,13 @@ const docTemplate = `{
                 "summary": "알람조회",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "페이지 번호 default 0",
                         "name": "page",
@@ -72,6 +79,13 @@ const docTemplate = `{
                 ],
                 "summary": "알람삭제",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "삭제할 id 배열",
                         "name": "request",
@@ -121,6 +135,13 @@ const docTemplate = `{
                 ],
                 "summary": "알람생성/수정",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "요청 DTO - 알람데이터",
                         "name": "request",
@@ -177,7 +198,7 @@ const docTemplate = `{
                     "example": "HH:mm"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "week": {
                     "type": "array",
@@ -213,7 +234,7 @@ const docTemplate = `{
                     "example": "HH:mm"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "updated": {
                     "type": "string",

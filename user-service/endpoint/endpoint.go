@@ -39,7 +39,7 @@ func MakeAutoLoginEndpoint(s service.UserService) endpoint.Endpoint {
 
 func MakeGetUserEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		id := request.(int)
+		id := request.(uint)
 		result, err := s.GetUser(id)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err

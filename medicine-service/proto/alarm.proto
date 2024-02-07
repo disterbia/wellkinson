@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package alarmservice;
+
+option go_package = "./";
+
+service AlarmService {
+    rpc RemoveAlarm (AlarmRemoveRequest) returns (AlarmResponse);
+    rpc MultiSetAlarm (MultiAlarmRequest) returns (AlarmResponse);
+    rpc MultiUpdateAlarm (MultiAlarmRequest) returns (AlarmResponse);
+}
+
+message AlarmRequest {
+    int32 parent_id = 1;
+    string start_at = 2;
+    string end_at = 3;
+    string timestamp = 4;
+    repeated int32 week = 5;
+    int32 type = 6;
+    string body = 7;
+    int32 uid = 8;
+}
+
+message AlarmResponse {
+    string status = 1;
+}
+
+message AlarmRemoveRequest {
+   repeated int32 parent_ids = 1;
+   int32 uid = 2;
+   int32 type = 3;
+}
+
+message MultiAlarmRequest {
+    repeated AlarmRequest alarm_requests = 1;
+}

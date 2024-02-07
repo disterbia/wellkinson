@@ -19,7 +19,7 @@ type UserService interface {
 	GoogleLogin(idToken string, userRequest dto.UserRequest) (string, error) //구글로그인
 	findOrCreateUser(user model.User) (model.User, error)                    //로그인처리
 	SetUser(user dto.UserRequest) (string, error)                            //유저업데이트
-	GetUser(id int) (dto.UserResponse, error)                                //유저조회
+	GetUser(id uint) (dto.UserResponse, error)                               //유저조회
 	AdminLogin(email string, password string) (string, error)
 }
 
@@ -187,7 +187,7 @@ func (su *userService) SetUser(userRequest dto.UserRequest) (string, error) {
 	return "200", nil
 }
 
-func (gu *userService) GetUser(id int) (dto.UserResponse, error) {
+func (gu *userService) GetUser(id uint) (dto.UserResponse, error) {
 	var user model.User
 	result := gu.db.First(&user, id)
 	if result.Error != nil {

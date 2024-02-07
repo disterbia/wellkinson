@@ -6,19 +6,21 @@ option go_package = "./";
 
 service AlarmService {
     rpc SetAlarm (AlarmRequest) returns (AlarmResponse);
+    rpc UpdateAlarm (AlarmRequest) returns (AlarmResponse);
     rpc RemoveAlarm (AlarmRemoveRequest) returns (AlarmResponse);
+    rpc MultiSetAlarm (MultiAlarmRequest) returns (AlarmResponse);
+    rpc MultiUpdateAlarm (MultiAlarmRequest) returns (AlarmResponse);
 }
 
 message AlarmRequest {
-    int32 id = 1;
-    string startAt = 2;
-    string endAt = 3;
+    int32 parent_id = 1;
+    string start_at = 2;
+    string end_at = 3;
     string timestamp = 4;
     repeated int32 week = 5;
-    string type = 6;
+    int32 type = 6;
     string body = 7;
     int32 uid = 8;
-    bool useAlarm = 9;
 }
 
 message AlarmResponse {
@@ -26,6 +28,11 @@ message AlarmResponse {
 }
 
 message AlarmRemoveRequest {
-   repeated int32 ids = 1;
+   repeated int32 parent_ids = 1;
    int32 uid = 2;
+   int32 type = 3;
+}
+
+message MultiAlarmRequest {
+    repeated AlarmRequest alarm_requests = 1;
 }

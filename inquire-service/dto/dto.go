@@ -1,20 +1,20 @@
 package dto
 
 type GetInquireParams struct {
-	Page      int    `form:"page"`
+	Page      uint   `form:"page"`
 	StartDate string `form:"start_date"`
 	EndDate   string `form:"end_date"`
 }
 
 type InquireRequest struct {
-	Uid     int    `json:"-"`
+	Uid     uint   `json:"-"`
 	Email   string `json:"email"`
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
 
 type InquireResponse struct {
-	Id      int                    `json:"id"`
+	Id      uint                   `json:"id"`
 	Email   string                 `json:"email"`
 	Title   string                 `json:"title"`
 	Content string                 `json:"content"`
@@ -24,16 +24,16 @@ type InquireResponse struct {
 }
 
 type InquireReplyRequest struct {
-	Id        int    `json:"-"`
-	Uid       int    `json:"-"`
-	InquireId int    `json:"inquire_id"`
+	Id        uint   `json:"-"`
+	Uid       uint   `json:"-"`
+	InquireId uint   `json:"inquire_id"`
 	Content   string `json:"content"`
 	ReplyType bool   `json:"reply_type"`
 }
 
 type InquireReplyResponse struct {
-	Id        int    `json:"id"`
-	InquireId int    `json:"inquire_id"`
+	Id        uint   `json:"id"`
+	InquireId uint   `json:"inquire_id"`
 	Content   string `json:"content"`
 	ReplyType bool   `json:"reply_type"`
 	Created   string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`

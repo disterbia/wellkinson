@@ -21,7 +21,7 @@ type VimeoResponse2 struct {
 type VimeoResponse3 struct {
 	Name     string `json:"name"`
 	Uri      string `json:"uri"`
-	Duration int    `json:"duration"`
+	Duration uint   `json:"duration"`
 	Pictures struct {
 		BaseLink string `json:"base_link"`
 	} `json:"pictures"`

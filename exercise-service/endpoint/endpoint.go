@@ -23,7 +23,7 @@ func SaveExerciseEndpoint(s service.ExerciseService) endpoint.Endpoint {
 func GetExercisesEndpoint(s service.ExerciseService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		id := reqMap["id"].(uint)
 		queryParams := reqMap["queryParams"].(dto.GetParams)
 		inquires, err := s.GetExercises(id, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {
@@ -36,8 +36,8 @@ func GetExercisesEndpoint(s service.ExerciseService) endpoint.Endpoint {
 func RemoveExercisesEndpoint(s service.ExerciseService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		ids := reqMap["ids"].([]int)
-		uid := reqMap["uid"].(int)
+		ids := reqMap["ids"].([]uint)
+		uid := reqMap["uid"].(uint)
 		code, err := s.RemoveExercises(ids, uid)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err

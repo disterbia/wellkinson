@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
@@ -38,8 +39,15 @@ func main() {
 	saveEndpoint := endpoint.SaveEndpoint(svc)
 
 	router := gin.Default()
+	config := cors.Config{
+		AllowAllOrigins: true, // 모든 출처 허용
+		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Authorization"},
+	}
+	router.Use(cors.New(config))
+
 	router.GET("/get-items", transport.GetVimeoLevel1sHandler(getVimeoLevel1sEndpoint))
-	router.GET("/get-video/:id", transport.GetVimeoLevel2sHandler(getVimeoLevel2sEndpoint))
+	router.GET("/get-videos/:id", transport.GetVimeoLevel2sHandler(getVimeoLevel2sEndpoint))
 	router.POST("/save-videos", transport.SaveHandler(saveEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -2,20 +2,20 @@
 package dto
 
 type GetPresetParams struct {
-	Page      int    `form:"page"`
+	Page      uint   `form:"page"`
 	StartDate string `form:"start_date"`
 	EndDate   string `form:"end_date"`
 }
 
 type DietPresetRequest struct {
-	Id    int      `json:"id"`
-	Uid   int      `json:"-"`
+	Id    uint     `json:"id"`
+	Uid   uint     `json:"-"`
 	Name  string   `json:"name"`
 	Foods []string `json:"foods"`
 }
 
 type DietPresetResponse struct {
-	Id      int      `json:"id"`
+	Id      uint     `json:"id"`
 	Name    string   `json:"name"`
 	Foods   []string `json:"foods"`
 	Created string   `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
@@ -23,20 +23,20 @@ type DietPresetResponse struct {
 }
 
 type DietRequest struct {
-	Id     int      `json:"id"`
-	Uid    int      `json:"-"`
+	Id     uint     `json:"id"`
+	Uid    uint     `json:"-"`
 	Name   string   `json:"name"`
 	Time   string   `json:"time" example:"HH:mm"`
-	Type   int      `json:"type"`
+	Type   uint     `json:"type"`
 	Images []string `json:"images" example:"base64 encoding string"`
 	Foods  []string `json:"foods"`
 }
 
 type DietResponse struct {
-	Id      int             `json:"id"`
+	Id      uint            `json:"id"`
 	Name    string          `json:"name"`
 	Time    string          `json:"time"`
-	Type    int             `json:"type"`
+	Type    uint            `json:"type"`
 	Images  []ImageResponse `json:"images"`
 	Foods   []string        `json:"foods"`
 	Created string          `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`

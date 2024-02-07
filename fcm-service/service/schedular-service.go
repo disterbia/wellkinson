@@ -100,9 +100,9 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 		Data: map[string]string{
 			"start_at":           alarm.StartAt,
 			"end_at":             alarm.EndAt,
-			"uid":                strconv.Itoa(alarm.Uid),
-			"type":               alarm.Type,
-			"notification_count": strconv.Itoa(notification_count),
+			"uid":                strconv.FormatUint(uint64(alarm.Uid), 10),
+			"type":               strconv.FormatUint(uint64(alarm.Uid), 10),
+			"notification_count": strconv.FormatUint(uint64(notification_count), 10),
 		},
 		Notification: &messaging.Notification{
 			Title: "알림 제목",
@@ -120,7 +120,7 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 
 	newNotification := model.Notification{
 		Uid:    alarm.Uid,
-		Type:   alarm.Type,
+		Type:   strconv.FormatUint(uint64(alarm.Uid), 10),
 		Body:   alarm.Body,
 		IsRead: false,
 	}
@@ -133,8 +133,8 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 	}
 }
 
-func calculateNotificationCount(db *gorm.DB, uid int) int {
+func calculateNotificationCount(db *gorm.DB, uid uint) uint {
 	var count int64
 	db.Model(&model.Notification{}).Where("uid = ? AND is_read = ?", uid, false).Count(&count)
-	return int(count)
+	return uint(count)
 }

@@ -109,7 +109,7 @@ func SendHandler(sendEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param  page  query  int  false  "페이지 번호 default 0" (10개씩)
+// @Param  page  query  uint  false  "페이지 번호 default 0" (10개씩)
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
 // @Success 200 {object} []dto.InquireResponse "문의내역 배열 반환"
@@ -149,7 +149,7 @@ func GetHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 관리자 문의내역 확인시 호출 (10개씩)
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param  page  query  int  false  "페이지 번호 default 0"
+// @Param  page  query  uint  false  "페이지 번호 default 0"
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
 // @Success 200 {object} []dto.InquireResponse "문의내역 배열 반환"

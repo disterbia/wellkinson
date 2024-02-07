@@ -23,7 +23,7 @@ func SaveScoresEndpoint(s service.FaceService) endpoint.Endpoint {
 func GetScoresEndpoint(s service.FaceService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(int)
+		id := reqMap["id"].(uint)
 		queryParams := reqMap["queryParams"].(dto.GetParams)
 		faceScores, err := s.GetFaceScores(id, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {

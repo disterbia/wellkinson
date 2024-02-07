@@ -12,7 +12,7 @@ import (
 
 type FaceService interface {
 	SaveFaceScores(faceScoreRequests []dto.FaceScoreRequest) (string, error)
-	GetFaceScores(id int, startDate, endDate string) ([]dto.FaceScoreResponse, error)
+	GetFaceScores(id uint, startDate, endDate string) ([]dto.FaceScoreResponse, error)
 	GetFaceExams() ([]dto.FaceExamResponse, error)
 }
 
@@ -24,7 +24,7 @@ func NewFaceService(db *gorm.DB) FaceService {
 	return &faceService{db: db}
 }
 func (service *faceService) GetFaceExams() ([]dto.FaceExamResponse, error) {
-	var faceExams []model.FaceExams
+	var faceExams []model.FaceExam
 	var faceExamResponses []dto.FaceExamResponse
 
 	err := service.db.Find(&faceExams).Error
@@ -38,8 +38,8 @@ func (service *faceService) GetFaceExams() ([]dto.FaceExamResponse, error) {
 	return faceExamResponses, nil
 }
 
-func (service *faceService) GetFaceScores(id int, startDate, endDate string) ([]dto.FaceScoreResponse, error) {
-	var faceScores []model.FaceScores
+func (service *faceService) GetFaceScores(id uint, startDate, endDate string) ([]dto.FaceScoreResponse, error) {
+	var faceScores []model.FaceScore
 	var faceScoreResponses []dto.FaceScoreResponse
 
 	query := service.db.Where("uid = ?", id)
@@ -65,7 +65,7 @@ func (service *faceService) GetFaceScores(id int, startDate, endDate string) ([]
 
 func (service *faceService) SaveFaceScores(faceScoreRequests []dto.FaceScoreRequest) (string, error) {
 
-	var faceScores []model.FaceScores
+	var faceScores []model.FaceScore
 
 	if err := util.CopyStruct(faceScoreRequests, &faceScores); err != nil {
 		return "", err

@@ -8,7 +8,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 
 	"gorm.io/gorm"
 )
@@ -18,8 +17,8 @@ type AlarmServer struct {
 	Db *gorm.DB
 }
 type TempAlarm struct {
-	Id        int             `gorm:"primaryKey;autoIncrement"`
-	Uid       int             `gorm:"not null"`
+	Id        uint            `gorm:"primaryKey;autoIncrement"`
+	Uid       uint            `gorm:"not null"`
 	Type      string          `gorm:"size:255;not null"`
 	Body      string          `gorm:"type:text;not null"`
 	StartAt   string          `gorm:"size:255;not null" json:"start_at"`
@@ -31,29 +30,12 @@ type TempAlarm struct {
 func (s *AlarmServer) SetAlarm(ctx context.Context, req *pb.AlarmRequest) (*pb.AlarmResponse, error) {
 
 	var alarm model.Alarm
-	var tempAlarm TempAlarm
-	result := s.Db.Where("id=? AND uid=?", req.Id, req.Uid).First(&alarm)
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-
-		// 레코드가 존재하지 않으면 새 레코드 생성
-		if err := util.CopyStruct(req, &alarm); err != nil {
-			return nil, err
-		}
-		if err := s.Db.Create(&alarm).Error; err != nil {
-			return nil, errors.New("db error")
-		}
-	} else if result.Error != nil {
-		return nil, errors.New("db error2")
-	} else {
-		if err := util.CopyStruct(req, &tempAlarm); err != nil {
-			return nil, err
-		}
-		log.Println(tempAlarm.Week[0])
-		log.Println(tempAlarm.StartAt)
-		if err := s.Db.Model(&alarm).Updates(tempAlarm).Error; err != nil {
-			return nil, errors.New("db error3")
-		}
+	if err := util.CopyStruct(req, &alarm); err != nil {
+		return nil, err
+	}
+	if err := s.Db.Create(&alarm).Error; err != nil {
+		return nil, errors.New("db error")
 	}
 
 	return &pb.AlarmResponse{Status: "Success"}, nil
@@ -62,11 +44,67 @@ func (s *AlarmServer) SetAlarm(ctx context.Context, req *pb.AlarmRequest) (*pb.A
 
 func (s *AlarmServer) RemoveAlarm(ctx context.Context, req *pb.AlarmRemoveRequest) (*pb.AlarmResponse, error) {
 
-	result := s.Db.Where("id IN ? AND uid= ?", req.Ids, req.Uid).Delete(&model.Alarm{})
+	result := s.Db.Where("parent_id IN ? AND uid= ? AND type=?", req.ParentIds, req.Uid, req.Type).Delete(&model.Alarm{})
 
 	if result.Error != nil {
 		return nil, errors.New("db error")
 	}
 
 	return &pb.AlarmResponse{Status: "Success"}, nil
+}
+
+func (s *AlarmServer) UpdateAlarm(ctx context.Context, req *pb.AlarmRequest) (*pb.AlarmResponse, error) {
+
+	var alarm model.Alarm
+
+	result := s.Db.Where("parent_id = ? AND uid= ? AND type=?", req.ParentId, req.Uid, req.Type).Delete(&model.Alarm{})
+	if result.Error != nil {
+		return nil, errors.New("db error")
+	}
+	if err := util.CopyStruct(req, &alarm); err != nil {
+		return nil, err
+	}
+	if err := s.Db.Create(&alarm).Error; err != nil {
+		return nil, errors.New("db error")
+	}
+
+	return &pb.AlarmResponse{Status: "Success"}, nil
+
+}
+
+func (s *AlarmServer) MultiSetAlarm(ctx context.Context, req *pb.MultiAlarmRequest) (*pb.AlarmResponse, error) {
+
+	var alarms []model.Alarm
+
+	if err := util.CopyStruct(req.AlarmRequests, &alarms); err != nil {
+		return nil, err
+	}
+	if err := s.Db.Create(&alarms).Error; err != nil {
+		return nil, errors.New("db error")
+	}
+
+	return &pb.AlarmResponse{Status: "Success"}, nil
+
+}
+
+func (s *AlarmServer) MultiUpdateAlarm(ctx context.Context, req *pb.MultiAlarmRequest) (*pb.AlarmResponse, error) {
+
+	var alarms []model.Alarm
+	var ids []int32
+	for _, v := range req.AlarmRequests {
+		ids = append(ids, v.ParentId)
+	}
+	result := s.Db.Where("parent_id IN ? AND uid= ? AND type=?", ids, req.AlarmRequests[0].Uid, req.AlarmRequests[0].Type).Delete(&model.Alarm{})
+	if result.Error != nil {
+		return nil, errors.New("db error")
+	}
+	if err := util.CopyStruct(req.AlarmRequests, &alarms); err != nil {
+		return nil, err
+	}
+	if err := s.Db.Create(&alarms).Error; err != nil {
+		return nil, errors.New("db error")
+	}
+
+	return &pb.AlarmResponse{Status: "Success"}, nil
+
 }
