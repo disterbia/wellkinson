@@ -13,5 +13,6 @@ use (
 	./gateway
 	./inquire-service
 	./medicine-service
+	./sleep-service
 	./user-service
 )

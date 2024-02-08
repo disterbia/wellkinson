@@ -161,25 +161,23 @@ type Video struct {
 
 type Medicine struct {
 	TimestampModel
-	Id                 uint
-	Uid                uint
-	Timestamp          json.RawMessage `gorm:"type:json"`
-	Weekdays           json.RawMessage `gorm:"type:json"`
-	CustomMedicineType string          `json:"custom_medicine_type"`
-	Dose               float32
-	IntervalType       uint8   `json:"interval_type"`
-	IsActive           bool    `json:"is_active"`
-	LeastStore         float32 `json:"least_store"`
-	MedicineType       string  `json:"medicine_type"`
-	Name               string
-	Store              float32
-	StartAt            string `json:"start_at"`
-	EndAt              string `json:"end_at"`
-	UseLeastStore      bool   `json:"use_least_store"`
-	UsePrivacy         bool   `json:"use_privacy"`
+	Id           uint
+	Uid          uint
+	Timestamp    json.RawMessage `gorm:"type:json"`
+	Weekdays     json.RawMessage `gorm:"type:json"`
+	Dose         float32
+	IntervalType uint8   `json:"interval_type"`
+	IsActive     bool    `json:"is_active"`
+	LeastStore   float32 `json:"least_store"`
+	MedicineType string  `json:"medicine_type"`
+	Name         string
+	Store        float32
+	StartAt      string `json:"start_at"`
+	EndAt        string `json:"end_at"`
+	UsePrivacy   bool   `json:"use_privacy"`
 }
 
-type MedicineTakes struct {
+type MedicineTake struct {
 	TimestampModel
 	Id         uint
 	Uid        uint
@@ -187,6 +185,32 @@ type MedicineTakes struct {
 	TimeTaken  string `json:"time_taken"`
 	Dose       float32
 	MedicineId uint `json:"medicine_id"`
+}
+
+type MedicineSearch struct {
+	TimestampModel
+	Id   uint
+	Name string
+}
+
+type SleepAlarm struct {
+	TimestampModel
+	Id        uint
+	Uid       uint
+	StartTime string          `json:"start_time"`
+	AlarmTime string          `json:"alarm_time"`
+	EndTime   string          `json:"end_time"`
+	Weekdays  json.RawMessage `gorm:"type:json"`
+	IsActive  bool            `json:"is_active"`
+}
+
+type SleepTime struct {
+	TimestampModel
+	Id        uint
+	Uid       uint
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
+	DateSleep string `json:"date_sleep"`
 }
 
 func (tm *TimestampModel) BeforeCreate(tx *gorm.DB) (err error) {

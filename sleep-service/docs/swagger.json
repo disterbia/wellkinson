@@ -4,24 +4,35 @@
         "contact": {}
     },
     "paths": {
-        "/get-medicines": {
-            "get": {
-                "description": "등록 약물 조회시 호출",
+        "/do-exercises": {
+            "post": {
+                "description": "운동 완료/취소시 호출",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "운동"
                 ],
-                "summary": "등록 약물 조회",
+                "summary": "운동 기록",
+                "parameters": [
+                    {
+                        "description": "운동 완료/취소 데이터",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ExerciseDo"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "등록 약물 정보",
+                        "description": "성공시 200 반환",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.MedicineResponse"
-                            }
+                            "$ref": "#/definitions/dto.BasicResponse"
                         }
                     },
                     "400": {
@@ -39,37 +50,28 @@
                 }
             }
         },
-        "/get-takens": {
+        "/get-exercises": {
             "get": {
-                "description": "약물 복용내역 조회시 호출",
+                "description": "운동 조회시 호출",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "운동"
                 ],
-                "summary": "약물 복용내역 조회",
+                "summary": "운동 조회",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer {jwt_token}",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "시작날짜 yyyy-mm-dd",
                         "name": "start_date",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "종료날짜 yyyy-mm-dd",
                         "name": "end_date",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -78,7 +80,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.MedicineDateInfo"
+                                "$ref": "#/definitions/dto.ExerciseDateInfo"
                             }
                         }
                     },
@@ -97,9 +99,9 @@
                 }
             }
         },
-        "/remove-medicines": {
+        "/remove-exercise": {
             "post": {
-                "description": "약물 삭제시 호출",
+                "description": "운동 삭제시 호출",
                 "consumes": [
                     "application/json"
                 ],
@@ -107,17 +109,10 @@
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "운동"
                 ],
-                "summary": "약물 삭제",
+                "summary": "운동 삭제",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer {jwt_token}",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "삭제할 id 배열",
                         "name": "request",
@@ -153,84 +148,24 @@
                 }
             }
         },
-        "/save-medicine": {
+        "/save-exercise": {
             "post": {
-                "description": "약물등록 및 수정시 호출",
+                "description": "운동 생성시 Id 생략",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "운동"
                 ],
-                "summary": "약물 저장",
+                "summary": "운동 생성/수정",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Bearer {jwt_token}",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "요청 DTO - 약물데이터",
+                        "description": "요청 DTO - 운동 데이터",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.MedicineRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "성공시 200 반환",
-                        "schema": {
-                            "$ref": "#/definitions/dto.BasicResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "요청 처리 실패시 오류 메시지 반환",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "요청 처리 실패시 오류 메시지 반환",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/take-medicine": {
-            "post": {
-                "description": "약물 복용 및 복용취소시 호출",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "약물"
-                ],
-                "summary": "약물 복용",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer {jwt_token}",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "약물 복용/취소 데이터",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.TakeMedicine"
+                            "$ref": "#/definitions/dto.ExerciseRequest"
                         }
                     }
                 ],
@@ -274,67 +209,70 @@
                 }
             }
         },
-        "dto.MedicineDateInfo": {
+        "dto.ExerciseDateInfo": {
             "type": "object",
             "properties": {
                 "date": {
                     "type": "string",
                     "example": "YYYY-MM-DD"
                 },
-                "medicines": {
+                "exercises": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.MedicineTakenInfo"
+                        "$ref": "#/definitions/dto.ExerciseDoneInfo"
                     }
                 }
             }
         },
-        "dto.MedicineRequest": {
+        "dto.ExerciseDo": {
             "type": "object",
             "properties": {
-                "dose": {
-                    "type": "number"
+                "exercise_id": {
+                    "type": "integer"
                 },
-                "end_at": {
+                "performed_date": {
                     "type": "string",
-                    "example": "YYYY-MM:dd"
+                    "example": "YYYY-MM-DD"
+                }
+            }
+        },
+        "dto.ExerciseDoneInfo": {
+            "type": "object",
+            "properties": {
+                "done": {
+                    "type": "boolean"
+                },
+                "exercise": {
+                    "$ref": "#/definitions/dto.ExerciseResponse"
+                }
+            }
+        },
+        "dto.ExerciseRequest": {
+            "type": "object",
+            "properties": {
+                "exercise_end_at": {
+                    "type": "string",
+                    "example": "HH:mm"
+                },
+                "exercise_start_at": {
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "interval_type": {
-                    "type": "integer"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "least_store": {
-                    "type": "number"
-                },
-                "medicine_type": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "start_at": {
+                "plan_end_at": {
                     "type": "string",
-                    "example": "YYYY-MM-dd"
+                    "example": "YYYY-MM-DD"
                 },
-                "store": {
-                    "type": "number"
+                "plan_start_at": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
                 },
-                "timestamp": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "HH:mm",
-                        "HH:mm"
-                    ]
+                "title": {
+                    "type": "string"
                 },
-                "use_privacy": {
+                "use_alarm": {
                     "type": "boolean"
                 },
                 "weekdays": {
@@ -345,58 +283,35 @@
                 }
             }
         },
-        "dto.MedicineResponse": {
+        "dto.ExerciseResponse": {
             "type": "object",
             "properties": {
                 "created": {
                     "type": "string"
                 },
-                "dose": {
-                    "type": "number"
-                },
-                "end_at": {
+                "exercise_end_at": {
                     "type": "string",
-                    "example": "YYYY-MM:dd"
+                    "example": "HH:mm"
+                },
+                "exercise_start_at": {
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "interval_type": {
-                    "type": "integer"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "least_store": {
-                    "type": "number"
-                },
-                "medicine_type": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "start_at": {
+                "plan_end_at": {
                     "type": "string",
-                    "example": "YYYY-MM-dd"
+                    "example": "YYYY-MM-DD"
                 },
-                "store": {
-                    "type": "number"
-                },
-                "timestamp": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "HH:mm",
-                        "HH:mm"
-                    ]
+                "plan_start_at": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
                 },
                 "updated": {
                     "type": "string"
                 },
-                "use_privacy": {
+                "use_alarm": {
                     "type": "boolean"
                 },
                 "weekdays": {
@@ -404,32 +319,6 @@
                     "items": {
                         "type": "integer"
                     }
-                }
-            }
-        },
-        "dto.MedicineTakenInfo": {
-            "type": "object",
-            "properties": {
-                "medicine": {
-                    "$ref": "#/definitions/dto.MedicineResponse"
-                },
-                "taken": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "dto.TakeMedicine": {
-            "type": "object",
-            "properties": {
-                "dose": {
-                    "type": "string"
-                },
-                "exercise_id": {
-                    "type": "integer"
-                },
-                "time_taken": {
-                    "type": "string",
-                    "example": "YYYY-MM-DD"
                 }
             }
         }

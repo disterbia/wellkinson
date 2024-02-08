@@ -1,4 +1,4 @@
-// /exercise-service/service/util.go
+// /face-service/service/util.go
 package service
 
 import (

@@ -43,12 +43,20 @@ func main() {
 
 	saveEndpoint := endpoint.SaveEndpoint(svc)
 	removeEndpoint := endpoint.RemoveEndpoint(svc)
-	getTakensEndPotint := endpoint.GetTakensEndpoint(svc)
+	getTakensEndpoint := endpoint.GetTakensEndpoint(svc)
+	getMedicinesEndpoint := endpoint.GetMedicinesEndpoint(svc)
+	takeEndpoint := endpoint.TakeEndpoint(svc)
+	unTakeEndpoint := endpoint.UnTakeEndpoint(svc)
+	searchEndpoint := endpoint.SearchsEndpoint(svc)
 
 	router := gin.Default()
 	router.POST("/save-medicine", transport.SaveHandler(saveEndpoint))
 	router.POST("/remove-medicine", transport.RemoveHandler(removeEndpoint))
-	router.GET("/get-takens", transport.GetTakensHandler(getTakensEndPotint))
+	router.POST("/take-medicine", transport.TakeHandler(takeEndpoint))
+	router.POST("/untake-medicine", transport.UnTakeHandler(unTakeEndpoint))
+	router.GET("/get-takens", transport.GetTakensHandler(getTakensEndpoint))
+	router.GET("/get-medicines", transport.GetMedicinesHandler(getMedicinesEndpoint))
+	router.GET("/search-medicines", transport.SearchHandler(searchEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":44444")

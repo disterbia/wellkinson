@@ -136,10 +136,11 @@ func GetTakensHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Summary 등록 약물 조회
 // @Description 등록 약물 조회시 호출
 // @Produce  json
-// @Success 200 {object} []dto.MedicineExamResponse "등록 약물 정보"
+// @Param Authorization header string true "Bearer {jwt_token}"
+// @Success 200 {object} []dto.MedicineResponse "등록 약물 정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /get-faces [get]
+// @Router /get-medicines [get]
 func GetMedicinesHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _, err := util.VerifyJWT(c)
@@ -155,6 +156,119 @@ func GetMedicinesHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 
 		resp := response.([]dto.MedicineResponse)
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
+// @Tags 약물
+// @Summary 약물 복용
+// @Description 약물 복용시 호출
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
+// @Param request body dto.TakeMedicine true "약물 복용 데이터"
+// @Success 200 {object} dto.BasicResponse "성공시 200 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Router /take-medicine [post]
+func TakeHandler(doEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uid, _, err := util.VerifyJWT(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// 사용자별 잠금 시작
+		if _, loaded := userLocks.LoadOrStore(uid, true); loaded {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Concurrent request detected"})
+			return
+		}
+		defer userLocks.Delete(uid)
+
+		var param dto.TakeMedicine
+		if err := c.ShouldBindJSON(&param); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		param.Uid = uid
+		response, err := doEndpoint(c.Request.Context(), param)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.(dto.BasicResponse)
+		c.JSON(http.StatusOK, resp)
+
+	}
+}
+
+// @Tags 약물
+// @Summary 약물 복용취소
+// @Description 약물 복용취소시 호출
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
+// @Param request body dto.UnTakeMedicine true "약물 취소 데이터"
+// @Success 200 {object} dto.BasicResponse "성공시 200 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Router /untake-medicine [post]
+func UnTakeHandler(doEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uid, _, err := util.VerifyJWT(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// 사용자별 잠금 시작
+		if _, loaded := userLocks.LoadOrStore(uid, true); loaded {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Concurrent request detected"})
+			return
+		}
+		defer userLocks.Delete(uid)
+
+		var param dto.UnTakeMedicine
+		if err := c.ShouldBindJSON(&param); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		param.Uid = uid
+		response, err := doEndpoint(c.Request.Context(), param)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.(dto.BasicResponse)
+		c.JSON(http.StatusOK, resp)
+
+	}
+}
+
+// @Tags 약물
+// @Summary 약물 찾기
+// @Description 약물 검색 키워드 입력시 호출
+// @Produce  json
+// @Param  keyword  query string  true  "키워드"
+// @Success 200 {object} []string "약물명"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Router /get-takens [get]
+func SearchHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		keyword := c.Query("keyword")
+
+		response, err := getEndpoint(c.Request.Context(), keyword)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.([]string)
 		c.JSON(http.StatusOK, resp)
 	}
 }

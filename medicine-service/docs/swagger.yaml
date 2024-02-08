@@ -21,8 +21,6 @@ definitions:
     type: object
   dto.MedicineRequest:
     properties:
-      custom_medicine_type:
-        type: string
       dose:
         type: number
       end_at:
@@ -52,8 +50,6 @@ definitions:
         items:
           type: string
         type: array
-      use_least_store:
-        type: boolean
       use_privacy:
         type: boolean
       weekdays:
@@ -64,8 +60,6 @@ definitions:
   dto.MedicineResponse:
     properties:
       created:
-        type: string
-      custom_medicine_type:
         type: string
       dose:
         type: number
@@ -98,8 +92,6 @@ definitions:
         type: array
       updated:
         type: string
-      use_least_store:
-        type: boolean
       use_privacy:
         type: boolean
       weekdays:
@@ -114,9 +106,42 @@ definitions:
       taken:
         type: boolean
     type: object
+  dto.TakeMedicine:
+    properties:
+      dose:
+        type: string
+      exercise_id:
+        type: integer
+      time_taken:
+        example: YYYY-MM-DD
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /get-medicines:
+    get:
+      description: 등록 약물 조회시 호출
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 등록 약물 정보
+          schema:
+            items:
+              $ref: '#/definitions/dto.MedicineResponse'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 등록 약물 조회
+      tags:
+      - 약물
   /get-takens:
     get:
       description: 약물 복용내역 조회시 호출
@@ -224,6 +249,41 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 약물 저장
+      tags:
+      - 약물
+  /take-medicine:
+    post:
+      consumes:
+      - application/json
+      description: 약물 복용 및 복용취소시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 약물 복용/취소 데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TakeMedicine'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 약물 복용
       tags:
       - 약물
 swagger: "2.0"

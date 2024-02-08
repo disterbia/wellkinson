@@ -56,3 +56,36 @@ func GetMedicinesEndpoint(s service.MedicineService) endpoint.Endpoint {
 		return medicines, nil
 	}
 }
+
+func TakeEndpoint(s service.MedicineService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		takeMedicine := request.(dto.TakeMedicine)
+		code, err := s.TakeMedicine(takeMedicine)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
+func UnTakeEndpoint(s service.MedicineService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		unTakeMedicine := request.(dto.UnTakeMedicine)
+		code, err := s.UnTakeMedicine(unTakeMedicine)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
+func SearchsEndpoint(s service.MedicineService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		keyword := request.(string)
+		medicines, err := s.SearchMedicines(keyword)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return medicines, nil
+	}
+}

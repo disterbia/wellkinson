@@ -151,7 +151,10 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 
 	exercise.Uid = exerciseRequest.Uid //  json: "-" 이라서
 
-	newWeekdays, unique, _ := validateWeek(exercise.Weekdays)
+	newWeekdays, unique, err := validateWeek(exercise.Weekdays)
+	if err != nil {
+		return "", err
+	}
 	exercise.Weekdays = newWeekdays
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -172,7 +175,7 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 			Week:      unique,
 		}
 		if exercise.UseAlarm {
-			sendAlarm(service, ar)
+			go sendAlarm(service, ar)
 		}
 	} else if result.Error != nil {
 		return "", errors.New("db error")
@@ -192,7 +195,7 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 			Week:      unique,
 		}
 		if exercise.UseAlarm {
-			updateAlarm(service, ar)
+			go updateAlarm(service, ar)
 		} else {
 			b := make([]int32, 1)
 
@@ -202,7 +205,7 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 				ParentIds: b,
 				Uid:       int32(exercise.Uid),
 			}
-			removeAlarm(service, arr)
+			go removeAlarm(service, arr)
 		}
 	}
 
@@ -227,7 +230,7 @@ func (service *exerciseService) RemoveExercises(ids []uint, uid uint) (string, e
 		Type:      int32(util.ExerciseType),
 	}
 
-	removeAlarm(service, arr)
+	go removeAlarm(service, arr)
 	return "200", nil
 }
 

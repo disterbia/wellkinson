@@ -21,6 +21,9 @@ type MedicineService interface {
 	RemoveMedicines(ids []uint, uid uint) (string, error)
 	GetTakens(id uint, startDateStr, endDateStr string) ([]dto.MedicineDateInfo, error)
 	GetMedicines(id uint) ([]dto.MedicineResponse, error)
+	TakeMedicine(takeMedicine dto.TakeMedicine) (string, error)
+	UnTakeMedicine(takeMedicine dto.UnTakeMedicine) (string, error)
+	SearchMedicines(keyword string) ([]string, error)
 }
 
 type medicineService struct {
@@ -48,7 +51,10 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 
 	medicine.Uid = medicineRequest.Uid //  json: "-" 이라서
 
-	newWeekdays, unique, _ := validateWeek(medicine.Weekdays)
+	newWeekdays, unique, err := validateWeek(medicine.Weekdays)
+	if err != nil {
+		return "", err
+	}
 	medicine.Weekdays = newWeekdays
 	bodyMessage := "약 먹을 시간입니다. 드시고 나면 잊지 말고 표시해주세요."
 
@@ -82,7 +88,7 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 
 		mar.AlarmRequests = ars
 
-		sendAlarm(service, mar)
+		go sendAlarm(service, mar)
 
 	} else if result.Error != nil {
 		return "", errors.New("db error")
@@ -107,7 +113,7 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 
 		mar.AlarmRequests = ars
 		if medicine.IsActive {
-			updateAlarm(service, mar)
+			go updateAlarm(service, mar)
 		} else {
 			b := make([]int32, 1)
 
@@ -118,7 +124,7 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 				Uid:       int32(medicine.Uid),
 				Type:      int32(util.MedicineType),
 			}
-			removeAlarm(service, arr)
+			go removeAlarm(service, arr)
 		}
 	}
 
@@ -144,7 +150,7 @@ func (service *medicineService) RemoveMedicines(ids []uint, uid uint) (string, e
 		Type:      int32(util.MedicineType),
 	}
 
-	removeAlarm(service, arr)
+	go removeAlarm(service, arr)
 	return "200", nil
 }
 
@@ -177,13 +183,13 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 	for _, medicine := range medicineResponse {
 		medicineIds = append(medicineIds, medicine.Id)
 	}
-	var takenMedicines []model.MedicineTakes
+	var takenMedicines []model.MedicineTake
 	err = service.db.Where("medicine_id IN (?) AND date_taken BETWEEN ? AND ?", medicineIds, startDate, endDate).Find(&takenMedicines).Error
 	if err != nil {
 		return nil, err
 	}
 
-	// 복용내역 응답형식으로 가공
+	// 복용내역 응답형식으로 가공 및 복용일 반영
 	takenMap := make(map[uint]map[string]bool)
 	for _, tm := range takenMedicines {
 		if takenMap[tm.MedicineId] == nil {
@@ -211,6 +217,75 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 	}
 
 	return medicineDates, nil
+}
+
+func (service *medicineService) GetMedicines(id uint) ([]dto.MedicineResponse, error) {
+	var medicines []model.Medicine
+	var medicineResponses []dto.MedicineResponse
+
+	err := service.db.Where("uid = ?", id).Find(&medicines).Error
+	if err != nil {
+		return nil, errors.New("db error")
+	}
+	if err := util.CopyStruct(medicines, &medicineResponses); err != nil {
+		return nil, err
+	}
+
+	return medicineResponses, nil
+}
+
+func (service *medicineService) TakeMedicine(takeMedicine dto.TakeMedicine) (string, error) {
+	var medicineTake model.MedicineTake
+	if err := util.ValidateTime(takeMedicine.TimeTaken); err != nil {
+		return "", err
+	}
+	if err := util.ValidateDate(takeMedicine.DateTaken); err != nil {
+		return "", err
+	}
+
+	result := service.db.Where("medicine_id = ? AND uid = ? AND date_taken = ? AND time_taken = ? ", takeMedicine.MedicineId, takeMedicine.Uid, takeMedicine.DateTaken, takeMedicine.TimeTaken).First(&medicineTake)
+
+	if result.RowsAffected == 0 {
+
+		medicineTake.Uid = takeMedicine.Uid
+		if err := util.CopyStruct(takeMedicine, &medicineTake); err != nil {
+			return "", err
+		}
+		if err := service.db.Create(&medicineTake).Error; err != nil {
+			return "", errors.New("db error")
+		}
+	} else {
+		return "", errors.New("duplicated")
+
+	}
+	return "200", nil
+}
+
+func (service *medicineService) UnTakeMedicine(unTakeMedicine dto.UnTakeMedicine) (string, error) {
+
+	if err := util.ValidateTime(unTakeMedicine.TimeTaken); err != nil {
+		return "", err
+	}
+
+	if err := util.ValidateDate(unTakeMedicine.DateTaken); err != nil {
+		return "", err
+	}
+
+	result := service.db.Where("medicine_id = ? AND uid=? AND date_taken = ? AND time_taken = ?", unTakeMedicine.MedicineId, unTakeMedicine.Uid, unTakeMedicine.DateTaken, unTakeMedicine.TimeTaken).Delete(&model.MedicineTake{})
+	if result.Error != nil {
+		return "", errors.New("db error2")
+	}
+
+	return "200", nil
+}
+
+func (service *medicineService) SearchMedicines(keyword string) ([]string, error) {
+	var names []string
+	err := service.db.Model(&model.MedicineSearch{}).Where("name LIKE ?", "%"+keyword+"%").Pluck("name", &names).Error
+	if err != nil {
+		return nil, errors.New("db error")
+	}
+	return names, nil
 }
 
 func isMedicineDay(weekdays []uint, day time.Weekday) bool {
@@ -244,19 +319,4 @@ func updateAlarm(service *medicineService, mar *pb.MultiAlarmRequest) {
 		log.Printf("Failed to update Alarm: %v", err)
 	}
 	log.Printf("update Alarm: %v", reponse)
-}
-
-func (service *medicineService) GetMedicines(id uint) ([]dto.MedicineResponse, error) {
-	var medicines []model.Medicine
-	var medicineResponses []dto.MedicineResponse
-
-	err := service.db.Where("uid=?", id).Find(&medicines).Error
-	if err != nil {
-		return nil, errors.New("db error")
-	}
-	if err := util.CopyStruct(medicines, &medicineResponses); err != nil {
-		return nil, err
-	}
-
-	return medicineResponses, nil
 }

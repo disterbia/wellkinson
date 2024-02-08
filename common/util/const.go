@@ -4,3 +4,5 @@ package util
 var ExerciseType = 1
 
 var MedicineType = 2
+
+var SleepType = 3
