@@ -20,6 +20,8 @@ type ExerciseService interface {
 	GetExercises(id uint, startDate, endDate string) ([]dto.ExerciseDateInfo, error)
 	RemoveExercises(ids []uint, uid uint) (string, error)
 	DoExercise(exerciseDo dto.ExerciseDo) (string, error)
+	GetProjects() ([]dto.ProjectResponse, error)
+	GetVideos(projectId string, page uint) ([]dto.VideoResponse, error)
 }
 
 type exerciseService struct {
@@ -232,6 +234,40 @@ func (service *exerciseService) RemoveExercises(ids []uint, uid uint) (string, e
 
 	go removeAlarm(service, arr)
 	return "200", nil
+}
+
+func (service *exerciseService) GetProjects() ([]dto.ProjectResponse, error) {
+	var videos []model.Video
+	var projects []dto.ProjectResponse
+	result := service.db.Find(&videos)
+
+	if result.Error != nil {
+		return nil, errors.New("db error")
+	}
+
+	return projects, nil
+}
+
+func (service *exerciseService) GetVideos(projectId string, page uint) ([]dto.VideoResponse, error) {
+	pageSize := 10
+	var videos []model.Video
+	offset := page * uint(pageSize)
+
+	query := service.db.Where("projectId = ?", projectId)
+
+	// query = query.Order("id DESC")
+	result := query.Offset(int(offset)).Limit(pageSize).Find(&videos)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var VideoResponses []dto.VideoResponse
+	if err := util.CopyStruct(videos, &VideoResponses); err != nil {
+		return nil, err
+	}
+
+	return VideoResponses, nil
 }
 
 func sendAlarm(service *exerciseService, ar *pb.AlarmRequest) {

@@ -6,6 +6,11 @@ type GetParams struct {
 	EndDate   string `form:"end_date"`
 }
 
+type GetVideoParams struct {
+	Page      string `form:"page"`
+	ProjectId string `form:"project_id"`
+}
+
 type ExerciseRequest struct {
 	Id              uint   `json:"id"`
 	Uid             uint   `json:"-"`
@@ -44,6 +49,21 @@ type ExerciseDo struct {
 	Uid           uint   `json:"-"`
 	ExerciseId    uint   `json:"exercise_id"`
 	PerformedDate string `json:"performed_date"  example:"YYYY-MM-DD"`
+}
+
+type ProjectResponse struct {
+	ProjectId string `json:"project_id"`
+	Name      string `json:"name"`
+	Count     uint   `json:"count"`
+}
+
+type VideoResponse struct {
+	Name         string `json:"name"`
+	VideoId      string `json:"video_id"`
+	ThumbnailUrl string `json:"thumbnail_url"`
+	Duration     uint   `json:"duration"`
+	Created      string `json:"created"`
+	Updated      string `json:"updated"`
 }
 
 type SuccessResponse struct {

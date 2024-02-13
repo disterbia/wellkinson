@@ -18,8 +18,8 @@ type SleepAlarmRequest struct {
 
 type SleepAlarmResponse struct {
 	Id        uint   `json:"id"`
-	StartTime string `json:"date_taken"`
-	EndTime   string `json:"time_taken"`
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
 	Weekdays  []uint `json:"weekdays"`
 	IsActive  bool   `json:"is_active"`
 	Created   string `json:"created"`
@@ -28,14 +28,15 @@ type SleepAlarmResponse struct {
 
 type SleepTimeRequest struct {
 	Uid       uint   `json:"-"`
-	StartTime string `json:"date_taken"`
-	EndTime   string `json:"time_taken"`
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
 	DateSleep string `json:"date_sleep"`
 }
 
 type SleepTimeResponse struct {
-	StartTime string `json:"date_taken"`
-	EndTime   string `json:"time_taken"`
+	Id        uint   `json:"id"`
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
 	DateSleep string `json:"date_sleep"`
 }
 

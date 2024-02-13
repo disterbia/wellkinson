@@ -18,6 +18,11 @@ import (
 
 type SleepService interface {
 	SaveSleepAlarm(sleepRequest dto.SleepAlarmRequest) (string, error)
+	GetSleepAlarms(id uint) ([]dto.SleepAlarmResponse, error)
+	RemoveSleepAlarms(ids []uint, uid uint) (string, error)
+	GetSleepTimes(id uint, startDate, endDate string) ([]dto.SleepTimeResponse, error)
+	SaveSleepTime(sleepRequest dto.SleepTimeRequest) (string, error)
+	RemoveSleepTime(id uint, uid uint) (string, error)
 }
 
 type sleepService struct {
@@ -35,26 +40,20 @@ func (service *sleepService) SaveSleepAlarm(sleepRequest dto.SleepAlarmRequest) 
 	if err := validateSleep(sleepRequest); err != nil {
 		return "", err
 	}
-
-	var sleep model.SleepAlarm
-
-	result := service.db.Where("id=? AND uid=?", sleepRequest.Id, sleepRequest.Uid).First(&model.SleepAlarm{})
-
 	var weekdays []json.RawMessage
-	err := service.db.Where("uid=?", sleepRequest.Id, sleepRequest.Uid).Pluck("weekdays", &weekdays)
-	if err != nil {
-		return "", errors.New("db error")
-	}
+	service.db.Model(&model.SleepAlarm{}).Where("id != ? AND uid=?", sleepRequest.Id, sleepRequest.Uid).Pluck("weekdays", &weekdays)
 
 	if err := isDuplicateWeek(sleepRequest.Weekdays, weekdays); err != nil {
 		return "", err
 	}
 
+	var sleep model.SleepAlarm
+
+	result := service.db.Where("id=? AND uid=?", sleepRequest.Id, sleepRequest.Uid).First(&model.SleepAlarm{})
+
 	if err := util.CopyStruct(sleepRequest, &sleep); err != nil {
 		return "", err
 	}
-
-	// ////
 
 	sleep.Uid = sleepRequest.Uid //  json: "-" 이라서
 
@@ -111,6 +110,7 @@ func (service *sleepService) SaveSleepAlarm(sleepRequest dto.SleepAlarmRequest) 
 			arr := &pb.AlarmRemoveRequest{
 				ParentIds: b,
 				Uid:       int32(sleep.Uid),
+				Type:      int32(util.SleepType),
 			}
 			go removeAlarm(service, arr)
 		}
@@ -119,131 +119,104 @@ func (service *sleepService) SaveSleepAlarm(sleepRequest dto.SleepAlarmRequest) 
 	return "200", nil
 }
 
-// func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr string) ([]dto.ExerciseDateInfo, error) {
+func (service *sleepService) GetSleepAlarms(id uint) ([]dto.SleepAlarmResponse, error) {
+	var sleepAlarms []model.SleepAlarm
+	var alarmsResponses []dto.SleepAlarmResponse
+	err := service.db.Where("uid = ? ", id).Find(&sleepAlarms).Error
+	if err != nil {
+		return nil, errors.New("db error")
+	}
 
-// 	// 문자열을 time.Time 타입으로 변환
-// 	startDate, err := time.Parse("2006-01-02", startDateStr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	endDate, err := time.Parse("2006-01-02", endDateStr)
+	if err := util.CopyStruct(sleepAlarms, &alarmsResponses); err != nil {
+		return nil, err
+	}
+	return alarmsResponses, nil
+}
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (service *sleepService) RemoveSleepAlarms(ids []uint, uid uint) (string, error) {
+	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.SleepAlarm{})
 
-// 	var exercises []model.Exercise
-// 	var exerciseResponse []dto.ExerciseResponse
-// 	err = service.db.Where("uid = ? AND plan_start_at <= ? AND plan_end_at >= ?", id, endDate, startDate).Find(&exercises).Error
-// 	if err != nil {
-// 		return nil, errors.New("db error")
-// 	}
+	if result.Error != nil {
+		return "", errors.New("db error")
+	}
 
-// 	if err := util.CopyStruct(exercises, &exerciseResponse); err != nil {
-// 		return nil, err
-// 	}
+	b := make([]int32, len(ids))
 
-// 	// 해당 운동 실행내역 조회
-// 	var exerciseIDs []uint
-// 	for _, exercise := range exerciseResponse {
-// 		exerciseIDs = append(exerciseIDs, exercise.Id)
-// 	}
-// 	var performedExercises []model.ExerciseInfo
-// 	err = service.db.Where("exercise_id IN (?) AND date_performed BETWEEN ? AND ?", exerciseIDs, startDate, endDate).Find(&performedExercises).Error
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	for i, v := range ids {
+		b[i] = int32(v)
+	}
 
-// 	// 운동 실행내역 응답형식으로 가공
-// 	performedMap := make(map[uint]map[string]bool)
-// 	for _, pe := range performedExercises {
-// 		if performedMap[pe.ExerciseId] == nil {
-// 			performedMap[pe.ExerciseId] = make(map[string]bool)
-// 		}
-// 		performedMap[pe.ExerciseId][pe.DatePerformed] = true
-// 	}
+	arr := &pb.AlarmRemoveRequest{
+		ParentIds: b,
+		Uid:       int32(uid),
+		Type:      int32(util.SleepType),
+	}
 
-// 	// var exerciseDates []dto.ExerciseDateInfo
-// 	// log.Println(exerciseDates) // 출력: [] 이지만 실제로 nil임
+	go removeAlarm(service, arr)
+	return "200", nil
+}
 
-// 	// 전체 날짜에서 실행한 날짜 체크
-// 	exerciseDates := make([]dto.ExerciseDateInfo, 0)
-// 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
-// 		var dailyExercises []dto.ExerciseDoneInfo
-// 		for _, e := range exerciseResponse {
-// 			planStartAt, _ := time.Parse("2006-01-02", e.PlanStartAt)
-// 			planEndAt, _ := time.Parse("2006-01-02", e.PlanEndAt)
+func (service *sleepService) GetSleepTimes(id uint, startDateStr, endDateStr string) ([]dto.SleepTimeResponse, error) {
 
-// 			if d.After(planStartAt) && d.Before(planEndAt) && isExerciseDay(e.Weekdays, d.Weekday()) {
-// 				performed := performedMap[e.Id][d.Format("2006-01-02")]
-// 				dailyExercises = append(dailyExercises, dto.ExerciseDoneInfo{Exercise: e, Done: performed})
-// 			}
-// 		}
-// 		if len(dailyExercises) > 0 {
-// 			exerciseDates = append(exerciseDates, dto.ExerciseDateInfo{Date: d.Format("2006-01-02"), Exercises: dailyExercises})
-// 		}
-// 	}
-// 	log.Println(exerciseDates)
-// 	return exerciseDates, nil
-// }
+	// 문자열을 time.Time 타입으로 변환
+	startDate, err := time.Parse("2006-01-02", startDateStr)
+	if err != nil {
+		return nil, err
+	}
+	endDate, err := time.Parse("2006-01-02", endDateStr)
 
-// func isExerciseDay(weekdays []uint, day time.Weekday) bool {
-// 	for _, d := range weekdays {
-// 		if uint(day) == d {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+	if err != nil {
+		return nil, err
+	}
 
-// func (service *exerciseService) DoExercise(exerciseDo dto.ExerciseDo) (string, error) {
-// 	var info model.ExerciseInfo
-// 	datePerformed, err := time.Parse("2006-01-02", exerciseDo.PerformedDate)
-// 	if err != nil {
-// 		return "", errors.New("must YYYY-MM-DD")
-// 	}
-// 	result := service.db.Where("exercise_id = ? AND uid=? AND date_performed = ?", exerciseDo.ExerciseId, exerciseDo.Uid, datePerformed).First(&info)
+	var sleepTimes []model.SleepTime
+	var sleepTimeResponses []dto.SleepTimeResponse
+	err = service.db.Where("date_sleep BETWEEN ? AND ?", startDate, endDate).Find(&sleepTimes).Error
+	if err != nil {
+		return nil, errors.New("db error")
+	}
+	if err := util.CopyStruct(sleepTimes, &sleepTimeResponses); err != nil {
+		return nil, err
+	}
 
-// 	if result.RowsAffected == 0 {
-// 		// 기록이 없으면 새로운 기록 추가
-// 		newInfo := model.ExerciseInfo{
-// 			Uid:           exerciseDo.Uid,
-// 			ExerciseId:    exerciseDo.ExerciseId,
-// 			DatePerformed: exerciseDo.PerformedDate,
-// 		}
-// 		if err := service.db.Create(&newInfo).Error; err != nil {
-// 			return "", errors.New("db error")
-// 		}
-// 	} else {
-// 		result := service.db.Where("exercise_id = ? AND uid=? AND date_performed = ?", exerciseDo.ExerciseId, exerciseDo.Uid, exerciseDo.PerformedDate).Delete(&model.ExerciseInfo{})
-// 		if result.Error != nil {
-// 			return "", errors.New("db error2")
-// 		}
-// 	}
-// 	return "200", nil
-// }
+	return sleepTimeResponses, nil
+}
 
-// func (service *exerciseService) RemoveExercises(ids []uint, uid uint) (string, error) {
-// 	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.Exercise{})
+func (service *sleepService) RemoveSleepTime(id uint, uid uint) (string, error) {
+	result := service.db.Where("id = ? AND uid= ?", id, uid).Delete(&model.SleepTime{})
+	if result.Error != nil {
+		return "", errors.New("db error")
+	}
+	return "200", nil
+}
 
-// 	if result.Error != nil {
-// 		return "", errors.New("db error")
-// 	}
+func (service *sleepService) SaveSleepTime(sleepRequest dto.SleepTimeRequest) (string, error) {
+	if err := validateSleepTime(sleepRequest); err != nil {
+		return "", err
+	}
 
-// 	b := make([]int32, len(ids))
+	var sleepTime model.SleepTime
 
-// 	for i, v := range ids {
-// 		b[i] = int32(v)
-// 	}
-// 	arr := &pb.AlarmRemoveRequest{
-// 		ParentIds: b,
-// 		Uid:       int32(uid),
-// 		Type:      int32(util.ExerciseType),
-// 	}
+	result := service.db.Where("date_sleep = ? AND uid=?", sleepRequest.DateSleep, sleepRequest.Uid).First(&sleepTime)
 
-// 	go removeAlarm(service, arr)
-// 	return "200", nil
-// }
+	if err := util.CopyStruct(sleepRequest, &sleepTime); err != nil {
+		return "", err
+	}
+
+	sleepTime.Uid = sleepRequest.Uid
+	if result.RowsAffected == 0 {
+
+		if err := service.db.Create(&sleepTime).Error; err != nil {
+			return "", errors.New("db error")
+		}
+	} else {
+		result := service.db.Model(&sleepTime).Updates(sleepRequest)
+		if result.Error != nil {
+			return "", errors.New("db error2")
+		}
+	}
+	return "200", nil
+}
 
 func sendAlarm(service *sleepService, ar *pb.AlarmRequest) {
 	reponse, err := service.alarmClient.SetAlarm(context.Background(), ar)

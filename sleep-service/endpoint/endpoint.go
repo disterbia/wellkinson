@@ -20,39 +20,63 @@ func SaveSleepAlarmEndpoint(s service.SleepService) endpoint.Endpoint {
 	}
 }
 
-// func GetExercisesEndpoint(s service.ExerciseService) endpoint.Endpoint {
-// 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-// 		reqMap := request.(map[string]interface{})
-// 		id := reqMap["id"].(uint)
-// 		queryParams := reqMap["queryParams"].(dto.GetParams)
-// 		inquires, err := s.GetExercises(id, queryParams.StartDate, queryParams.EndDate)
-// 		if err != nil {
-// 			return dto.BasicResponse{Code: err.Error()}, err
-// 		}
-// 		return inquires, nil
-// 	}
-// }
+func GetSleepAlarmsEndpoint(s service.SleepService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		id := request.(uint)
+		SleepAlarms, err := s.GetSleepAlarms(id)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return SleepAlarms, nil
+	}
+}
 
-// func RemoveExercisesEndpoint(s service.ExerciseService) endpoint.Endpoint {
-// 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-// 		reqMap := request.(map[string]interface{})
-// 		ids := reqMap["ids"].([]uint)
-// 		uid := reqMap["uid"].(uint)
-// 		code, err := s.RemoveExercises(ids, uid)
-// 		if err != nil {
-// 			return dto.BasicResponse{Code: err.Error()}, err
-// 		}
-// 		return dto.BasicResponse{Code: code}, nil
-// 	}
-// }
+func RemoveSleepAlarmsEndpoint(s service.SleepService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		ids := reqMap["ids"].([]uint)
+		uid := reqMap["uid"].(uint)
+		code, err := s.RemoveSleepAlarms(ids, uid)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
 
-// func DoExerciseEndpoint(s service.ExerciseService) endpoint.Endpoint {
-// 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-// 		exercise := request.(dto.ExerciseDo)
-// 		code, err := s.DoExercise(exercise)
-// 		if err != nil {
-// 			return dto.BasicResponse{Code: err.Error()}, err
-// 		}
-// 		return dto.BasicResponse{Code: code}, nil
-// 	}
-// }
+func GetSleepTimesEndpoint(s service.SleepService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(uint)
+		queryParams := reqMap["queryParams"].(dto.GetParams)
+		sleepTimes, err := s.GetSleepTimes(id, queryParams.StartDate, queryParams.EndDate)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return sleepTimes, nil
+	}
+}
+
+func SaveSleepTimeEndpoint(s service.SleepService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		sleepTime := request.(dto.SleepTimeRequest)
+		code, err := s.SaveSleepTime(sleepTime)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
+func RemoveSleepTimeEndpoint(s service.SleepService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		id := reqMap["id"].(uint)
+		uid := reqMap["uid"].(uint)
+		code, err := s.RemoveSleepTime(id, uid)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}

@@ -9,136 +9,82 @@ definitions:
       err:
         type: string
     type: object
-  dto.ExerciseDateInfo:
+  dto.SleepAlarmRequest:
     properties:
-      date:
-        example: YYYY-MM-DD
+      alarm_time:
         type: string
-      exercises:
-        items:
-          $ref: '#/definitions/dto.ExerciseDoneInfo'
-        type: array
-    type: object
-  dto.ExerciseDo:
-    properties:
-      exercise_id:
-        type: integer
-      performed_date:
-        example: YYYY-MM-DD
-        type: string
-    type: object
-  dto.ExerciseDoneInfo:
-    properties:
-      done:
-        type: boolean
-      exercise:
-        $ref: '#/definitions/dto.ExerciseResponse'
-    type: object
-  dto.ExerciseRequest:
-    properties:
-      exercise_end_at:
-        example: HH:mm
-        type: string
-      exercise_start_at:
-        example: HH:mm
+      end_time:
         type: string
       id:
         type: integer
-      plan_end_at:
-        example: YYYY-MM-DD
-        type: string
-      plan_start_at:
-        example: YYYY-MM-DD
-        type: string
-      title:
-        type: string
-      use_alarm:
+      is_active:
         type: boolean
+      start_time:
+        type: string
       weekdays:
         items:
           type: integer
         type: array
     type: object
-  dto.ExerciseResponse:
+  dto.SleepAlarmResponse:
     properties:
       created:
         type: string
-      exercise_end_at:
-        example: HH:mm
-        type: string
-      exercise_start_at:
-        example: HH:mm
+      end_time:
         type: string
       id:
         type: integer
-      plan_end_at:
-        example: YYYY-MM-DD
-        type: string
-      plan_start_at:
-        example: YYYY-MM-DD
+      is_active:
+        type: boolean
+      start_time:
         type: string
       updated:
         type: string
-      use_alarm:
-        type: boolean
       weekdays:
         items:
           type: integer
         type: array
+    type: object
+  dto.SleepTimeRequest:
+    properties:
+      date_sleep:
+        type: string
+      end_time:
+        type: string
+      start_time:
+        type: string
+    type: object
+  dto.SleepTimeResponse:
+    properties:
+      date_sleep:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      start_time:
+        type: string
     type: object
 info:
   contact: {}
 paths:
-  /do-exercises:
-    post:
-      consumes:
-      - application/json
-      description: 운동 완료/취소시 호출
-      parameters:
-      - description: 운동 완료/취소 데이터
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ExerciseDo'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 성공시 200 반환
-          schema:
-            $ref: '#/definitions/dto.BasicResponse'
-        "400":
-          description: 요청 처리 실패시 오류 메시지 반환
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: 요청 처리 실패시 오류 메시지 반환
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: 운동 기록
-      tags:
-      - 운동
-  /get-exercises:
+  /get-sleep-alarms:
     get:
-      description: 운동 조회시 호출
+      description: 수만알람 조회시 호출
       parameters:
-      - description: 시작날짜 yyyy-mm-dd
-        in: query
-        name: start_date
-        type: string
-      - description: 종료날짜 yyyy-mm-dd
-        in: query
-        name: end_date
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: 운동정보
+          description: 수면 알람정보
           schema:
             items:
-              $ref: '#/definitions/dto.ExerciseDateInfo'
+              $ref: '#/definitions/dto.SleepAlarmResponse'
             type: array
         "400":
           description: 요청 처리 실패시 오류 메시지 반환
@@ -148,15 +94,59 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 운동 조회
+      summary: 수면알람 조회
       tags:
-      - 운동
-  /remove-exercise:
+      - 수면
+  /get-sleep-times:
+    get:
+      description: 기간별 수면시간 조회시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 시작날짜 yyyy-mm-dd
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: 종료날짜 yyyy-mm-dd
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 수면시간 정보
+          schema:
+            items:
+              $ref: '#/definitions/dto.SleepTimeResponse'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 기간별 수면시간 조회
+      tags:
+      - 수면
+  /remove-sleep-alarms:
     post:
       consumes:
       - application/json
-      description: 운동 삭제시 호출
+      description: 수면 알림 삭제시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 삭제할 id 배열
         in: body
         name: request
@@ -180,19 +170,24 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 운동 삭제
+      summary: 수면알림 삭제
       tags:
-      - 운동
-  /save-exercise:
+      - 수면
+  /remove-sleep-times/{id}:
     post:
-      description: 운동 생성시 Id 생략
+      consumes:
+      - application/json
+      description: 수면 시간 삭제시 호출
       parameters:
-      - description: 요청 DTO - 운동 데이터
-        in: body
-        name: request
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
         required: true
-        schema:
-          $ref: '#/definitions/dto.ExerciseRequest'
+        type: string
+      - description: 수면시간 ID
+        in: path
+        name: id
+        type: integer
       produces:
       - application/json
       responses:
@@ -208,7 +203,75 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 운동 생성/수정
+      summary: 수면시간 삭제
       tags:
-      - 운동
+      - 수면
+  /save-sleep:
+    post:
+      description: 수면알림 생성시 Id 생략
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 수면알림 DTO - 수면알림 데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SleepAlarmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 수면알림 생성/수정
+      tags:
+      - 수면
+  /save-sleep-time:
+    post:
+      consumes:
+      - application/json
+      description: 수면시간 등록/수정 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 수면시간 DTO - 수면시간 데이터
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SleepTimeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 수면시간 등록/수정
+      tags:
+      - 수면
 swagger: "2.0"

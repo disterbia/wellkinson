@@ -4,7 +4,6 @@ package transport
 import (
 	"admin-video-service/dto"
 	"common/util"
-	"log"
 	"net/http"
 	"sync"
 
@@ -93,7 +92,6 @@ func SaveHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 		var videoIds []string // 삭제할 ID 배열
 		if err := c.ShouldBindJSON(&videoIds); err != nil {
-			log.Println()
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}

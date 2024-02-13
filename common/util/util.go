@@ -51,7 +51,7 @@ func GenerateJWT(user model.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":    user.Id,
 		"email": user.Email,
-		"exp":   time.Now().Add(time.Hour * 24 * 7).Unix(), // 1주일 유효 기간
+		"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(), // 한달 유효 기간
 	})
 
 	tokenString, err := token.SignedString(jwtSecretKey)

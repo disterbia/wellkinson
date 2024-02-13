@@ -61,5 +61,5 @@ func main() {
 	router.GET("/get-alarms", transport.GetHandler(getAlarmsEndpoint))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	router.Run(":44445")
+	router.Run(":44444ç")
 }

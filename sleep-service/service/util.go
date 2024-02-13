@@ -15,9 +15,26 @@ func validateSleep(sleepRequest dto.SleepAlarmRequest) error {
 	if err := util.ValidateTime(sleepRequest.EndTime); err != nil {
 		return err
 	}
-	if err := util.ValidateTime(sleepRequest.AlarmTime); err != nil {
+	if sleepRequest.IsActive {
+		if err := util.ValidateTime(sleepRequest.AlarmTime); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func validateSleepTime(sleepRequest dto.SleepTimeRequest) error {
+	if err := util.ValidateTime(sleepRequest.StartTime); err != nil {
 		return err
 	}
+	if err := util.ValidateTime(sleepRequest.EndTime); err != nil {
+		return err
+	}
+	if err := util.ValidateDate(sleepRequest.DateSleep); err != nil {
+		return err
+	}
+
 	return nil
 }
 func validateWeek(weekdays json.RawMessage) (json.RawMessage, []int32, error) {

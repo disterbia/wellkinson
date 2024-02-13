@@ -42,9 +42,19 @@ func main() {
 	svc := service.NewSleepService(database, conn)
 
 	saveAlarmsEndpoint := endpoint.SaveSleepAlarmEndpoint(svc)
+	getSleepAlarmsEndpoint := endpoint.GetSleepAlarmsEndpoint(svc)
+	removeSleepAlarmsEndpoint := endpoint.RemoveSleepAlarmsEndpoint(svc)
+	getSleepTimesEndpoint := endpoint.GetSleepTimesEndpoint(svc)
+	removeSleepTimesEndpoint := endpoint.RemoveSleepTimeEndpoint(svc)
+	saveSleepTimesEndpoint := endpoint.SaveSleepTimeEndpoint(svc)
 
 	router := gin.Default()
 	router.POST("/save-sleep-alarm", transport.SaveSleepHandler(saveAlarmsEndpoint))
+	router.POST("/remove-sleep-alarms", transport.RemoveSleepAlarmsHandler(removeSleepAlarmsEndpoint))
+	router.POST("/save-sleep-time", transport.SaveSleepTimeHandler(saveSleepTimesEndpoint))
+	router.POST("/remove-sleep-time/:id", transport.RemoveSleepTimeHandler(removeSleepTimesEndpoint))
+	router.GET("/get-sleep-alarms", transport.GetSleepAlarmsHandler(getSleepAlarmsEndpoint))
+	router.GET("/get-sleep-times", transport.GetSleepTimesHandler(getSleepTimesEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":44444")

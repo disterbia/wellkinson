@@ -80,7 +80,7 @@ func (service *dietService) GetDiets(id uint, startDate, endDate string) ([]dto.
 			if err != nil {
 				return nil, err
 			}
-			thumbnailUrlStr, err := thumbnailUrl.Presign(1 * time.Second) // URL은 1초 동안 유효
+			thumbnailUrlStr, err := thumbnailUrl.Presign(1 * time.Second) // URL은 1초 동안 유효 CachedNetworkImage 에서 캐싱해서 쓰면됨
 			if err != nil {
 				return nil, err
 			}
