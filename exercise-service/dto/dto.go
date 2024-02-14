@@ -7,7 +7,7 @@ type GetParams struct {
 }
 
 type GetVideoParams struct {
-	Page      string `form:"page"`
+	Page      uint   `form:"page"`
 	ProjectId string `form:"project_id"`
 }
 

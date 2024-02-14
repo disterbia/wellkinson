@@ -56,3 +56,24 @@ func DoExerciseEndpoint(s service.ExerciseService) endpoint.Endpoint {
 		return dto.BasicResponse{Code: code}, nil
 	}
 }
+
+func GetProjectsEndpoint(s service.ExerciseService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		projects, err := s.GetProjects()
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return projects, nil
+	}
+}
+
+func GetVideosEndpoint(s service.ExerciseService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(dto.GetVideoParams)
+		videos, err := s.GetVideos(reqMap.ProjectId, reqMap.Page)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return videos, nil
+	}
+}

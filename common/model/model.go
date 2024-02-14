@@ -148,6 +148,14 @@ type FaceExam struct {
 	VideoId string `json:"video_id"`
 }
 
+type FaceExercise struct {
+	TimestampModel
+	Id      uint
+	Type    uint
+	Title   string
+	VideoId string `json:"video_id"`
+}
+
 type Video struct {
 	TimestampModel
 	Id           uint

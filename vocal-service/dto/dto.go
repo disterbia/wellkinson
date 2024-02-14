@@ -1,4 +1,4 @@
-// /face-service/dto/dto.go
+// /vocal-service/dto/dto.go
 package dto
 
 import "common/model"

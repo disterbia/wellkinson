@@ -237,25 +237,29 @@ func (service *exerciseService) RemoveExercises(ids []uint, uid uint) (string, e
 }
 
 func (service *exerciseService) GetProjects() ([]dto.ProjectResponse, error) {
-	var videos []model.Video
-	var projects []dto.ProjectResponse
-	result := service.db.Find(&videos)
 
-	if result.Error != nil {
-		return nil, errors.New("db error")
+	var projects []dto.ProjectResponse
+	err := service.db.Model(&model.Video{}).
+		Select("project_id, project_name as name, count(*) as count").
+		Group("project_id").Scan(&projects).Error
+
+	if err != nil {
+		return nil, err
 	}
 
 	return projects, nil
 }
 
+// face-service 의 face-exercise 쪽에는 한번에 다가져옴
+
 func (service *exerciseService) GetVideos(projectId string, page uint) ([]dto.VideoResponse, error) {
-	pageSize := 10
+	pageSize := 20
 	var videos []model.Video
 	offset := page * uint(pageSize)
 
-	query := service.db.Where("projectId = ?", projectId)
+	query := service.db.Where("project_id = ?", projectId)
 
-	// query = query.Order("id DESC")
+	query = query.Order("id DESC")
 	result := query.Offset(int(offset)).Limit(pageSize).Find(&videos)
 
 	if result.Error != nil {

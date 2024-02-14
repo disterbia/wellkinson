@@ -1,11 +1,11 @@
-// /face-service/service/service.go
+// /vocal-service/service/service.go
 package service
 
 import (
 	"common/model"
 	"common/util"
 	"errors"
-	"face-service/dto"
+	"vocal-service/dto"
 
 	"gorm.io/gorm"
 )

@@ -1,10 +1,10 @@
-// /face-service/endpoint/endpoint.go
+// /vocal-service/endpoint/endpoint.go
 package endpoint
 
 import (
 	"context"
-	"face-service/dto"
-	"face-service/service"
+	"vocal-service/dto"
+	"vocal-service/service"
 
 	"github.com/go-kit/kit/endpoint"
 )

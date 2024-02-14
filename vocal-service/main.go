@@ -1,14 +1,14 @@
-// /face-service/main.go
+// /vocal-service/main.go
 package main
 
 import (
-	"face-service/db"
-	_ "face-service/docs"
-	"face-service/endpoint"
-	"face-service/service"
-	"face-service/transport"
 	"log"
 	"os"
+	"vocal-service/db"
+	_ "vocal-service/docs"
+	"vocal-service/endpoint"
+	"vocal-service/service"
+	"vocal-service/transport"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

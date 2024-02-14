@@ -235,9 +235,17 @@ CREATE TABLE sleep_times(
     date_sleep VARCHAR(40) NOT NULL  COMMENT '수면 일자',
     created DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (uid) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (medicine_id) REFERENCES medicines(id) ON DELETE CASCADE
+    FOREIGN KEY (uid) REFERENCES users(id) ON DELETE CASCADE
 )engine=InnoDB default charset utf8 COMMENT = '사용자별 수면시간 정보';
+
+CREATE TABLE face_exercises(  
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    video_id VARCHAR(40) COMMENT 'vimeo 비디오 id' ,
+    title VARCHAR(40) NOT NULL  COMMENT '동영상 제목',
+    type TINYINT NOT NULL  COMMENT '코드 1:기쁨 2:슬픔 3:놀람 4:분노', 
+    created DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)engine=InnoDB default charset utf8 COMMENT = '표정운동 베이스 테이블';
 
 
 
@@ -371,3 +379,22 @@ INSERT INTO medicine_searches (name) VALUES
 ('대웅바이오프로피베린정20mg'),
 ('디트루베린정'),
 ('베아베린정');
+
+INSERT INTO face_exercises (video_id, title, type) VALUES
+('795204724', '뺨 올리기', 1),
+('795204919', '윙크', 1),
+('795203942', '눈썹올리기', 2),
+('795203091', '눈깜빡감기', 2),
+('795202256', '눈 천천히 감기', 2),
+('795205255', '아래턱 움직이기', 2),
+('795205026', '혀로 뺨 밀기', 2),
+('795203640', '혀 입끝으로 보내기', 2),
+('795202539', '눈썹모으기', 3),
+('795203091', '눈깜빡감기', 3),
+('795202256', '눈 천천히 감기', 3),
+('795202446', '입둘레 부풀리기', 3),
+('795203459', '입술깔대기만들기', 3),
+('795204129', '입술모아올리기', 3),
+('795202814', '입술 말아 넣기', 3),
+('795202539', '눈썹모으기', 4),
+('795202946', '입꼬리 내리기', 4);

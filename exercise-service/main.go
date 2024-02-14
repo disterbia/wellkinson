@@ -45,12 +45,16 @@ func main() {
 	getExercisesEndpoint := endpoint.GetExercisesEndpoint(svc)
 	removeExercisesEndpoint := endpoint.RemoveExercisesEndpoint(svc)
 	doExerciseEndpoint := endpoint.DoExerciseEndpoint(svc)
+	getProjectsEndpoint := endpoint.GetProjectsEndpoint(svc)
+	getVideosEndpoint := endpoint.GetVideosEndpoint(svc)
 
 	router := gin.Default()
 	router.POST("/save-exercise", transport.SaveExerciseHandler(saveExerciseEndpoint))
 	router.POST("/remove-exercises", transport.RemoveExercisesHandler(removeExercisesEndpoint))
 	router.POST("/do-exercise", transport.DoExerciseHandler(doExerciseEndpoint))
 	router.GET("/get-exercises", transport.GetExercisesHandler(getExercisesEndpoint))
+	router.GET("/get-projects", transport.GetProjectsHandler(getProjectsEndpoint))
+	router.GET("/get-videos", transport.GetVideosHandler(getVideosEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":44444")

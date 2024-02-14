@@ -15,4 +15,5 @@ use (
 	./medicine-service
 	./sleep-service
 	./user-service
+	./vocal-service
 )

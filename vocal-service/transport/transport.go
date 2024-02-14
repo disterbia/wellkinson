@@ -1,11 +1,11 @@
-// /face-service/transport/transport.go
+// /vocal-service/transport/transport.go
 package transport
 
 import (
 	"common/util"
-	"face-service/dto"
 	"net/http"
 	"sync"
+	"vocal-service/dto"
 
 	"github.com/gin-gonic/gin"
 	kitEndpoint "github.com/go-kit/kit/endpoint"
