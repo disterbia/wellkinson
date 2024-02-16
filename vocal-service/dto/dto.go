@@ -1,54 +1,29 @@
 // /vocal-service/dto/dto.go
 package dto
 
-import "common/model"
-
 type GetParams struct {
 	StartDate string `form:"start_date"`
 	EndDate   string `form:"end_date"`
 }
 
-type FaceScoreRequest struct {
+type VocalScoreRequest struct {
 	Uid   uint `json:"-"`
 	Score uint `json:"score"`
 	Type  uint `json:"type"`
 }
 
-type FaceScoreResponse struct {
+type VocalScoreResponse struct {
 	Score   uint   `json:"score"`
 	Type    uint   `json:"type"`
-	Created string `json:"created"`
-	Updated string `json:"updated"`
+	Created string `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Updated string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 }
 
-type FaceExamResponse struct {
-	Type    uint
-	Title   string
-	VideoId string `json:"video_id"`
+type VoiceWordResponse struct {
+	Type  uint   `json:"type"`
+	Title string `json:"title"`
 }
 
-type SwaggerExercise struct {
-	Id      uint
-	Type    uint
-	Title   string
-	VideoId string `json:"video_id"`
-	Created string
-	Updated string
-}
-
-type FaceExerciseResponse struct {
-	Type         uint
-	Title        string
-	Count        uint
-	FaceExercise []model.FaceExercise `json:"videos" gorm:"-"`
-}
-
-type SwaggerResponse struct {
-	Type         uint
-	Title        string
-	Count        uint
-	FaceExercise SwaggerExercise `json:"videos"`
-}
 type SuccessResponse struct {
 	Jwt string `json:"jwt"`
 }

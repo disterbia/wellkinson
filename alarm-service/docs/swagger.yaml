@@ -2,6 +2,7 @@ definitions:
   dto.AlarmRequest:
     properties:
       body:
+        example: 알람내용
         type: string
       end_at:
         example: yyyy-mm-dd
@@ -24,6 +25,7 @@ definitions:
   dto.AlarmResponse:
     properties:
       body:
+        example: 알람내용
         type: string
       created:
         example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
@@ -62,9 +64,38 @@ definitions:
 info:
   contact: {}
 paths:
+  /get-notis:
+    get:
+      description: 수신 알림 조회시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 알람정보 - type 1:운동 2:약 3:수면
+          schema:
+            items:
+              $ref: '#/definitions/dto.AlarmResponse'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 수신 알림 조회
+      tags:
+      - 알람 /alarm
   /get-presets:
     get:
-      description: 알람조회시 호출 (10개씩)
+      description: 등록된 알람조회시 호출 (10개씩)
       parameters:
       - description: Bearer {jwt_token}
         in: header
@@ -79,7 +110,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 알람정보
+          description: 알람정보 - type 1:운동 2:약 3:수면
           schema:
             items:
               $ref: '#/definitions/dto.AlarmResponse'
@@ -92,9 +123,38 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 알람조회
+      summary: 등록된 알람 조회
       tags:
-      - 알람
+      - 알람 /alarm
+  /read-notis:
+    post:
+      consumes:
+      - application/json
+      description: 수신 알림 조회시 자동 읽음 처리라면 수신 알림 조회완료 후 함께 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 알림 모두 읽기
+      tags:
+      - 알람 /alarm
   /remove-alarms:
     post:
       consumes:
@@ -131,7 +191,44 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 알람삭제
       tags:
-      - 알람
+      - 알람 /alarm
+  /remove-notis:
+    post:
+      consumes:
+      - application/json
+      description: 수신된 알림 삭제시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 삭제할 id 배열
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 수신된 알림 삭제
+      tags:
+      - 알람 /alarm
   /save-alarm:
     post:
       consumes:
@@ -143,7 +240,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: 요청 DTO - 알람데이터
+      - description: 요청 DTO - 알람데이터, type 1:운동 2:약 3:수면
         in: body
         name: request
         required: true
@@ -166,5 +263,5 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 알람생성/수정
       tags:
-      - 알람
+      - 알람 /alarm
 swagger: "2.0"

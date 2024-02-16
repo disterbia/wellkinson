@@ -259,7 +259,7 @@ func (service *dietService) RemoveDiets(ids []uint, uid uint) (string, error) {
 		return "", errors.New("db error")
 	}
 
-	result = tx.Model(&model.Image{}).Where("diet_id =IN (?)", ids).Select("level").Updates(map[string]interface{}{"level": 10})
+	result = tx.Model(&model.Image{}).Where("diet_id IN (?)", ids).Select("level").Updates(map[string]interface{}{"level": 10})
 
 	if result.Error != nil {
 		tx.Rollback()

@@ -57,7 +57,7 @@ func main() {
 	router.GET("/get-videos", transport.GetVideosHandler(getVideosEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Run(":44444")
+	router.Run(":44404")
 	// router.RunTLS(":8080", "cert.pem", "key.pem")
 
 }

@@ -62,6 +62,7 @@ definitions:
   dto.ExerciseResponse:
     properties:
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       exercise_end_at:
         example: HH:mm
@@ -78,6 +79,7 @@ definitions:
         example: YYYY-MM-DD
         type: string
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       use_alarm:
         type: boolean
@@ -147,7 +149,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 운동 기록
       tags:
-      - 운동
+      - 운동 /exercise
   /get-exercises:
     get:
       description: 운동 조회시 호출
@@ -186,7 +188,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 운동 조회
       tags:
-      - 운동
+      - 운동 /exercise
   /get-projects:
     get:
       description: 운동 동영상 카테고리 조회시 호출
@@ -215,7 +217,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 운동 동영상 카테고리 조회
       tags:
-      - 운동
+      - 운동 /exercise
   /get-videos:
     get:
       description: 카테고리별 운동 동영상 조회시 호출
@@ -251,9 +253,9 @@ paths:
           description: 요청 처리 실패시 오류 메시지 반환
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: 카테고리별 운동 동영상 조회
+      summary: 카테고리별 운동 동영상 조회 (20개씩)
       tags:
-      - 운동
+      - 운동 /exercise
   /remove-exercise:
     post:
       consumes:
@@ -290,7 +292,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 운동 삭제
       tags:
-      - 운동
+      - 운동 /exercise
   /save-exercise:
     post:
       description: 운동 생성시 Id 생략
@@ -323,5 +325,5 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 운동 생성/수정
       tags:
-      - 운동
+      - 운동 /exercise
 swagger: "2.0"

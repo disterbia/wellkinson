@@ -14,7 +14,8 @@ type UserRequest struct {
 	UseAutoLogin         bool   `json:"use_auto_login"`
 	UsePrivacyProtection bool   `json:"user_privacy_protection"`
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
-	UserType             string `json:"user_type"`
+	UserType             string `json:"user_type" example:"0:해당없음 1:파킨슨 환자 2:보호자"`
+	UseServices          []int  `json:"use_services"`
 }
 
 type UserResponse struct {
@@ -28,10 +29,16 @@ type UserResponse struct {
 	UseAutoLogin         bool   `json:"use_auto_login"`
 	UsePrivacyProtection bool   `json:"user_privacy_protection"`
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
-	UserType             string `json:"user_type"`
+	UserType             string `json:"user_type" example:"0:해당없음 1:파킨슨 환자 2:보호자"`
 	Email                string `json:"email"`
 	Created              string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	Updated              string `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	UseServices          []int  `json:"use_services"`
+}
+
+type MainService struct {
+	Id    uint   `json:"id"`
+	Title string `json:"title"`
 }
 
 type LoginRequest struct {

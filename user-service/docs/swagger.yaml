@@ -121,7 +121,7 @@ paths:
       - jwt: []
       summary: 관리자 로그인
       tags:
-      - 로그인
+      - 로그인 /user
   /auto-login:
     post:
       consumes:
@@ -148,7 +148,7 @@ paths:
       - jwt: []
       summary: 자동로그인
       tags:
-      - 로그인
+      - 로그인 /user
   /get-user:
     post:
       consumes:
@@ -177,7 +177,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 유저 조회
       tags:
-      - 회원조회(본인)
+      - 회원조회(본인)  /user
   /google-login:
     post:
       consumes:
@@ -207,7 +207,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 구글로그인
       tags:
-      - 로그인
+      - 로그인 /user
   /kakao-login:
     post:
       consumes:
@@ -237,7 +237,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 카카오로그인
       tags:
-      - 로그인
+      - 로그인 /user
   /set-user:
     post:
       consumes:
@@ -272,5 +272,5 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 유저 데이터 변경
       tags:
-      - 회원상태 변경(본인)
+      - 회원상태 변경(본인)  /user
 swagger: "2.0"

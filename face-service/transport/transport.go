@@ -13,7 +13,7 @@ import (
 
 var userLocks sync.Map
 
-// @Tags 표정
+// @Tags 표정 /face
 // @Summary 표정 점수 저장
 // @Description 표정 검사 완료 후 호출
 // @Produce  json
@@ -55,7 +55,7 @@ func SaveScoresHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 표정
+// @Tags 표정 /face
 // @Summary 표정 점수 조회
 // @Description 표정 점수 조회시 호출
 // @Produce  json
@@ -95,7 +95,7 @@ func GetScoresHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 표정
+// @Tags 표정 /face
 // @Summary 표정검사지 조회
 // @Description 표정 검사시 호출
 // @Produce  json
@@ -117,7 +117,7 @@ func GetFaceExamsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 표정
+// @Tags 표정 /face
 // @Summary 표정운동 조회
 // @Description 표정 운동 조회시 호출
 // @Produce  json

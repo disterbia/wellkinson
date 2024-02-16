@@ -13,7 +13,7 @@ import (
 
 var userLocks sync.Map
 
-// @Tags 식단
+// @Tags 식단 /diet
 // @Summary 추가한 식단 생성/수정
 // @Description 추가한 식단 생성시 Id 생략
 // @Produce  json
@@ -56,7 +56,7 @@ func SavePresetHandler(savePresetEndpoint kitEndpoint.Endpoint) gin.HandlerFunc 
 	}
 }
 
-// @Tags 식단
+// @Tags 식단 /diet
 // @Summary 추가한 식단 조회
 // @Description 추가한 식단 조회시 호출 (10개씩)
 // @Produce  json
@@ -97,7 +97,7 @@ func GetPresetsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 식단
+// @Tags 식단 /diet
 // @Summary 추가한 식단 삭제
 // @Description 추가한 식단 삭제시 호출
 // @Accept  json
@@ -135,12 +135,12 @@ func RemovePresetHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 식단
+// @Tags 식단 /diet
 // @Summary 식단생성/수정
 // @Description 식단생성시 Id 생략
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param request body dto.DietRequest true "요청 DTO - 식단데이터"
+// @Param request body dto.DietRequest true "요청 DTO - 식단데이터 type - 아침/점심/저녁/간식 1/2/3/4"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -178,14 +178,14 @@ func SaveDietHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 식단
+// @Tags 식단 /diet
 // @Summary 식단 조회
 // @Description 식단 조회시 호출
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
-// @Success 200 {object} []dto.DietResponse "식단정보"
+// @Success 200 {object} []dto.DietResponse "식단정보 type - 아침/점심/저녁/간식 1/2/3/4"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /get-diets [get]
@@ -218,7 +218,7 @@ func GetDietsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 식단
+// @Tags 식단 /diet
 // @Summary 추가한 식단 삭제
 // @Description 추가한 식단 삭제시 호출
 // @Accept  json

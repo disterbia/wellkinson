@@ -16,6 +16,9 @@ type AlarmService interface {
 	SaveAlarm(alarmRequest dto.AlarmRequest) (string, error)
 	RemoveAlarm(ids []uint, uid uint) (string, error)
 	GetAlarms(id uint, page uint) ([]dto.AlarmResponse, error)
+	GetNotifications(uid uint) ([]dto.NotificationResponse, error)
+	ReadAll(uid uint) (string, error)
+	RemoveNotifications(ids []uint, uid uint) (string, error)
 }
 
 type alarmService struct {
@@ -24,6 +27,19 @@ type alarmService struct {
 
 func NewAlarmService(db *gorm.DB) AlarmService {
 	return &alarmService{db: db}
+}
+func (service *alarmService) GetNotifications(uid uint) ([]dto.NotificationResponse, error) {
+	var notifications []model.Notification
+	result := service.db.Where("uid = ? ", uid).Find(&notifications)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var notificationResponses []dto.NotificationResponse
+	if err := util.CopyStruct(notifications, &notificationResponses); err != nil {
+		return nil, err
+	}
+
+	return notificationResponses, nil
 }
 
 func (service *alarmService) GetAlarms(id uint, page uint) ([]dto.AlarmResponse, error) {
@@ -100,9 +116,28 @@ func (service *alarmService) SaveAlarm(alarmRequest dto.AlarmRequest) (string, e
 	return "200", nil
 }
 
-func (ra *alarmService) RemoveAlarm(ids []uint, uid uint) (string, error) {
+func (service *alarmService) RemoveAlarm(ids []uint, uid uint) (string, error) {
 
-	result := ra.db.Where("id IN ? AND uid= ?", ids, uid).Delete(&model.Alarm{})
+	result := service.db.Where("id IN ? AND uid= ?", ids, uid).Delete(&model.Alarm{})
+
+	if result.Error != nil {
+		return "", errors.New("db error")
+	}
+	return "200", nil
+}
+
+func (service *alarmService) ReadAll(uid uint) (string, error) {
+	var noti model.Notification
+	result := service.db.Model(&noti).Where("uid = ?", uid).Select("is_read").Updates(map[string]interface{}{"is_read": true})
+	if result.Error != nil {
+		return "", errors.New("db error")
+	}
+	return "200", nil
+}
+
+func (service *alarmService) RemoveNotifications(ids []uint, uid uint) (string, error) {
+
+	result := service.db.Where("id IN ? AND uid= ?", ids, uid).Delete(&model.Notification{})
 
 	if result.Error != nil {
 		return "", errors.New("db error")

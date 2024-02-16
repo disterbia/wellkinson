@@ -16,7 +16,7 @@ import (
 
 var userLocks sync.Map
 
-// @Tags 문의
+// @Tags 문의 /inquire
 // @Summary 답변/추가문의
 // @Description 답변/추가문의 등록시 호출
 // @Accept  json
@@ -59,7 +59,7 @@ func AnswerHandler(answerEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 문의
+// @Tags 문의 /inquire
 // @Summary 문의하기
 // @Description 문의등록시 호출
 // @Accept  json
@@ -103,7 +103,7 @@ func SendHandler(sendEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 문의
+// @Tags 문의 /inquire
 // @Summary 문의조회(본인)
 // @Description 나의문의보기시 호출
 // @Accept  json
@@ -144,7 +144,7 @@ func GetHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 문의
+// @Tags 문의 /inquire
 // @Summary 문의조회(관리자)
 // @Description 관리자 문의내역 확인시 호출 (10개씩)
 // @Produce  json
@@ -184,7 +184,7 @@ func GetAllHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 문의
+// @Tags 문의 /inquire
 // @Summary 문의삭제
 // @Description 문의삭제시 호출
 // @Accept  json
@@ -210,7 +210,7 @@ func RemoveInquireHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 		response, err := removeEndpoint(c.Request.Context(), map[string]interface{}{
 			"uid": uid,
-			"id":  id,
+			"id":  uint(id),
 		})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -222,7 +222,7 @@ func RemoveInquireHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 문의
+// @Tags 문의 /inquire
 // @Summary 문의답변/추가문의 삭제
 // @Description 문의답변/추가문의 삭제시 호출
 // @Accept  json
@@ -248,7 +248,7 @@ func RemoveReplyHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 		response, err := removeEndpoint(c.Request.Context(), map[string]interface{}{
 			"uid": uid,
-			"id":  id,
+			"id":  uint(id),
 		})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

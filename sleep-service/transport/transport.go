@@ -14,7 +14,7 @@ import (
 
 var userLocks sync.Map
 
-// @Tags 수면
+// @Tags 수면 /sleep
 // @Summary 수면알림 생성/수정
 // @Description 수면알림 생성시 Id 생략
 // @Produce  json
@@ -57,7 +57,7 @@ func SaveSleepHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 수면
+// @Tags 수면 /sleep
 // @Summary 수면알람 조회
 // @Description 수만알람 조회시 호출
 // @Produce  json
@@ -85,7 +85,7 @@ func GetSleepAlarmsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 수면
+// @Tags 수면 /sleep
 // @Summary 수면알림 삭제
 // @Description 수면 알림 삭제시 호출
 // @Accept  json
@@ -123,7 +123,7 @@ func RemoveSleepAlarmsHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFu
 	}
 }
 
-// @Tags 수면
+// @Tags 수면 /sleep
 // @Summary 기간별 수면시간 조회
 // @Description 기간별 수면시간 조회시 호출
 // @Produce  json
@@ -163,7 +163,7 @@ func GetSleepTimesHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 수면
+// @Tags 수면 /sleep
 // @Summary 수면시간 등록/수정
 // @Description 수면시간 등록/수정 호출
 // @Accept  json
@@ -207,7 +207,7 @@ func SaveSleepTimeHandler(doEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 수면
+// @Tags 수면 /sleep
 // @Summary 수면시간 삭제
 // @Description 수면 시간 삭제시 호출
 // @Accept  json

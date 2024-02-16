@@ -7,10 +7,12 @@ definitions:
   dto.EmotionRequest:
     properties:
       emotion:
+        example: 기분명
         type: string
       id:
         type: integer
       state:
+        example: 기분내용
         type: string
     type: object
   dto.EmotionResponse:
@@ -19,10 +21,12 @@ definitions:
         example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       emotion:
+        example: 기분명
         type: string
       id:
         type: integer
       state:
+        example: 기분내용
         type: string
       updated:
         example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
@@ -40,6 +44,11 @@ paths:
     get:
       description: 기분 조회시 호출 (10개씩)
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 시작날짜 yyyy-mm-dd
         in: query
         name: start_date
@@ -52,7 +61,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 성공시 200 반환
+          description: 기분정보
           schema:
             items:
               $ref: '#/definitions/dto.EmotionResponse'
@@ -67,13 +76,18 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 기분 조회
       tags:
-      - 기분
+      - 기분 /emotion
   /remove-emotion:
     post:
       consumes:
       - application/json
       description: 기분 삭제시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 삭제할 id 배열
         in: body
         name: request
@@ -99,11 +113,16 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 기분 삭제
       tags:
-      - 기분
+      - 기분 /emotion
   /save-emotion:
     post:
       description: 기분 생성시 Id 생략
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 요청 DTO - 기분 데이터
         in: body
         name: request
@@ -127,5 +146,5 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 기분 생성/수정
       tags:
-      - 기분
+      - 기분 /emotion
 swagger: "2.0"

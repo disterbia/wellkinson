@@ -13,7 +13,7 @@ import (
 
 var userLocks sync.Map
 
-// @Tags 기분
+// @Tags 기분 /emotion
 // @Summary 기분 생성/수정
 // @Description 기분 생성시 Id 생략
 // @Produce  json
@@ -54,7 +54,7 @@ func SaveEmotionHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 기분
+// @Tags 기분 /emotion
 // @Summary 기분 조회
 // @Description 기분 조회시 호출 (10개씩)
 // @Produce  json
@@ -94,7 +94,7 @@ func GetEmotionsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 기분
+// @Tags 기분 /emotion
 // @Summary 기분 삭제
 // @Description 기분 삭제시 호출
 // @Accept  json

@@ -22,10 +22,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "문의"
+                    "문의 /inquire"
                 ],
                 "summary": "문의조회(관리자)",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "페이지 번호 default 0",
@@ -80,10 +87,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "문의"
+                    "문의 /inquire"
                 ],
                 "summary": "문의조회(본인)",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "페이지 번호 default 0",
@@ -138,10 +152,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "문의"
+                    "문의 /inquire"
                 ],
                 "summary": "답변/추가문의",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "요청 DTO - 답변데이터",
                         "name": "request",
@@ -184,10 +205,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "문의"
+                    "문의 /inquire"
                 ],
                 "summary": "문의삭제",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "문의ID",
@@ -227,10 +255,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "문의"
+                    "문의 /inquire"
                 ],
                 "summary": "문의답변/추가문의 삭제",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "답변/추가문의ID",
@@ -270,10 +305,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "문의"
+                    "문의 /inquire"
                 ],
                 "summary": "문의하기",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "요청 DTO - 문의데이터",
                         "name": "request",
@@ -346,7 +388,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "id": {
                     "type": "integer"
@@ -358,7 +401,8 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 }
             }
         },
@@ -383,7 +427,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "email": {
                     "type": "string"
@@ -401,7 +446,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 }
             }
         }

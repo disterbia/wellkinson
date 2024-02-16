@@ -9,10 +9,10 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
-func SaveScoresEndpoint(s service.FaceService) endpoint.Endpoint {
+func SaveScoresEndpoint(s service.VocalService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		scores := request.([]dto.FaceScoreRequest)
-		code, err := s.SaveFaceScores(scores)
+		scores := request.([]dto.VocalScoreRequest)
+		code, err := s.SaveVocalScores(scores)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
@@ -20,12 +20,12 @@ func SaveScoresEndpoint(s service.FaceService) endpoint.Endpoint {
 	}
 }
 
-func GetScoresEndpoint(s service.FaceService) endpoint.Endpoint {
+func GetScoresEndpoint(s service.VocalService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(map[string]interface{})
 		id := reqMap["id"].(uint)
 		queryParams := reqMap["queryParams"].(dto.GetParams)
-		faceScores, err := s.GetFaceScores(id, queryParams.StartDate, queryParams.EndDate)
+		faceScores, err := s.GetVocalScores(id, queryParams.StartDate, queryParams.EndDate)
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
@@ -33,22 +33,12 @@ func GetScoresEndpoint(s service.FaceService) endpoint.Endpoint {
 	}
 }
 
-func GetFaceExamsEndpoint(s service.FaceService) endpoint.Endpoint {
+func GetVocalTablesEndpoint(s service.VocalService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		faceScores, err := s.GetFaceExams()
+		faceScores, err := s.GetVoiceTables()
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
 		return faceScores, nil
-	}
-}
-
-func GetFaceExercisesEndpoint(s service.FaceService) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		faceExercises, err := s.GetFaceExercises()
-		if err != nil {
-			return dto.BasicResponse{Code: err.Error()}, err
-		}
-		return faceExercises, nil
 	}
 }

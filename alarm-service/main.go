@@ -53,13 +53,19 @@ func main() {
 	saveAlarmEndpoint := endpoint.SaveAlarmEndpoint(alarmSvc)
 	removeAlarmsEndpoint := endpoint.RemoveAlarmEndpoint(alarmSvc)
 	getAlarmsEndpoint := endpoint.GetEndpoint(alarmSvc)
-
+	getNoitsEndpoint := endpoint.GetNotiEndpoint(alarmSvc)
+	readAllNotisEndpoint := endpoint.ReadAllEndpoint(alarmSvc)
+	removeNotisEndpoint := endpoint.RemoveNotiEndpoint(alarmSvc)
 	router := gin.Default()
 
 	router.POST("/save-alarm", transport.SaveAlarmHandler(saveAlarmEndpoint))
 	router.POST("/remove-alarms", transport.RemoveAlarmsHandler(removeAlarmsEndpoint))
+	router.POST("/remove-notis", transport.RemoveNoitsHandler(removeNotisEndpoint))
+	router.POST("/read-notis", transport.ReadAllHandler(readAllNotisEndpoint))
 	router.GET("/get-alarms", transport.GetHandler(getAlarmsEndpoint))
+	router.GET("/get-notis", transport.GetNotisHandler(getNoitsEndpoint))
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	router.Run(":44444ç")
+	router.Run(":44401")
 }

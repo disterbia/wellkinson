@@ -2,8 +2,8 @@
 package dto
 
 type GetParams struct {
-	StartDate string `form:"start_date"`
-	EndDate   string `form:"end_date"`
+	StartDate string `form:"start_date" example:"YYYY-MM-DD"`
+	EndDate   string `form:"end_date" example:"YYYY-MM-DD"`
 }
 
 type GetVideoParams struct {
@@ -31,8 +31,8 @@ type ExerciseResponse struct {
 	PlanEndAt       string `json:"plan_end_at"  example:"YYYY-MM-DD"`
 	UseAlarm        bool   `json:"use_alarm"`
 	Weekdays        []uint `json:"weekdays"`
-	Created         string `json:"created"`
-	Updated         string `json:"updated"`
+	Created         string `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Updated         string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 }
 
 type ExerciseDateInfo struct {

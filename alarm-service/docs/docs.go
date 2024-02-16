@@ -15,16 +15,60 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/get-presets": {
+        "/get-notis": {
             "get": {
-                "description": "알람조회시 호출 (10개씩)",
+                "description": "수신 알림 조회시 호출",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "알람"
+                    "알람 /alarm"
                 ],
-                "summary": "알람조회",
+                "summary": "수신 알림 조회",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "알람정보 - type 1:운동 2:약 3:수면",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.AlarmResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/get-presets": {
+            "get": {
+                "description": "등록된 알람조회시 호출 (10개씩)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "알람 /alarm"
+                ],
+                "summary": "등록된 알람 조회",
                 "parameters": [
                     {
                         "type": "string",
@@ -42,12 +86,56 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "알람정보",
+                        "description": "알람정보 - type 1:운동 2:약 3:수면",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/dto.AlarmResponse"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/read-notis": {
+            "post": {
+                "description": "수신 알림 조회시 자동 읽음 처리라면 수신 알림 조회완료 후 함께 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "알람 /alarm"
+                ],
+                "summary": "알림 모두 읽기",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
                         }
                     },
                     "400": {
@@ -75,9 +163,65 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "알람"
+                    "알람 /alarm"
                 ],
                 "summary": "알람삭제",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "삭제할 id 배열",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/remove-notis": {
+            "post": {
+                "description": "수신된 알림 삭제시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "알람 /alarm"
+                ],
+                "summary": "수신된 알림 삭제",
                 "parameters": [
                     {
                         "type": "string",
@@ -131,7 +275,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "알람"
+                    "알람 /alarm"
                 ],
                 "summary": "알람생성/수정",
                 "parameters": [
@@ -143,7 +287,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "요청 DTO - 알람데이터",
+                        "description": "요청 DTO - 알람데이터, type 1:운동 2:약 3:수면",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -180,7 +324,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "알람내용"
                 },
                 "end_at": {
                     "type": "string",
@@ -212,7 +357,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "알람내용"
                 },
                 "created": {
                     "type": "string",

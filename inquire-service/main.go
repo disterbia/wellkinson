@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -33,7 +34,7 @@ func main() {
 	}
 
 	// gRPC 클라이언트 연결 생성
-	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to email service: %v", err)
 	}
@@ -48,6 +49,12 @@ func main() {
 	reomoveReplyEndpoint := endpoint.RemoveReplyEndpoint(inquireSvc)
 
 	router := gin.Default()
+	config := cors.Config{
+		AllowAllOrigins: true, // 모든 출처 허용
+		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Authorization"},
+	}
+	router.Use(cors.New(config))
 
 	router.POST("/inquire-reply", transport.AnswerHandler(answerEndpoint))
 	router.POST("/send-inquire", transport.SendHandler(sendEndpoint))
@@ -58,6 +65,6 @@ func main() {
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	router.Run(":44444")
+	router.Run(":44406")
 
 }

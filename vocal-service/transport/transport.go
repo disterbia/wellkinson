@@ -13,16 +13,16 @@ import (
 
 var userLocks sync.Map
 
-// @Tags 표정
-// @Summary 표정 점수 저장
-// @Description 표정 검사 완료 후 호출
+// @Tags 발성 /vocal
+// @Summary 발성 점수 저장
+// @Description 발성 검사 완료 후 호출
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param request body []dto.FaceScoreRequest true "요청 DTO - 표정검사 데이터 ( type: 1: 기쁨 2: 슬픔 3: 놀람 4: 분노 )"
+// @Param request body []dto.VocalScoreRequest true "요청 DTO - 발성검사 데이터 ( type: 1:a 2:e 3:i 4:o 5:u )"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /save-faces [post]
+// @Router /save-vocals [post]
 func SaveScoresHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _, err := util.VerifyJWT(c)
@@ -38,7 +38,7 @@ func SaveScoresHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 		defer userLocks.Delete(id)
 
-		var req []dto.FaceScoreRequest
+		var req []dto.VocalScoreRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -55,17 +55,17 @@ func SaveScoresHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 표정
-// @Summary 표정 점수 조회
-// @Description 표정 점수 조회시 호출
+// @Tags 발성 /vocal
+// @Summary 발성 점수 조회
+// @Description 발성 점수 조회시 호출
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
 // @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
-// @Success 200 {object} []dto.FaceScoreResponse "표정검사 점수 정보"
+// @Success 200 {object} []dto.VocalScoreResponse "표정검사 점수 정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /get-face-scores [get]
+// @Router /get-vocal-scores [get]
 func GetScoresHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _, err := util.VerifyJWT(c)
@@ -90,20 +90,20 @@ func GetScoresHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.([]dto.FaceScoreResponse)
+		resp := response.([]dto.VocalScoreResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }
 
-// @Tags 표정
-// @Summary 표정검사지 조회
-// @Description 표정 검사시 호출
+// @Tags 발성 /vocal
+// @Summary 발성운동 단어 조회
+// @Description 발성운동 단어 조회시 호출
 // @Produce  json
-// @Success 200 {object} []dto.FaceExamResponse "표정검사지 정보"
+// @Success 200 {object} []dto.VoiceWordResponse "발성운동 단어 데이터"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /get-face-exams [get]
-func GetFaceExamsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+// @Router /get-voice-tables [get]
+func GetVocalTablesHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		response, err := getEndpoint(c.Request.Context(), false)
@@ -112,29 +112,7 @@ func GetFaceExamsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.([]dto.FaceExamResponse)
-		c.JSON(http.StatusOK, resp)
-	}
-}
-
-// @Tags 표정
-// @Summary 표정운동 조회
-// @Description 표정 운동 조회시 호출
-// @Produce  json
-// @Success 200 {object} []dto.SwaggerResponse "표정운동 정보"
-// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /get-face-exercises [get]
-func GetFaceExercisesHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		response, err := getEndpoint(c.Request.Context(), false)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		resp := response.([]dto.FaceExerciseResponse)
+		resp := response.([]dto.VoiceWordResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }

@@ -30,7 +30,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "로그인"
+                    "로그인 /user"
                 ],
                 "summary": "관리자 로그인",
                 "parameters": [
@@ -84,7 +84,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "로그인"
+                    "로그인 /user"
                 ],
                 "summary": "자동로그인",
                 "parameters": [
@@ -122,7 +122,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "회원조회(본인)"
+                    "회원조회(본인)  /user"
                 ],
                 "summary": "유저 조회",
                 "parameters": [
@@ -166,7 +166,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "로그인"
+                    "로그인 /user"
                 ],
                 "summary": "구글로그인",
                 "parameters": [
@@ -212,7 +212,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "로그인"
+                    "로그인 /user"
                 ],
                 "summary": "카카오로그인",
                 "parameters": [
@@ -258,7 +258,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "회원상태 변경(본인)"
+                    "회원상태 변경(본인)  /user"
                 ],
                 "summary": "유저 데이터 변경",
                 "parameters": [

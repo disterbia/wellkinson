@@ -45,7 +45,7 @@ func main() {
 	router.GET("/get-face-exercises", transport.GetFaceExercisesHandler(getfaceExerciseEndPoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Run(":44444")
+	router.Run(":44405")
 	// router.RunTLS(":8080", "cert.pem", "key.pem")
 
 }

@@ -46,7 +46,7 @@ type Notification struct {
 	TimestampModel
 	Id     uint
 	Uid    uint
-	Type   string
+	Type   uint
 	Body   string
 	IsRead bool `json:"is_read"`
 }
@@ -219,6 +219,21 @@ type SleepTime struct {
 	StartTime string `json:"start_time"`
 	EndTime   string `json:"end_time"`
 	DateSleep string `json:"date_sleep"`
+}
+
+type VocalWord struct {
+	TimestampModel
+	Id    uint
+	Type  uint
+	Title string
+}
+
+type VocalScore struct {
+	TimestampModel
+	Id    uint
+	Uid   uint
+	Score uint
+	Type  uint
 }
 
 func (tm *TimestampModel) BeforeCreate(tx *gorm.DB) (err error) {

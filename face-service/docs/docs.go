@@ -22,7 +22,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "표정"
+                    "표정 /face"
                 ],
                 "summary": "표정검사지 조회",
                 "responses": {
@@ -57,7 +57,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "표정"
+                    "표정 /face"
                 ],
                 "summary": "표정운동 조회",
                 "responses": {
@@ -92,7 +92,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "표정"
+                    "표정 /face"
                 ],
                 "summary": "표정 점수 조회",
                 "parameters": [
@@ -148,7 +148,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "표정"
+                    "표정 /face"
                 ],
                 "summary": "표정 점수 저장",
                 "parameters": [
@@ -241,7 +241,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "score": {
                     "type": "integer"
@@ -250,7 +251,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 }
             }
         },

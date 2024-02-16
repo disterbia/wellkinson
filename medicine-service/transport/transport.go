@@ -13,7 +13,7 @@ import (
 
 var userLocks sync.Map
 
-// @Tags 약물
+// @Tags 약물 /medicine
 // @Summary 약물 저장
 // @Description 약물등록 및 수정시 호출
 // @Produce  json
@@ -55,7 +55,7 @@ func SaveHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 약물
+// @Tags 약물 /medicine
 // @Summary 약물 삭제
 // @Description 약물 삭제시 호출
 // @Accept  json
@@ -93,7 +93,7 @@ func RemoveHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 약물
+// @Tags 약물 /medicine
 // @Summary 약물 복용내역 조회
 // @Description 약물 복용내역 조회시 호출
 // @Produce  json
@@ -132,7 +132,7 @@ func GetTakensHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 약물
+// @Tags 약물 /medicine
 // @Summary 등록 약물 조회
 // @Description 등록 약물 조회시 호출
 // @Produce  json
@@ -160,7 +160,7 @@ func GetMedicinesHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 약물
+// @Tags 약물 /medicine
 // @Summary 약물 복용
 // @Description 약물 복용시 호출
 // @Accept  json
@@ -204,7 +204,7 @@ func TakeHandler(doEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 약물
+// @Tags 약물 /medicine
 // @Summary 약물 복용취소
 // @Description 약물 복용취소시 호출
 // @Accept  json
@@ -248,7 +248,7 @@ func UnTakeHandler(doEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 약물
+// @Tags 약물 /medicine
 // @Summary 약물 찾기
 // @Description 약물 검색 키워드 입력시 호출
 // @Produce  json
@@ -256,7 +256,7 @@ func UnTakeHandler(doEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Success 200 {object} []string "약물명"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /get-takens [get]
+// @Router /search-medicines [get]
 func SearchHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 

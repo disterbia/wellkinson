@@ -4,86 +4,16 @@
         "contact": {}
     },
     "paths": {
-        "/get-face-exams": {
+        "/get-vocal-scores": {
             "get": {
-                "description": "표정 검사시 호출",
+                "description": "발성 점수 조회시 호출",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "표정"
+                    "발성 /vocal"
                 ],
-                "summary": "표정검사지 조회",
-                "responses": {
-                    "200": {
-                        "description": "표정검사지 정보",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.FaceExamResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "요청 처리 실패시 오류 메시지 반환",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "요청 처리 실패시 오류 메시지 반환",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/get-face-exercises": {
-            "get": {
-                "description": "표정 운동 조회시 호출",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "표정"
-                ],
-                "summary": "표정운동 조회",
-                "responses": {
-                    "200": {
-                        "description": "표정운동 정보",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.SwaggerResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "요청 처리 실패시 오류 메시지 반환",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "요청 처리 실패시 오류 메시지 반환",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/get-face-scores": {
-            "get": {
-                "description": "표정 점수 조회시 호출",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "표정"
-                ],
-                "summary": "표정 점수 조회",
+                "summary": "발성 점수 조회",
                 "parameters": [
                     {
                         "type": "string",
@@ -111,7 +41,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.FaceScoreResponse"
+                                "$ref": "#/definitions/dto.VocalScoreResponse"
                             }
                         }
                     },
@@ -130,16 +60,51 @@
                 }
             }
         },
-        "/save-faces": {
-            "post": {
-                "description": "표정 검사 완료 후 호출",
+        "/get-voice-tables": {
+            "get": {
+                "description": "발성운동 단어 조회시 호출",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "표정"
+                    "발성 /vocal"
                 ],
-                "summary": "표정 점수 저장",
+                "summary": "발성운동 단어 조회",
+                "responses": {
+                    "200": {
+                        "description": "발성운동 단어 데이터",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.VoiceWordResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/save-vocals": {
+            "post": {
+                "description": "발성 검사 완료 후 호출",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "발성 /vocal"
+                ],
+                "summary": "발성 점수 저장",
                 "parameters": [
                     {
                         "type": "string",
@@ -149,14 +114,14 @@
                         "required": true
                     },
                     {
-                        "description": "요청 DTO - 표정검사 데이터 ( type: 1: 기쁨 2: 슬픔 3: 놀람 4: 분노 )",
+                        "description": "요청 DTO - 발성검사 데이터 ( type: 1:a 2:e 3:i 4:o 5:u )",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.FaceScoreRequest"
+                                "$ref": "#/definitions/dto.VocalScoreRequest"
                             }
                         }
                     }
@@ -201,21 +166,7 @@
                 }
             }
         },
-        "dto.FaceExamResponse": {
-            "type": "object",
-            "properties": {
-                "title": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "integer"
-                },
-                "video_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.FaceScoreRequest": {
+        "dto.VocalScoreRequest": {
             "type": "object",
             "properties": {
                 "score": {
@@ -226,11 +177,12 @@
                 }
             }
         },
-        "dto.FaceScoreResponse": {
+        "dto.VocalScoreResponse": {
             "type": "object",
             "properties": {
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "score": {
                     "type": "integer"
@@ -239,47 +191,19 @@
                     "type": "integer"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 }
             }
         },
-        "dto.SwaggerExercise": {
+        "dto.VoiceWordResponse": {
             "type": "object",
             "properties": {
-                "created": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
                 "title": {
                     "type": "string"
                 },
                 "type": {
                     "type": "integer"
-                },
-                "updated": {
-                    "type": "string"
-                },
-                "video_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.SwaggerResponse": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "integer"
-                },
-                "videos": {
-                    "$ref": "#/definitions/dto.SwaggerExercise"
                 }
             }
         }

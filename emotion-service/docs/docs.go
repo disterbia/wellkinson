@@ -22,10 +22,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "기분"
+                    "기분 /emotion"
                 ],
                 "summary": "기분 조회",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "시작날짜 yyyy-mm-dd",
@@ -41,7 +48,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "성공시 200 반환",
+                        "description": "기분정보",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -74,10 +81,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "기분"
+                    "기분 /emotion"
                 ],
                 "summary": "기분 삭제",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "삭제할 id 배열",
                         "name": "request",
@@ -120,10 +134,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "기분"
+                    "기분 /emotion"
                 ],
                 "summary": "기분 생성/수정",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "요청 DTO - 기분 데이터",
                         "name": "request",
@@ -170,13 +191,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "emotion": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "기분명"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "state": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "기분내용"
                 }
             }
         },
@@ -188,13 +211,15 @@ const docTemplate = `{
                     "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "emotion": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "기분명"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "state": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "기분내용"
                 },
                 "updated": {
                     "type": "string",

@@ -28,12 +28,14 @@ definitions:
   dto.FaceScoreResponse:
     properties:
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       score:
         type: integer
       type:
         type: integer
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
     type: object
   dto.SwaggerExercise:
@@ -87,7 +89,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 표정검사지 조회
       tags:
-      - 표정
+      - 표정 /face
   /get-face-exercises:
     get:
       description: 표정 운동 조회시 호출
@@ -110,7 +112,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 표정운동 조회
       tags:
-      - 표정
+      - 표정 /face
   /get-face-scores:
     get:
       description: 표정 점수 조회시 호출
@@ -147,7 +149,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 표정 점수 조회
       tags:
-      - 표정
+      - 표정 /face
   /save-faces:
     post:
       description: 표정 검사 완료 후 호출
@@ -182,5 +184,5 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 표정 점수 저장
       tags:
-      - 표정
+      - 표정 /face
 swagger: "2.0"

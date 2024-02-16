@@ -24,6 +24,7 @@ definitions:
       content:
         type: string
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       id:
         type: integer
@@ -32,6 +33,7 @@ definitions:
       reply_type:
         type: boolean
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
     type: object
   dto.InquireRequest:
@@ -48,6 +50,7 @@ definitions:
       content:
         type: string
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       email:
         type: string
@@ -60,6 +63,7 @@ definitions:
       title:
         type: string
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
     type: object
 info:
@@ -69,6 +73,11 @@ paths:
     get:
       description: 관리자 문의내역 확인시 호출 (10개씩)
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 페이지 번호 default 0
         in: query
         name: page
@@ -100,13 +109,18 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 문의조회(관리자)
       tags:
-      - 문의
+      - 문의 /inquire
   /get-inquires:
     get:
       consumes:
       - application/json
       description: 나의문의보기시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 페이지 번호 default 0
         in: query
         name: page
@@ -138,13 +152,18 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 문의조회(본인)
       tags:
-      - 문의
+      - 문의 /inquire
   /inquire-reply:
     post:
       consumes:
       - application/json
       description: 답변/추가문의 등록시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 요청 DTO - 답변데이터
         in: body
         name: request
@@ -168,13 +187,18 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 답변/추가문의
       tags:
-      - 문의
+      - 문의 /inquire
   /remove-inquire/{id}:
     post:
       consumes:
       - application/json
       description: 문의삭제시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 문의ID
         in: path
         name: id
@@ -196,13 +220,18 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 문의삭제
       tags:
-      - 문의
+      - 문의 /inquire
   /remove-reply/{id}:
     post:
       consumes:
       - application/json
       description: 문의답변/추가문의 삭제시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 답변/추가문의ID
         in: path
         name: id
@@ -224,13 +253,18 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 문의답변/추가문의 삭제
       tags:
-      - 문의
+      - 문의 /inquire
   /send-inquire:
     post:
       consumes:
       - application/json
       description: 문의등록시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 요청 DTO - 문의데이터
         in: body
         name: request
@@ -254,5 +288,5 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 문의하기
       tags:
-      - 문의
+      - 문의 /inquire
 swagger: "2.0"

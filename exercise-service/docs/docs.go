@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "운동"
+                    "운동 /exercise"
                 ],
                 "summary": "운동 기록",
                 "parameters": [
@@ -75,7 +75,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "운동"
+                    "운동 /exercise"
                 ],
                 "summary": "운동 조회",
                 "parameters": [
@@ -133,7 +133,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "운동"
+                    "운동 /exercise"
                 ],
                 "summary": "운동 동영상 카테고리 조회",
                 "parameters": [
@@ -177,9 +177,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "운동"
+                    "운동 /exercise"
                 ],
-                "summary": "카테고리별 운동 동영상 조회",
+                "summary": "카테고리별 운동 동영상 조회 (20개씩)",
                 "parameters": [
                     {
                         "type": "string",
@@ -237,7 +237,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "운동"
+                    "운동 /exercise"
                 ],
                 "summary": "운동 삭제",
                 "parameters": [
@@ -290,7 +290,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "운동"
+                    "운동 /exercise"
                 ],
                 "summary": "운동 생성/수정",
                 "parameters": [
@@ -429,7 +429,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "exercise_end_at": {
                     "type": "string",
@@ -451,7 +452,8 @@ const docTemplate = `{
                     "example": "YYYY-MM-DD"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "use_alarm": {
                     "type": "boolean"

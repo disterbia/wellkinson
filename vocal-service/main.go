@@ -31,21 +31,19 @@ func main() {
 		return
 	}
 
-	svc := service.NewFaceService(database)
+	svc := service.NewVocalService(database)
 
 	savefaceScoresEndpoint := endpoint.SaveScoresEndpoint(svc)
 	getfaceScoresEndpoint := endpoint.GetScoresEndpoint(svc)
-	getfaceExamsEndpoint := endpoint.GetFaceExamsEndpoint(svc)
-	getfaceExerciseEndPoint := endpoint.GetFaceExercisesEndpoint(svc)
+	getfaceExamsEndpoint := endpoint.GetVocalTablesEndpoint(svc)
 
 	router := gin.Default()
-	router.POST("/save-faces", transport.SaveScoresHandler(savefaceScoresEndpoint))
-	router.GET("/get-face-scores", transport.GetScoresHandler(getfaceScoresEndpoint))
-	router.GET("/get-face-exams", transport.GetFaceExamsHandler(getfaceExamsEndpoint))
-	router.GET("/get-face-exercises", transport.GetFaceExercisesHandler(getfaceExerciseEndPoint))
+	router.POST("/save-vocals", transport.SaveScoresHandler(savefaceScoresEndpoint))
+	router.GET("/get-vocal-scores", transport.GetScoresHandler(getfaceScoresEndpoint))
+	router.GET("/get-voice-tables", transport.GetVocalTablesHandler(getfaceExamsEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Run(":44444")
+	router.Run(":44410")
 	// router.RunTLS(":8080", "cert.pem", "key.pem")
 
 }

@@ -17,20 +17,21 @@ const docTemplate = `{
     "paths": {
         "/get-diets": {
             "get": {
-                "description": "식단 조회시 호출 (10개씩)",
+                "description": "식단 조회시 호출",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "식단"
+                    "식단 /diet"
                 ],
                 "summary": "식단 조회",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "페이지 번호 default 0",
-                        "name": "page",
-                        "in": "query"
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -47,7 +48,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "성공시 200 반환",
+                        "description": "식단정보 type - 아침/점심/저녁/간식 1/2/3/4",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -77,10 +78,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "식단"
+                    "식단 /diet"
                 ],
                 "summary": "추가한 식단 조회",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "페이지 번호 default 0",
@@ -102,7 +110,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "성공시 200 반환",
+                        "description": "식단정보",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -135,10 +143,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "식단"
+                    "식단 /diet"
                 ],
                 "summary": "추가한 식단 삭제",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "삭제할 id 배열",
                         "name": "request",
@@ -184,10 +199,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "식단"
+                    "식단 /diet"
                 ],
                 "summary": "추가한 식단 삭제",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "삭제할 id 배열",
                         "name": "request",
@@ -230,12 +252,19 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "식단"
+                    "식단 /diet"
                 ],
                 "summary": "식단생성/수정",
                 "parameters": [
                     {
-                        "description": "요청 DTO - 식단데이터",
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "요청 DTO - 식단데이터 type - 아침/점심/저녁/간식 1/2/3/4",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -273,10 +302,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "식단"
+                    "식단 /diet"
                 ],
                 "summary": "추가한 식단 생성/수정",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "요청 DTO - 추가한 식단 데이터",
                         "name": "request",

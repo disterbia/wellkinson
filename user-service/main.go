@@ -53,7 +53,7 @@ func main() {
 	router.GET("/get-user", transport.GetUserHandler(getUserEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Run(":44440")
+	router.Run(":44409")
 	// router.RunTLS(":8080", "cert.pem", "key.pem")
 
 }

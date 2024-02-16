@@ -22,9 +22,18 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "약물 /medicine"
                 ],
                 "summary": "등록 약물 조회",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "등록 약물 정보",
@@ -57,7 +66,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "약물 /medicine"
                 ],
                 "summary": "약물 복용내역 조회",
                 "parameters": [
@@ -118,7 +127,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "약물 /medicine"
                 ],
                 "summary": "약물 삭제",
                 "parameters": [
@@ -171,7 +180,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "약물 /medicine"
                 ],
                 "summary": "약물 저장",
                 "parameters": [
@@ -214,9 +223,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/search-medicines": {
+            "get": {
+                "description": "약물 검색 키워드 입력시 호출",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "약물 /medicine"
+                ],
+                "summary": "약물 찾기",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "키워드",
+                        "name": "keyword",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "약물명",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/take-medicine": {
             "post": {
-                "description": "약물 복용 및 복용취소시 호출",
+                "description": "약물 복용시 호출",
                 "consumes": [
                     "application/json"
                 ],
@@ -224,7 +277,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "약물"
+                    "약물 /medicine"
                 ],
                 "summary": "약물 복용",
                 "parameters": [
@@ -236,12 +289,65 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "약물 복용/취소 데이터",
+                        "description": "약물 복용 데이터",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/dto.TakeMedicine"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/untake-medicine": {
+            "post": {
+                "description": "약물 복용취소시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "약물 /medicine"
+                ],
+                "summary": "약물 복용취소",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "약물 취소 데이터",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UnTakeMedicine"
                         }
                     }
                 ],
@@ -360,7 +466,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "dose": {
                     "type": "number"
@@ -405,7 +512,8 @@ const docTemplate = `{
                     ]
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "use_privacy": {
                     "type": "boolean"
@@ -432,10 +540,30 @@ const docTemplate = `{
         "dto.TakeMedicine": {
             "type": "object",
             "properties": {
-                "dose": {
-                    "type": "string"
+                "date_taken": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
                 },
-                "exercise_id": {
+                "dose": {
+                    "type": "number"
+                },
+                "medicine_id": {
+                    "type": "integer"
+                },
+                "time_taken": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                }
+            }
+        },
+        "dto.UnTakeMedicine": {
+            "type": "object",
+            "properties": {
+                "date_taken": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "medicine_id": {
                     "type": "integer"
                 },
                 "time_taken": {

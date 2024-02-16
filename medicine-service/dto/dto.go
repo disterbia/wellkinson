@@ -2,8 +2,8 @@
 package dto
 
 type GetParams struct {
-	StartDate string `form:"start_date"`
-	EndDate   string `form:"end_date"`
+	StartDate string `form:"start_date" example:"YYYY-MM-DD"`
+	EndDate   string `form:"end_date" example:"YYYY-MM-DD"`
 }
 
 type MedicineRequest struct {
@@ -37,8 +37,8 @@ type MedicineResponse struct {
 	StartAt      string   `json:"start_at" example:"YYYY-MM-dd"`
 	EndAt        string   `json:"end_at"  example:"YYYY-MM:dd"`
 	UsePrivacy   bool     `json:"use_privacy"`
-	Created      string   `json:"created"`
-	Updated      string   `json:"updated"`
+	Created      string   `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Updated      string   `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 }
 
 type MedicineDateInfo struct {

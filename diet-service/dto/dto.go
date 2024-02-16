@@ -3,8 +3,8 @@ package dto
 
 type GetPresetParams struct {
 	Page      uint   `form:"page"`
-	StartDate string `form:"start_date"`
-	EndDate   string `form:"end_date"`
+	StartDate string `form:"start_date" example:"yyyy-mm-dd"`
+	EndDate   string `form:"end_date" example:"yyyy-mm-dd"`
 }
 
 type DietPresetRequest struct {

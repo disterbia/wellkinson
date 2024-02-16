@@ -101,7 +101,7 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 			"start_at":           alarm.StartAt,
 			"end_at":             alarm.EndAt,
 			"uid":                strconv.FormatUint(uint64(alarm.Uid), 10),
-			"type":               strconv.FormatUint(uint64(alarm.Uid), 10),
+			"type":               strconv.FormatUint(uint64(alarm.Type), 10),
 			"notification_count": strconv.FormatUint(uint64(notification_count), 10),
 		},
 		Notification: &messaging.Notification{
@@ -120,7 +120,7 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 
 	newNotification := model.Notification{
 		Uid:    alarm.Uid,
-		Type:   strconv.FormatUint(uint64(alarm.Uid), 10),
+		Type:   alarm.Type,
 		Body:   alarm.Body,
 		IsRead: false,
 	}

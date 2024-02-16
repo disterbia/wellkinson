@@ -22,7 +22,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "수면"
+                    "수면 /sleep"
                 ],
                 "summary": "수면알람 조회",
                 "parameters": [
@@ -66,7 +66,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "수면"
+                    "수면 /sleep"
                 ],
                 "summary": "기간별 수면시간 조회",
                 "parameters": [
@@ -127,7 +127,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "수면"
+                    "수면 /sleep"
                 ],
                 "summary": "수면알림 삭제",
                 "parameters": [
@@ -183,7 +183,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "수면"
+                    "수면 /sleep"
                 ],
                 "summary": "수면시간 삭제",
                 "parameters": [
@@ -230,7 +230,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "수면"
+                    "수면 /sleep"
                 ],
                 "summary": "수면알림 생성/수정",
                 "parameters": [
@@ -283,7 +283,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "수면"
+                    "수면 /sleep"
                 ],
                 "summary": "수면시간 등록/수정",
                 "parameters": [
@@ -348,10 +348,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "alarm_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "end_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "id": {
                     "type": "integer"
@@ -360,7 +362,8 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "start_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "weekdays": {
                     "type": "array",
@@ -374,10 +377,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "end_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "id": {
                     "type": "integer"
@@ -386,10 +391,12 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "start_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "updated": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "weekdays": {
                     "type": "array",
@@ -403,10 +410,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "date_sleep": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
                 },
                 "end_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "start_time": {
                     "type": "string"
@@ -417,16 +426,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "date_sleep": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
                 },
                 "end_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "HH:mm"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "start_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "HH:mm"
                 }
             }
         }

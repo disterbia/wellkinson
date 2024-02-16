@@ -26,7 +26,7 @@ func GetLimiter(ip string) *rate.Limiter {
 
 	limiter, exists := ips[ip]
 	if !exists {
-		limiter = rate.NewLimiter(1, 5) // 레이트 리미팅 설정 조정
+		limiter = rate.NewLimiter(5, 10) // 레이트 리미팅 설정 조정
 		ips[ip] = limiter
 	}
 
@@ -70,23 +70,96 @@ func IPRateLimitMiddleware() gin.HandlerFunc {
 func main() {
 	router := gin.Default()
 	router.Use(IPRateLimitMiddleware())
-	// 유저 서비스로의 리버스 프록시 설정
-	userServiceURL, _ := url.Parse("http://localhost:44440")
-	userProxy := httputil.NewSingleHostReverseProxy(userServiceURL)
-	router.Any("/user/*path", func(c *gin.Context) {
-		c.Request.URL.Path = c.Param("path") // '/user' 접두사 제거
-		userProxy.ServeHTTP(c.Writer, c.Request)
-	})
 
-	adminServiceURL, _ := url.Parse("http://localhost:44444")
+	//서비스로의 리버스 프록시 설정
+	adminServiceURL, _ := url.Parse("http://localhost:44400")
 	adminProxy := httputil.NewSingleHostReverseProxy(adminServiceURL)
 	router.Any("/admin/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")
 		adminProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	setupSwaggerUIProxy(router, "/user-service/swagger/*proxyPath", "http://localhost:44440/swagger/")
-	setupSwaggerUIProxy(router, "/admin-service/swagger/*proxyPath", "http://localhost:44444/swagger/")
+	alarmServiceURL, _ := url.Parse("http://localhost:44401")
+	alarmProxy := httputil.NewSingleHostReverseProxy(alarmServiceURL)
+	router.Any("/alarm/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		alarmProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	dietServiceURL, _ := url.Parse("http://localhost:44402")
+	dietProxy := httputil.NewSingleHostReverseProxy(dietServiceURL)
+	router.Any("/diet/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		dietProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	emotionServiceURL, _ := url.Parse("http://localhost:44403")
+	emotionProxy := httputil.NewSingleHostReverseProxy(emotionServiceURL)
+	router.Any("/emotion/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		emotionProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	exerciseServiceURL, _ := url.Parse("http://localhost:44404")
+	exerciseProxy := httputil.NewSingleHostReverseProxy(exerciseServiceURL)
+	router.Any("/exercise/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		exerciseProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	faceServiceURL, _ := url.Parse("http://localhost:44405")
+	faceProxy := httputil.NewSingleHostReverseProxy(faceServiceURL)
+	router.Any("/face/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		faceProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	inquireServiceURL, _ := url.Parse("http://localhost:44406")
+	inquireProxy := httputil.NewSingleHostReverseProxy(inquireServiceURL)
+	router.Any("/inquire/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		inquireProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	medicineServiceURL, _ := url.Parse("http://localhost:44407")
+	medicineProxy := httputil.NewSingleHostReverseProxy(medicineServiceURL)
+	router.Any("/medicine/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		medicineProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	sleepServiceURL, _ := url.Parse("http://localhost:44408")
+	sleepProxy := httputil.NewSingleHostReverseProxy(sleepServiceURL)
+	router.Any("/sleep/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		sleepProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	userServiceURL, _ := url.Parse("http://localhost:44409")
+	userProxy := httputil.NewSingleHostReverseProxy(userServiceURL)
+	router.Any("/user/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path") // '/user' 접두사 제거
+		userProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	vocalServiceURL, _ := url.Parse("http://localhost:44410")
+	vocalProxy := httputil.NewSingleHostReverseProxy(vocalServiceURL)
+	router.Any("/vocal/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		vocalProxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	setupSwaggerUIProxy(router, "/admin-service/swagger/*proxyPath", "http://localhost:44400/swagger/")
+	setupSwaggerUIProxy(router, "/alarm-service/swagger/*proxyPath", "http://localhost:44401/swagger/")
+	setupSwaggerUIProxy(router, "/diet-service/swagger/*proxyPath", "http://localhost:44402/swagger/")
+	setupSwaggerUIProxy(router, "/emotion-service/swagger/*proxyPath", "http://localhost:44403/swagger/")
+	setupSwaggerUIProxy(router, "/exercise-service/swagger/*proxyPath", "http://localhost:44404/swagger/")
+	setupSwaggerUIProxy(router, "/face-service/swagger/*proxyPath", "http://localhost:44405/swagger/")
+	setupSwaggerUIProxy(router, "/inquire-service/swagger/*proxyPath", "http://localhost:44406/swagger/")
+	setupSwaggerUIProxy(router, "/medicine-service/swagger/*proxyPath", "http://localhost:44407/swagger/")
+	setupSwaggerUIProxy(router, "/sleep-service/swagger/*proxyPath", "http://localhost:44408/swagger/")
+	setupSwaggerUIProxy(router, "/user-service/swagger/*proxyPath", "http://localhost:44409/swagger/")
+	setupSwaggerUIProxy(router, "/vocal-service/swagger/*proxyPath", "http://localhost:44410/swagger/")
 
 	// API 게이트웨이 서버 시작
 	router.Run(":50000")

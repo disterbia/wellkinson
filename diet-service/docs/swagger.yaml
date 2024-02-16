@@ -96,12 +96,13 @@ info:
 paths:
   /get-diets:
     get:
-      description: 식단 조회시 호출 (10개씩)
+      description: 식단 조회시 호출
       parameters:
-      - description: 페이지 번호 default 0
-        in: query
-        name: page
-        type: integer
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 시작날짜 yyyy-mm-dd
         in: query
         name: start_date
@@ -114,7 +115,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 성공시 200 반환
+          description: 식단정보 type - 아침/점심/저녁/간식 1/2/3/4
           schema:
             items:
               $ref: '#/definitions/dto.DietResponse'
@@ -129,11 +130,16 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 식단 조회
       tags:
-      - 식단
+      - 식단 /diet
   /get-presets:
     get:
       description: 추가한 식단 조회시 호출 (10개씩)
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 페이지 번호 default 0
         in: query
         name: page
@@ -150,7 +156,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 성공시 200 반환
+          description: 식단정보
           schema:
             items:
               $ref: '#/definitions/dto.DietPresetResponse'
@@ -165,13 +171,18 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 추가한 식단 조회
       tags:
-      - 식단
+      - 식단 /diet
   /remove-diet:
     post:
       consumes:
       - application/json
       description: 추가한 식단 삭제시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 삭제할 id 배열
         in: body
         name: request
@@ -197,13 +208,18 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 추가한 식단 삭제
       tags:
-      - 식단
+      - 식단 /diet
   /remove-preset:
     post:
       consumes:
       - application/json
       description: 추가한 식단 삭제시 호출
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 삭제할 id 배열
         in: body
         name: request
@@ -229,12 +245,17 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 추가한 식단 삭제
       tags:
-      - 식단
+      - 식단 /diet
   /save-diet:
     post:
       description: 식단생성시 Id 생략
       parameters:
-      - description: 요청 DTO - 식단데이터
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 요청 DTO - 식단데이터 type - 아침/점심/저녁/간식 1/2/3/4
         in: body
         name: request
         required: true
@@ -257,11 +278,16 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 식단생성/수정
       tags:
-      - 식단
+      - 식단 /diet
   /save-preset:
     post:
       description: 추가한 식단 생성시 Id 생략
       parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 요청 DTO - 추가한 식단 데이터
         in: body
         name: request
@@ -285,5 +311,5 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 추가한 식단 생성/수정
       tags:
-      - 식단
+      - 식단 /diet
 swagger: "2.0"

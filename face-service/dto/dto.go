@@ -4,8 +4,8 @@ package dto
 import "common/model"
 
 type GetParams struct {
-	StartDate string `form:"start_date"`
-	EndDate   string `form:"end_date"`
+	StartDate string `form:"start_date" example:"YYYY-MM-DD"`
+	EndDate   string `form:"end_date" example:"YYYY-MM-DD"`
 }
 
 type FaceScoreRequest struct {
@@ -17,13 +17,13 @@ type FaceScoreRequest struct {
 type FaceScoreResponse struct {
 	Score   uint   `json:"score"`
 	Type    uint   `json:"type"`
-	Created string `json:"created"`
-	Updated string `json:"updated"`
+	Created string `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Updated string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 }
 
 type FaceExamResponse struct {
-	Type    uint
-	Title   string
+	Type    uint   `json:"type"`
+	Title   string `json:"title"`
 	VideoId string `json:"video_id"`
 }
 
@@ -37,9 +37,9 @@ type SwaggerExercise struct {
 }
 
 type FaceExerciseResponse struct {
-	Type         uint
-	Title        string
-	Count        uint
+	Type         uint                 `json:"type"`
+	Title        string               `json:"title"`
+	Count        uint                 `json:"count"`
 	FaceExercise []model.FaceExercise `json:"videos" gorm:"-"`
 }
 

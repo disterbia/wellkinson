@@ -13,7 +13,7 @@ import (
 
 var userLocks sync.Map
 
-// @Tags 운동
+// @Tags 운동 /exercise
 // @Summary 운동 생성/수정
 // @Description 운동 생성시 Id 생략
 // @Produce  json
@@ -56,7 +56,7 @@ func SaveExerciseHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 운동
+// @Tags 운동 /exercise
 // @Summary 운동 조회
 // @Description 운동 조회시 호출
 // @Produce  json
@@ -96,7 +96,7 @@ func GetExercisesHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 운동
+// @Tags 운동 /exercise
 // @Summary 운동 삭제
 // @Description 운동 삭제시 호출
 // @Accept  json
@@ -134,7 +134,7 @@ func RemoveExercisesHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc
 	}
 }
 
-// @Tags 운동
+// @Tags 운동 /exercise
 // @Summary 운동 기록
 // @Description 운동 완료/취소시 호출
 // @Accept  json
@@ -178,7 +178,7 @@ func DoExerciseHandler(doEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 운동
+// @Tags 운동 /exercise
 // @Summary 운동 동영상 카테고리 조회
 // @Description 운동 동영상 카테고리 조회시 호출
 // @Produce  json
@@ -205,7 +205,7 @@ func GetProjectsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	}
 }
 
-// @Tags 운동
+// @Tags 운동 /exercise
 // @Summary 카테고리별 운동 동영상 조회 (20개씩)
 // @Description 카테고리별 운동 동영상 조회시 호출
 // @Produce  json

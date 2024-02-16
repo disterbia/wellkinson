@@ -69,7 +69,7 @@ func main() {
 	router.GET("/get-diets", transport.GetDietsHandler(getDietsEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Run(":44444")
+	router.Run(":44402")
 	// router.RunTLS(":8080", "cert.pem", "key.pem")
 
 }

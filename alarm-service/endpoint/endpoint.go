@@ -46,3 +46,38 @@ func GetEndpoint(s service.AlarmService) endpoint.Endpoint {
 		return inquires, nil
 	}
 }
+
+func GetNotiEndpoint(s service.AlarmService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		id := request.(uint)
+		notis, err := s.GetNotifications(id)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return notis, nil
+	}
+}
+
+func ReadAllEndpoint(s service.AlarmService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		id := request.(uint)
+		code, err := s.ReadAll(id)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
+func RemoveNotiEndpoint(s service.AlarmService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(map[string]interface{})
+		ids := reqMap["ids"].([]uint)
+		uid := reqMap["uid"].(uint)
+		code, err := s.RemoveNotifications(ids, uid)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}

@@ -2,8 +2,8 @@ package dto
 
 type GetInquireParams struct {
 	Page      uint   `form:"page"`
-	StartDate string `form:"start_date"`
-	EndDate   string `form:"end_date"`
+	StartDate string `form:"start_date" example:"YYYY-MM-DD"`
+	EndDate   string `form:"end_date" example:"YYYY-MM-DD"`
 }
 
 type InquireRequest struct {

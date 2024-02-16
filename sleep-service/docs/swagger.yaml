@@ -12,14 +12,17 @@ definitions:
   dto.SleepAlarmRequest:
     properties:
       alarm_time:
+        example: HH:mm
         type: string
       end_time:
+        example: HH:mm
         type: string
       id:
         type: integer
       is_active:
         type: boolean
       start_time:
+        example: HH:mm
         type: string
       weekdays:
         items:
@@ -29,16 +32,20 @@ definitions:
   dto.SleepAlarmResponse:
     properties:
       created:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       end_time:
+        example: HH:mm
         type: string
       id:
         type: integer
       is_active:
         type: boolean
       start_time:
+        example: HH:mm
         type: string
       updated:
+        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       weekdays:
         items:
@@ -48,8 +55,10 @@ definitions:
   dto.SleepTimeRequest:
     properties:
       date_sleep:
+        example: YYYY-MM-DD
         type: string
       end_time:
+        example: HH:mm
         type: string
       start_time:
         type: string
@@ -57,12 +66,15 @@ definitions:
   dto.SleepTimeResponse:
     properties:
       date_sleep:
+        example: YYYY-MM-DD
         type: string
       end_time:
+        example: HH:mm
         type: string
       id:
         type: integer
       start_time:
+        example: HH:mm
         type: string
     type: object
 info:
@@ -96,7 +108,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 수면알람 조회
       tags:
-      - 수면
+      - 수면 /sleep
   /get-sleep-times:
     get:
       description: 기간별 수면시간 조회시 호출
@@ -135,7 +147,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 기간별 수면시간 조회
       tags:
-      - 수면
+      - 수면 /sleep
   /remove-sleep-alarms:
     post:
       consumes:
@@ -172,7 +184,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 수면알림 삭제
       tags:
-      - 수면
+      - 수면 /sleep
   /remove-sleep-times/{id}:
     post:
       consumes:
@@ -205,7 +217,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 수면시간 삭제
       tags:
-      - 수면
+      - 수면 /sleep
   /save-sleep:
     post:
       description: 수면알림 생성시 Id 생략
@@ -238,7 +250,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 수면알림 생성/수정
       tags:
-      - 수면
+      - 수면 /sleep
   /save-sleep-time:
     post:
       consumes:
@@ -273,5 +285,5 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 수면시간 등록/수정
       tags:
-      - 수면
+      - 수면 /sleep
 swagger: "2.0"
