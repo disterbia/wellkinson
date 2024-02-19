@@ -112,6 +112,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/get-services": {
+            "get": {
+                "description": "이용하고 싶은 서비스 목록 조회시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "전체 서비스 목록 조회 (공통)  /user"
+                ],
+                "summary": "전체 서비스 목록 조회",
+                "responses": {
+                    "200": {
+                        "description": "성공시 유저 객체 반환/ ture:남성",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.MainServiceResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/get-user": {
             "post": {
                 "description": "내 정보 조회시 호출",
@@ -319,6 +357,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ImageResponse": {
+            "type": "object",
+            "properties": {
+                "thumbnail_url": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.LoginRequest": {
             "type": "object",
             "properties": {
@@ -327,6 +376,17 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/dto.UserRequest"
+                }
+            }
+        },
+        "dto.MainServiceResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -365,8 +425,18 @@ const docTemplate = `{
                     "type": "string",
                     "example": "01000000000"
                 },
+                "profile_image": {
+                    "type": "string",
+                    "example": "base64 encoding string"
+                },
                 "use_auto_login": {
                     "type": "boolean"
+                },
+                "use_services": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "use_sleep_tracking": {
                     "type": "boolean"
@@ -375,7 +445,8 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "user_type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0:해당없음 1:파킨슨 환자 2:보호자"
                 }
             }
         },
@@ -413,12 +484,21 @@ const docTemplate = `{
                     "type": "string",
                     "example": "01000000000"
                 },
+                "profile_image": {
+                    "$ref": "#/definitions/dto.ImageResponse"
+                },
                 "updated": {
                     "type": "string",
                     "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
                 },
                 "use_auto_login": {
                     "type": "boolean"
+                },
+                "use_services": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.MainServiceResponse"
+                    }
                 },
                 "use_sleep_tracking": {
                     "type": "boolean"
@@ -427,7 +507,8 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "user_type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0:해당없음 1:파킨슨 환자 2:보호자"
                 }
             }
         }

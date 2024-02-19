@@ -77,3 +77,13 @@ func MakeSetUserEndpoint(s service.UserService) endpoint.Endpoint {
 		return dto.BasicResponse{Code: code}, nil
 	}
 }
+
+func GetMainServicesEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		code, err := s.GetMainServices()
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return code, nil
+	}
+}

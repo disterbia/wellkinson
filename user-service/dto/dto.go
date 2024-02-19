@@ -16,9 +16,40 @@ type UserRequest struct {
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
 	UserType             string `json:"user_type" example:"0:해당없음 1:파킨슨 환자 2:보호자"`
 	UseServices          []int  `json:"use_services"`
+	ProfileImage         string `json:"profile_image" example:"base64 encoding string"`
 }
 
 type UserResponse struct {
+	Birthday             string                `json:"birthday" example:"YYYY-MM-DD"`
+	DeviceID             string                `json:"device_id"`
+	Gender               bool                  `json:"gender"` // true:남 false: 여
+	FCMToken             string                `json:"fcm_token"`
+	IsFirst              bool                  `json:"is_first"`
+	Name                 string                `json:"name"`
+	PhoneNum             string                `json:"phone_num" example:"01000000000"`
+	UseAutoLogin         bool                  `json:"use_auto_login"`
+	UsePrivacyProtection bool                  `json:"user_privacy_protection"`
+	UseSleepTracking     bool                  `json:"use_sleep_tracking"`
+	UserType             string                `json:"user_type" example:"0:해당없음 1:파킨슨 환자 2:보호자"`
+	Email                string                `json:"email"`
+	Created              string                `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Updated              string                `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	UseServices          []MainServiceResponse `json:"use_services"`
+	ProfileImage         ImageResponse         `json:"profile_image"`
+}
+
+type ImageResponse struct {
+	Url          string `json:"url"`
+	ThumbnailUrl string `json:"thumbnail_url"`
+}
+type MainServiceResponse struct {
+	Id    uint   `json:"id"`
+	Title string `json:"title"`
+}
+
+type TempUser struct {
+	Id                   uint   `json:"-"`
+	Email                string `json:"-"`
 	Birthday             string `json:"birthday" example:"YYYY-MM-DD"`
 	DeviceID             string `json:"device_id"`
 	Gender               bool   `json:"gender"` // true:남 false: 여
@@ -30,15 +61,7 @@ type UserResponse struct {
 	UsePrivacyProtection bool   `json:"user_privacy_protection"`
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
 	UserType             string `json:"user_type" example:"0:해당없음 1:파킨슨 환자 2:보호자"`
-	Email                string `json:"email"`
-	Created              string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated              string `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	UseServices          []int  `json:"use_services"`
-}
-
-type MainService struct {
-	Id    uint   `json:"id"`
-	Title string `json:"title"`
 }
 
 type LoginRequest struct {

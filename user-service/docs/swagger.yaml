@@ -9,12 +9,26 @@ definitions:
       err:
         type: string
     type: object
+  dto.ImageResponse:
+    properties:
+      thumbnail_url:
+        type: string
+      url:
+        type: string
+    type: object
   dto.LoginRequest:
     properties:
       id_token:
         type: string
       user:
         $ref: '#/definitions/dto.UserRequest'
+    type: object
+  dto.MainServiceResponse:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
     type: object
   dto.SuccessResponse:
     properties:
@@ -40,13 +54,21 @@ definitions:
       phone_num:
         example: "01000000000"
         type: string
+      profile_image:
+        example: base64 encoding string
+        type: string
       use_auto_login:
         type: boolean
+      use_services:
+        items:
+          type: integer
+        type: array
       use_sleep_tracking:
         type: boolean
       user_privacy_protection:
         type: boolean
       user_type:
+        example: 0:해당없음 1:파킨슨 환자 2:보호자
         type: string
     type: object
   dto.UserResponse:
@@ -73,16 +95,23 @@ definitions:
       phone_num:
         example: "01000000000"
         type: string
+      profile_image:
+        $ref: '#/definitions/dto.ImageResponse'
       updated:
         example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
         type: string
       use_auto_login:
         type: boolean
+      use_services:
+        items:
+          $ref: '#/definitions/dto.MainServiceResponse'
+        type: array
       use_sleep_tracking:
         type: boolean
       user_privacy_protection:
         type: boolean
       user_type:
+        example: 0:해당없음 1:파킨슨 환자 2:보호자
         type: string
     type: object
 info:
@@ -149,6 +178,31 @@ paths:
       summary: 자동로그인
       tags:
       - 로그인 /user
+  /get-services:
+    get:
+      consumes:
+      - application/json
+      description: 이용하고 싶은 서비스 목록 조회시 호출
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 유저 객체 반환/ ture:남성
+          schema:
+            items:
+              $ref: '#/definitions/dto.MainServiceResponse'
+            type: array
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 전체 서비스 목록 조회
+      tags:
+      - 전체 서비스 목록 조회 (공통)  /user
   /get-user:
     post:
       consumes:

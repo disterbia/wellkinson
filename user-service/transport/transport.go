@@ -206,3 +206,26 @@ func GetUserHandler(getUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		c.JSON(http.StatusOK, resp)
 	}
 }
+
+// @Tags 전체 서비스 목록 조회 (공통)  /user
+// @Summary 전체 서비스 목록 조회
+// @Description 이용하고 싶은 서비스 목록 조회시 호출
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} []dto.MainServiceResponse "성공시 유저 객체 반환/ ture:남성"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Router /get-services [get]
+func GetMainServicesHandeler(getUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		response, err := getUserEndpoint(c.Request.Context(), nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.([]dto.MainServiceResponse)
+		c.JSON(http.StatusOK, resp)
+	}
+}

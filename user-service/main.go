@@ -12,6 +12,10 @@ import (
 
 	_ "user-service/docs"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -33,7 +37,20 @@ func main() {
 		log.Println("Database connection error:", err)
 	}
 
-	usvc := service.NewUserService(database)
+	accessKey := os.Getenv("S3_ACCESS_KEY")
+	secretKey := os.Getenv("S3_SECRET_KEY")
+	bucket := os.Getenv("S3_BUCKET")
+	bucketUrl := os.Getenv("S3_BUCKET_URL")
+	s3sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("ap-northeast-2"),
+		Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
+	})
+	if err != nil {
+		log.Println("aws connection error:", err)
+	}
+
+	s3svc := s3.New(s3sess)
+	usvc := service.NewUserService(database, s3svc, bucket, bucketUrl)
 
 	adminLoginEndpoint := endpoint.MakeAdminLoginEndpoint(usvc)
 	googleLoginEndpoint := endpoint.MakeGoogleLoginEndpoint(usvc)
@@ -41,6 +58,7 @@ func main() {
 	autoLoginEndpoint := endpoint.MakeAutoLoginEndpoint(usvc)
 	setUserEndpoint := endpoint.MakeSetUserEndpoint(usvc)
 	getUserEndpoint := endpoint.MakeGetUserEndpoint(usvc)
+	getMainServicesEndpoint := endpoint.GetMainServicesEndpoint(usvc)
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -51,6 +69,7 @@ func main() {
 	router.POST("/auto-login", transport.AutoLoginHandler(autoLoginEndpoint))
 	router.POST("/set-user", transport.SetUserHandler(setUserEndpoint))
 	router.GET("/get-user", transport.GetUserHandler(getUserEndpoint))
+	router.GET("/get-services", transport.GetMainServicesHandeler(getMainServicesEndpoint))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":44409")
