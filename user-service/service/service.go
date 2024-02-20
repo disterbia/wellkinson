@@ -7,8 +7,15 @@ import (
 	"common/util"
 	"encoding/base64"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"math/rand"
+	"net/http"
+	"net/url"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 	"user-service/dto"
 
@@ -27,6 +34,9 @@ type UserService interface {
 	GetUser(id uint) (dto.UserResponse, error)                               //유저조회
 	AdminLogin(email string, password string) (string, error)
 	GetMainServices() ([]dto.MainServiceResponse, error)
+	SendAuthCode(number string) (string, error)
+	VerifyAuthCode(number, code string) (string, error)
+	RemoveUser(id uint) (string, error)
 }
 
 type userService struct {
@@ -44,6 +54,62 @@ type KakaoPublicKey struct {
 
 type JWKS struct {
 	Keys []KakaoPublicKey `json:"keys"`
+}
+
+func (service *userService) SendAuthCode(number string) (string, error) {
+	err := util.ValidatePhoneNumber(number)
+	if err != nil {
+		return "", err
+	}
+	var sb strings.Builder
+	for i := 0; i < 6; i++ {
+		fmt.Fprintf(&sb, "%d", rand.Intn(10)) // 0부터 9까지의 숫자를 무작위로 선택
+	}
+
+	apiURL := "https://kakaoapi.aligo.in/akv10/alimtalk/send/"
+	data := url.Values{}
+	data.Set("apikey", os.Getenv("API_KEY"))
+	data.Set("userid", os.Getenv("USER_ID"))
+	data.Set("token", os.Getenv("TOKEN"))
+	data.Set("senderkey", os.Getenv("SENDER_KEY"))
+	data.Set("tpl_code", os.Getenv("TPL_CODE"))
+	data.Set("sender", os.Getenv("SENDER"))
+	data.Set("subject_1", os.Getenv("SUBJECT_1"))
+
+	data.Set("receiver_1", number)
+	data.Set("message_1", "인증번호는 ["+sb.String()+"]"+" 입니다.")
+
+	// HTTP POST 요청 실행
+	resp, err := http.PostForm(apiURL, data)
+	if err != nil {
+		fmt.Printf("HTTP Request Failed: %s\n", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	log.Println(fmt.Errorf("server returned non-200 status: %d, body: %s", resp.StatusCode, string(body)))
+
+	if err := service.db.Create(&model.AuthCode{PhoneNumber: number, Code: sb.String()}).Error; err != nil {
+		return "", err
+	}
+	return "200", nil
+}
+
+func (service *userService) VerifyAuthCode(number, code string) (string, error) {
+	var authCode model.AuthCode
+
+	if err := service.db.Where("phone_number = ? ", number).Last(&authCode).Error; err != nil {
+		return "", errors.New("db error")
+	}
+	if authCode.Code != code {
+		return "", errors.New("코드 불일치")
+	}
+	if err := service.db.Create(&model.VerifiedNumbers{PhoneNumber: authCode.PhoneNumber}).Error; err != nil {
+		return "", errors.New("db error2")
+	}
+
+	return "200", nil
 }
 
 func NewUserService(db *gorm.DB, s3svc *s3.S3, bucket string, bucketUrl string) UserService {
@@ -107,20 +173,25 @@ func (service *userService) KakaoLogin(idToken string, userRequest dto.UserReque
 		}
 
 		var user model.User
-		if err := util.CopyStruct(userRequest, &user); err != nil {
+
+		var temp dto.TempUser
+		if err := util.CopyStruct(userRequest, &temp); err != nil {
+			return "", err
+		}
+		if err := util.CopyStruct(temp, &user); err != nil {
 			return "", err
 		}
 
 		user.Email = email
 		u, err := service.findOrCreateUser(user)
 		if err != nil {
-			return "", errors.New(err.Error())
+			return "", errors.New("db error k")
 		}
 
 		// JWT 토큰 생성
 		tokenString, err := util.GenerateJWT(u)
 		if err != nil {
-			return "", errors.New(err.Error())
+			return "", errors.New("db error k2")
 		}
 		return tokenString, nil
 	}
@@ -131,25 +202,28 @@ func (service *userService) KakaoLogin(idToken string, userRequest dto.UserReque
 func (service *userService) GoogleLogin(idToken string, userRequest dto.UserRequest) (string, error) {
 	email, err := validateGoogleIDToken(idToken)
 	if err != nil {
-		return "", errors.New(err.Error())
+		return "", err
 	}
 
 	var user model.User
-
-	if err := util.CopyStruct(userRequest, &user); err != nil {
+	var temp dto.TempUser
+	if err := util.CopyStruct(userRequest, &temp); err != nil {
+		return "", err
+	}
+	if err := util.CopyStruct(temp, &user); err != nil {
 		return "", err
 	}
 
 	user.Email = email
 	u, err := service.findOrCreateUser(user)
 	if err != nil {
-		return "", errors.New(err.Error())
+		return "", err
 	}
 
 	// JWT 토큰 생성
 	tokenString, err := util.GenerateJWT(u)
 	if err != nil {
-		return "", errors.New(err.Error())
+		return "", err
 	}
 
 	return tokenString, nil
@@ -164,8 +238,13 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 		return model.User{}, err
 	}
 
+	err := service.db.Where("phone_number = ?", user.PhoneNum).First(&model.VerifiedNumbers{}).Error
+	if err != nil {
+		return model.User{}, errors.New("인증안된 번호")
+	}
+
 	// 데이터베이스에서 사용자 조회 및 없으면 생성
-	err := service.db.Where(model.User{Email: user.Email}).FirstOrCreate(&user).Error
+	err = service.db.Where(model.User{Email: user.Email}).FirstOrCreate(&user).Error
 	if err != nil {
 		return model.User{}, err
 	}
@@ -176,12 +255,17 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 func (service *userService) SetUser(userRequest dto.UserRequest) (string, error) {
 
 	// 유효성 검사 수행
-	if err := util.ValidateDate(userRequest.Birthday); err != nil {
-		return "", err
+	if userRequest.Birthday != "" {
+		if err := util.ValidateDate(userRequest.Birthday); err != nil {
+			return "", err
+		}
 	}
-	if err := util.ValidatePhoneNumber(userRequest.PhoneNum); err != nil {
-		return "", err
+	if userRequest.PhoneNum != "" {
+		if err := util.ValidatePhoneNumber(userRequest.PhoneNum); err != nil {
+			return "", err
+		}
 	}
+
 	var fileName, thumbnailFileName string
 	var image model.Image
 
@@ -351,13 +435,13 @@ func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 	var user model.User
 	result := service.db.Joins("ProfileImage", "level != 10 AND type = ?", util.UserProfileImageType).First(&user, id)
 	if result.Error != nil {
-		return dto.UserResponse{}, result.Error
+		return dto.UserResponse{}, errors.New("db error")
 	}
 
 	var useServices []model.UseService
 	result = service.db.Where("uid = ?", id).Find(&useServices, id)
 	if result.Error != nil {
-		return dto.UserResponse{}, result.Error
+		return dto.UserResponse{}, errors.New("db error2")
 	}
 
 	var mainServices []dto.MainServiceResponse
@@ -374,7 +458,6 @@ func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 	}
 	userResponse.UseServices = mainServices
 
-	// 여기서 프로필 이미지가 비었는지 체크 해야하는거 아니냐
 	if userResponse.ProfileImage.Url != "" {
 		urlkey := extractKeyFromUrl(userResponse.ProfileImage.Url, service.bucket, service.bucketUrl)
 		thumbnailUrlkey := extractKeyFromUrl(userResponse.ProfileImage.ThumbnailUrl, service.bucket, service.bucketUrl)
@@ -406,7 +489,7 @@ func (service *userService) GetMainServices() ([]dto.MainServiceResponse, error)
 	var services []model.MainService
 	result := service.db.Where("level != 10").Find(&services)
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, errors.New("db error")
 	}
 	var serviceResposnes []dto.MainServiceResponse
 	if err := util.CopyStruct(services, &serviceResposnes); err != nil {
@@ -414,4 +497,11 @@ func (service *userService) GetMainServices() ([]dto.MainServiceResponse, error)
 	}
 
 	return serviceResposnes, nil
+}
+
+func (service *userService) RemoveUser(id uint) (string, error) {
+	if err := service.db.Delete(&model.User{Id: id}).Error; err != nil {
+		return "", errors.New("db error")
+	}
+	return "200", nil
 }

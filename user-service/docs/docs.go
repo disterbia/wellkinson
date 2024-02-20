@@ -127,7 +127,7 @@ const docTemplate = `{
                 "summary": "전체 서비스 목록 조회",
                 "responses": {
                     "200": {
-                        "description": "성공시 유저 객체 반환/ ture:남성",
+                        "description": "서비스 목록",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -286,6 +286,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/send-code/{number}": {
+            "post": {
+                "description": "인증번호 발송시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "인증번호 /user"
+                ],
+                "summary": "인증번호 발송",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "휴대번호",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/set-user": {
             "post": {
                 "description": "유저 상태영구변경시 호출",
@@ -314,6 +358,52 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/dto.UserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/verify-code": {
+            "post": {
+                "description": "인증번호 입력 후 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "인증번호 /user"
+                ],
+                "summary": "번호 인증",
+                "parameters": [
+                    {
+                        "description": "요청 DTO",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.VerifyRequest"
                         }
                     }
                 ],
@@ -509,6 +599,19 @@ const docTemplate = `{
                 "user_type": {
                     "type": "string",
                     "example": "0:해당없음 1:파킨슨 환자 2:보호자"
+                }
+            }
+        },
+        "dto.VerifyRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "인증번호 6자리"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "01000000000"
                 }
             }
         }

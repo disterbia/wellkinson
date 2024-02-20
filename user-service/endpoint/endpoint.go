@@ -87,3 +87,36 @@ func GetMainServicesEndpoint(s service.UserService) endpoint.Endpoint {
 		return code, nil
 	}
 }
+
+func SendCodeEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		number := request.(string)
+		code, err := s.SendAuthCode(number)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
+func VerifyEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		veri := request.(dto.VerifyRequest)
+		code, err := s.VerifyAuthCode(veri.PhoneNumber, veri.Code)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
+func RemoveEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		uid := request.(uint)
+		code, err := s.RemoveUser(uid)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}

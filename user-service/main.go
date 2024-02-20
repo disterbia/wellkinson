@@ -4,7 +4,11 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
+	"strings"
+	"sync"
+	"time"
 	"user-service/db"
 	"user-service/endpoint"
 	"user-service/service"
@@ -19,12 +23,52 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"golang.org/x/time/rate"
 
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	swaggerFiles "github.com/swaggo/files"
 )
 
+var ipLimiters = make(map[string]*rate.Limiter)
+var ipLimitersMutex sync.Mutex
+
+func getClientIP(c *gin.Context) string {
+	// X-Real-IP 헤더를 확인
+	if ip := c.GetHeader("X-Real-IP"); ip != "" {
+		return ip
+	}
+	// X-Forwarded-For 헤더를 확인
+	if ip := c.GetHeader("X-Forwarded-For"); ip != "" {
+		return strings.Split(ip, ",")[0] // 여러 IP가 쉼표로 구분되어 있을 수 있음
+	}
+	// 헤더가 없는 경우 Gin의 기본 메서드 사용
+	return c.ClientIP()
+}
+
+func RateLimitMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ip := getClientIP(c)
+
+		// IP별 리미터가 있는지 확인
+		ipLimitersMutex.Lock()
+		limiter, exists := ipLimiters[ip]
+		if !exists {
+			// 새로운 리미터 생성
+			limiter = rate.NewLimiter(rate.Every(24*time.Hour/5), 5)
+			ipLimiters[ip] = limiter
+		}
+		ipLimitersMutex.Unlock()
+
+		// 요청 허용 여부 확인
+		if !limiter.Allow() {
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "요청 횟수 초과"})
+			return
+		}
+
+		c.Next()
+	}
+}
 func main() {
 
 	err := godotenv.Load(".env")
@@ -59,15 +103,23 @@ func main() {
 	setUserEndpoint := endpoint.MakeSetUserEndpoint(usvc)
 	getUserEndpoint := endpoint.MakeGetUserEndpoint(usvc)
 	getMainServicesEndpoint := endpoint.GetMainServicesEndpoint(usvc)
+	sendCodeEndpoint := endpoint.SendCodeEndpoint(usvc)
+	verifyEndpoint := endpoint.VerifyEndpoint(usvc)
+	removeEndpoint := endpoint.RemoveEndpoint(usvc)
 
 	router := gin.Default()
 	router.Use(cors.Default())
+	rateLimiterMiddleware := RateLimitMiddleware()
 
 	router.POST("/admin-login", transport.AdminLoginHandler(adminLoginEndpoint))
 	router.POST("/google-login", transport.GoogleLoginHandler(googleLoginEndpoint))
 	router.POST("/kakao-login", transport.KakaoLoginHandler(kakoLoginEndpoint))
 	router.POST("/auto-login", transport.AutoLoginHandler(autoLoginEndpoint))
 	router.POST("/set-user", transport.SetUserHandler(setUserEndpoint))
+	router.POST("/send-code/:number", rateLimiterMiddleware, transport.SendCodeHandler(sendCodeEndpoint))
+	router.POST("/verify-code", transport.VerifyHandler(verifyEndpoint))
+	router.POST("/remove-user", transport.RemoveHandler(removeEndpoint))
+
 	router.GET("/get-user", transport.GetUserHandler(getUserEndpoint))
 	router.GET("/get-services", transport.GetMainServicesHandeler(getMainServicesEndpoint))
 

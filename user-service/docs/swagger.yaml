@@ -114,6 +114,15 @@ definitions:
         example: 0:해당없음 1:파킨슨 환자 2:보호자
         type: string
     type: object
+  dto.VerifyRequest:
+    properties:
+      code:
+        example: 인증번호 6자리
+        type: string
+      phone_number:
+        example: "01000000000"
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -187,7 +196,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 성공시 유저 객체 반환/ ture:남성
+          description: 서비스 목록
           schema:
             items:
               $ref: '#/definitions/dto.MainServiceResponse'
@@ -292,6 +301,35 @@ paths:
       summary: 카카오로그인
       tags:
       - 로그인 /user
+  /send-code/{number}:
+    post:
+      consumes:
+      - application/json
+      description: 인증번호 발송시 호출
+      parameters:
+      - description: 휴대번호
+        in: path
+        name: number
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 인증번호 발송
+      tags:
+      - 인증번호 /user
   /set-user:
     post:
       consumes:
@@ -327,4 +365,34 @@ paths:
       summary: 유저 데이터 변경
       tags:
       - 회원상태 변경(본인)  /user
+  /verify-code:
+    post:
+      consumes:
+      - application/json
+      description: 인증번호 입력 후 호출
+      parameters:
+      - description: 요청 DTO
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 번호 인증
+      tags:
+      - 인증번호 /user
 swagger: "2.0"

@@ -69,6 +69,11 @@ type LoginRequest struct {
 	UserRequest UserRequest `json:"user"`
 }
 
+type VerifyRequest struct {
+	PhoneNumber string `json:"phone_number" example:"01000000000"`
+	Code        string `json:"code" example:"인증번호 6자리"`
+}
+
 type LoginResponse struct {
 	Jwt string `json:"jwt,omitempty"`
 	Err string `json:"err,omitempty"`

@@ -212,7 +212,7 @@ func GetUserHandler(getUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 이용하고 싶은 서비스 목록 조회시 호출
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} []dto.MainServiceResponse "성공시 유저 객체 반환/ ture:남성"
+// @Success 200 {object} []dto.MainServiceResponse "서비스 목록"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /get-services [get]
@@ -226,6 +226,93 @@ func GetMainServicesHandeler(getUserEndpoint kitEndpoint.Endpoint) gin.HandlerFu
 		}
 
 		resp := response.([]dto.MainServiceResponse)
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
+// @Tags 인증번호 /user
+// @Summary 인증번호 발송
+// @Description 인증번호 발송시 호출
+// @Accept  json
+// @Produce  json
+// @Param number path string true "휴대번호"
+// @Success 200 {object} dto.BasicResponse "성공시 200 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Router /send-code/{number} [post]
+func SendCodeHandler(sendEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		number := c.Param("number")
+
+		response, err := sendEndpoint(c.Request.Context(), number)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.(dto.BasicResponse)
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
+// @Tags 인증번호 /user
+// @Summary 번호 인증
+// @Description 인증번호 입력 후 호출
+// @Accept  json
+// @Produce  json
+// @Param request body dto.VerifyRequest true "요청 DTO"
+// @Success 200 {object} dto.BasicResponse "성공시 200 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Router /verify-code [post]
+func VerifyHandler(verifyEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		var req dto.VerifyRequest
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		response, err := verifyEndpoint(c.Request.Context(), req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.(dto.BasicResponse)
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
+// @Tags 회원탈퇴 /user
+// @Summary 회원탈퇴
+// @Description 회원탈퇴시 호출
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
+// @Success 200 {object} dto.BasicResponse "성공시 200 반환"
+// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Router /remvoe-user [post]
+func RemoveHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 토큰 검증 및 처리
+		id, _, err := util.VerifyJWT(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		response, err := removeEndpoint(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.(dto.UserResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }
