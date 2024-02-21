@@ -14,14 +14,14 @@ import (
 	"github.com/nfnt/resize"
 )
 
-func deleteFromS3(fileKey string, s3Client *s3.S3, bucket string, bucketUrl string, uid string) error {
+func deleteFromS3(fileKey string, s3Client *s3.S3, bucket string, bucketUrl string) error {
 
 	// URL에서 객체 키 추출
 	key := extractKeyFromUrl(fileKey, bucket, bucketUrl)
 	log.Println("key", fileKey)
 
 	_, err := s3Client.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(bucket), // 실제 S3 버킷 이름으로 대체
+		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
 

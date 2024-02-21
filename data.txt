@@ -148,6 +148,15 @@ INSERT INTO face_exercises (video_id, title, type) VALUES
 ('795202539', '눈썹모으기', 4),
 ('795202946', '입꼬리 내리기', 4);
 
+INSERT INTO main_services (title) VALUES
+('안면 운동'),
+('음성 운동'),
+('약 복용 관리'),
+('식단 관리'),
+('수면 관리'),
+('운동 관리'),
+('수면 관리');
+
 INSERT INTO voice_table (title, type) VALUES
 ("아빠", 1),
 ("아기", 1),

@@ -1,4 +1,13 @@
 definitions:
+  dto.AppVersionResponse:
+    properties:
+      android_link:
+        type: string
+      ios_link:
+        type: string
+      latest_version:
+        type: string
+    type: object
   dto.BasicResponse:
     properties:
       code:
@@ -15,6 +24,13 @@ definitions:
         type: string
       url:
         type: string
+    type: object
+  dto.LinkRequest:
+    properties:
+      id_token:
+        type: string
+      sns_type:
+        type: integer
     type: object
   dto.LoginRequest:
     properties:
@@ -68,8 +84,7 @@ definitions:
       user_privacy_protection:
         type: boolean
       user_type:
-        example: 0:해당없음 1:파킨슨 환자 2:보호자
-        type: string
+        type: integer
     type: object
   dto.UserResponse:
     properties:
@@ -111,8 +126,7 @@ definitions:
       user_privacy_protection:
         type: boolean
       user_type:
-        example: 0:해당없음 1:파킨슨 환자 2:보호자
-        type: string
+        type: integer
     type: object
   dto.VerifyRequest:
     properties:
@@ -158,6 +172,36 @@ paths:
       security:
       - jwt: []
       summary: 관리자 로그인
+      tags:
+      - 로그인 /user
+  /apple-login:
+    post:
+      consumes:
+      - application/json
+      description: 애플로그인 성공시 호출
+      parameters:
+      - description: '요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자'
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 JWT 토큰 반환
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: '요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 애플로그인
       tags:
       - 로그인 /user
   /auto-login:
@@ -211,7 +255,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 전체 서비스 목록 조회
       tags:
-      - 전체 서비스 목록 조회 (공통)  /user
+      - 공통 /user
   /get-user:
     post:
       consumes:
@@ -241,13 +285,36 @@ paths:
       summary: 유저 조회
       tags:
       - 회원조회(본인)  /user
+  /get-version:
+    get:
+      consumes:
+      - application/json
+      description: 최신버전 조회시 호출
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 최신 버전 정보
+          schema:
+            $ref: '#/definitions/dto.AppVersionResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 최신버전 조회
+      tags:
+      - 공통 /user
   /google-login:
     post:
       consumes:
       - application/json
       description: 구글로그인 성공시 호출
       parameters:
-      - description: 요청 DTO - idToken,기본값 데이터
+      - description: '요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자'
         in: body
         name: request
         required: true
@@ -265,7 +332,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
-          description: 요청 처리 실패시 오류 메시지 반환
+          description: '요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요'
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 구글로그인
@@ -277,7 +344,7 @@ paths:
       - application/json
       description: 카카오로그인 성공시 호출
       parameters:
-      - description: 요청 DTO - dToken,기본값 데이터
+      - description: '요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자'
         in: body
         name: request
         required: true
@@ -295,12 +362,76 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
-          description: 요청 처리 실패시 오류 메시지 반환
+          description: '요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요'
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 카카오로그인
       tags:
       - 로그인 /user
+  /link-email:
+    post:
+      consumes:
+      - application/json
+      description: 계정 연동시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 요청 DTO
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LinkRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 계정 연동
+      tags:
+      - 계정 연동 /user
+  /remvoe-user:
+    post:
+      consumes:
+      - application/json
+      description: 회원탈퇴시 호출
+      parameters:
+      - description: Bearer {jwt_token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 200 반환
+          schema:
+            $ref: '#/definitions/dto.BasicResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: 회원탈퇴
+      tags:
+      - 회원탈퇴 /user
   /send-code/{number}:
     post:
       consumes:
@@ -359,7 +490,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
-          description: 요청 처리 실패시 오류 메시지 반환
+          description: '요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요'
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: 유저 데이터 변경

@@ -25,8 +25,10 @@ type User struct {
 	UseAutoLogin         bool   `json:"use_auto_login"`
 	UsePrivacyProtection bool   `json:"use_privacy_protection"`
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
-	UserType             string `json:"user_type"`
+	UserType             uint   `json:"user_type"`
 	Email                string
+	SnsType              uint
+	ProfileImage         Image `json:"profile_image" gorm:"foreignkey:ParentId"`
 }
 
 type Alarm struct {
@@ -85,7 +87,7 @@ type Diet struct {
 	Name   string
 	Time   string
 	Type   uint
-	Images []Image
+	Images []Image         `gorm:"foreignkey:ParentId"`
 	Foods  json.RawMessage `gorm:"type:json"`
 }
 
@@ -95,9 +97,8 @@ type Image struct {
 	Uid uint
 
 	//부모 아이디
-	DietId uint `json:"diet_id"`
-
-	//부모아이디 끝
+	ParentId uint `json:"parent_id"`
+	Type     uint
 
 	Url          string
 	ThumbnailUrl string `json:"thumbnail_url"`
@@ -234,6 +235,50 @@ type VocalScore struct {
 	Uid   uint
 	Score uint
 	Type  uint
+}
+
+type MainService struct {
+	TimestampModel
+	Id    uint
+	Title string
+	Level uint
+}
+
+type UseService struct {
+	TimestampModel
+	Id        uint
+	Uid       uint
+	ServiceId uint `json:"service_id"`
+	Title     string
+}
+
+type AuthCode struct {
+	TimestampModel
+	Id          uint
+	PhoneNumber string
+	Code        string
+}
+
+type VerifiedNumbers struct {
+	TimestampModel
+	Id          uint
+	PhoneNumber string
+}
+
+type LinkedEmail struct {
+	TimestampModel
+	Id      uint
+	Email   string
+	Uid     uint
+	SnsType uint
+}
+
+type AppVersion struct {
+	TimestampModel
+	Id            uint
+	LatestVersion string `json:"latest_version"`
+	AndroidLink   string `json:"android_link"`
+	IosLink       string `json:"ios_link"`
 }
 
 func (tm *TimestampModel) BeforeCreate(tx *gorm.DB) (err error) {

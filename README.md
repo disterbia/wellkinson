@@ -7,7 +7,7 @@ CREATE TABLE users (
     fcm_token VARCHAR(255) NOT NULL COMMENT 'fcm토큰',
     is_first BOOLEAN NOT NULL DEFAULT true COMMENT '',
     name VARCHAR(40) NOT NULL COMMENT '이름',
-    phone_num VARCHAR(40) NOT NULL COMMENT '휴댜폰번호',
+    phone_num VARCHAR(40) NOT NULL COMMENT '휴대폰번호',
     use_auto_login BOOLEAN NOT NULL DEFAULT false COMMENT '자동로그인 여부', 
     use_privacy_protection BOOLEAN NOT NULL DEFAULT false COMMENT '개인정보 보호 알림 사용 여부',
     use_sleep_tracking BOOLEAN NOT NULL DEFAULT false COMMENT '수면 트래킹 기능 사용 여부',
@@ -96,12 +96,12 @@ CREATE TABLE images(
     uid INT NOT NULL COMMENT '유저 아이디', 
     url VARCHAR(255) NOT NULL COMMENT '이미지 url',
     thumbnail_url VARCHAR(255) NOT NULL COMMENT '썸네일 url',
-    diet_id INT COMMENT '식단 아이디' ,
+    parent_id INT COMMENT '부모 아이디' ,
+    type TINYINT  NOT NULL COMMENT '0:메인 프로필 1:식단',
     level TINYINT NOT NULL DEFAULT 0 COMMENT '상태 0:기본 10:삭제',
     created DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성일',
     updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일',
     FOREIGN KEY (uid) REFERENCES users(id),
-    FOREIGN KEY (diet_id) REFERENCES diets(id) 
 )engine=InnoDB default charset utf8  COMMENT = '사용자별 업로드한 이미지 정보';
 
 CREATE TABLE emotions(

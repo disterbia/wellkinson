@@ -69,6 +69,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/apple-login": {
+            "post": {
+                "description": "애플로그인 성공시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "로그인 /user"
+                ],
+                "summary": "애플로그인",
+                "parameters": [
+                    {
+                        "description": "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 JWT 토큰 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환: 오류메시지 \"-1\" = 번호인증 필요",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auto-login": {
             "post": {
                 "security": [
@@ -122,7 +168,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "전체 서비스 목록 조회 (공통)  /user"
+                    "공통 /user"
                 ],
                 "summary": "전체 서비스 목록 조회",
                 "responses": {
@@ -194,6 +240,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/get-version": {
+            "get": {
+                "description": "최신버전 조회시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "공통 /user"
+                ],
+                "summary": "최신버전 조회",
+                "responses": {
+                    "200": {
+                        "description": "최신 버전 정보",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AppVersionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/google-login": {
             "post": {
                 "description": "구글로그인 성공시 호출",
@@ -209,7 +290,7 @@ const docTemplate = `{
                 "summary": "구글로그인",
                 "parameters": [
                     {
-                        "description": "요청 DTO - idToken,기본값 데이터",
+                        "description": "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -232,7 +313,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "description": "요청 처리 실패시 오류 메시지 반환: 오류메시지 \"-1\" = 번호인증 필요",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -255,7 +336,7 @@ const docTemplate = `{
                 "summary": "카카오로그인",
                 "parameters": [
                     {
-                        "description": "요청 DTO - dToken,기본값 데이터",
+                        "description": "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -269,6 +350,103 @@ const docTemplate = `{
                         "description": "성공시 JWT 토큰 반환",
                         "schema": {
                             "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환: 오류메시지 \"-1\" = 번호인증 필요",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/link-email": {
+            "post": {
+                "description": "계정 연동시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "계정 연동 /user"
+                ],
+                "summary": "계정 연동",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "요청 DTO",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LinkRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/remvoe-user": {
+            "post": {
+                "description": "회원탈퇴시 호출",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "회원탈퇴 /user"
+                ],
+                "summary": "회원탈퇴",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {jwt_token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공시 200 반환",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BasicResponse"
                         }
                     },
                     "400": {
@@ -375,7 +553,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "요청 처리 실패시 오류 메시지 반환",
+                        "description": "요청 처리 실패시 오류 메시지 반환: 오류메시지 \"-1\" = 번호인증 필요",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -431,6 +609,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.AppVersionResponse": {
+            "type": "object",
+            "properties": {
+                "android_link": {
+                    "type": "string"
+                },
+                "ios_link": {
+                    "type": "string"
+                },
+                "latest_version": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.BasicResponse": {
             "type": "object",
             "properties": {
@@ -455,6 +647,17 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.LinkRequest": {
+            "type": "object",
+            "properties": {
+                "id_token": {
+                    "type": "string"
+                },
+                "sns_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -535,8 +738,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "user_type": {
-                    "type": "string",
-                    "example": "0:해당없음 1:파킨슨 환자 2:보호자"
+                    "type": "integer"
                 }
             }
         },
@@ -597,8 +799,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "user_type": {
-                    "type": "string",
-                    "example": "0:해당없음 1:파킨슨 환자 2:보호자"
+                    "type": "integer"
                 }
             }
         },

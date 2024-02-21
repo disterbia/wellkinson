@@ -51,7 +51,7 @@ func (service *dietService) GetDiets(id uint, startDate, endDate string) ([]dto.
 		query = query.Where("created <= ?", endDate+" 23:59:59")
 	}
 	query = query.Order("id DESC")
-	result := query.Preload("Images", "level!= 10").Find(&diet)
+	result := query.Preload("Images", "level != 10 AND type = ? ", util.DietImageType).Find(&diet)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -93,7 +93,10 @@ func (service *dietService) GetDiets(id uint, startDate, endDate string) ([]dto.
 
 func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error) {
 	var diet model.Diet
-
+	if err := util.ValidateTime(dietRequest.Time); err != nil {
+		return "", err
+	}
+	emptyImage := len(dietRequest.Images) == 0
 	// 트랜잭션 시작
 	tx := service.db.Begin()
 
@@ -123,19 +126,17 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	diet.Uid = dietRequest.Uid
 
 	// Images 필드 별도 처리
-	var temp []model.Image
-	for _, imgStr := range dietRequest.Images {
-		temp = append(temp, model.Image{Url: imgStr})
-	}
-	diet.Images = temp
+	// var temp []model.Image
+	// for _, imgStr := range dietRequest.Images {
+	// 	temp = append(temp, model.Image{Url: imgStr})
+	// }
+	// diet.Images = temp
 
 	// 고루틴으로 이미지 처리 및 업로드
 	var wg sync.WaitGroup
 	images := make([]model.Image, len(dietRequest.Images))
 	errorsChan := make(chan error, len(dietRequest.Images))
 	uploadedFiles := make(chan string, len(dietRequest.Images)*2)
-
-	uidString := strconv.FormatUint(uint64(diet.Uid), 10)
 
 	for i, imgStr := range dietRequest.Images {
 		wg.Add(1)
@@ -171,7 +172,7 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 			}
 
 			// S3에 이미지 및 썸네일 업로드
-			fileName, thumbnailFileName, err := uploadImagesToS3(imgData, thumbnailData, contentType, ext, service.s3svc, service.bucket, service.bucketUrl, uidString)
+			fileName, thumbnailFileName, err := uploadImagesToS3(imgData, thumbnailData, contentType, ext, service.s3svc, service.bucket, service.bucketUrl, strconv.FormatUint(uint64(diet.Uid), 10))
 			if err != nil {
 				errorsChan <- fmt.Errorf("error uploading images to S3: %v", err)
 				return
@@ -180,7 +181,13 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 			uploadedFiles <- fileName
 			uploadedFiles <- thumbnailFileName
 
-			images[i] = model.Image{Uid: dietRequest.Uid, Url: fileName, ThumbnailUrl: thumbnailFileName}
+			images[i] = model.Image{
+				Uid:          dietRequest.Uid,
+				Url:          fileName,
+				ThumbnailUrl: thumbnailFileName,
+				ParentId:     0,
+				Type:         uint(util.DietImageType),
+			}
 		}(i, imgStr)
 	}
 
@@ -201,14 +208,14 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 		// 이미 업로드된 파일들을 S3에서 삭제
 		go func() {
 			for file := range uploadedFiles {
-				deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl, uidString)
+				deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
 			}
 		}()
 		return "", fmt.Errorf("error occurred during image upload")
 	}
 
 	// Diet 객체에 이미지 정보 추가
-	diet.Images = images
+	// diet.Images = images
 
 	// 데이터베이스 작업
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -219,25 +226,64 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 			// 이미 업로드된 파일들을 S3에서 삭제
 			go func() {
 				for file := range uploadedFiles {
-					deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl, uidString)
+					deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
 				}
 			}()
 			return "", err
 		}
-	} else {
-		// 기존 이미지 레코드 논리삭제
-		result := service.db.Model(&model.Image{}).Where("diet_id = ?", diet.Id).Select("level").Updates(map[string]interface{}{"level": 10})
-		if result.Error != nil {
-			tx.Rollback()
-			return "", errors.New("db error")
+
+		for i := range images {
+			images[i].ParentId = diet.Id
 		}
+		if !emptyImage {
+			if err := tx.Create(&images).Error; err != nil {
+				tx.Rollback()
+				go func() {
+					for file := range uploadedFiles {
+						deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
+					}
+				}()
+				return "", errors.New("db error2")
+			}
+		}
+
+	} else {
+		if !emptyImage {
+			// 기존 이미지 레코드 논리삭제
+			result := service.db.Model(&model.Image{}).Where("parent_id = ? AND type =?", diet.Id, util.DietImageType).Select("level").Updates(map[string]interface{}{"level": 10})
+			if result.Error != nil {
+				tx.Rollback()
+				go func() {
+					for file := range uploadedFiles {
+						deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
+					}
+				}()
+				return "", errors.New("db error")
+			}
+
+			//이미지 레코드 재 생성
+			for i := range images {
+				images[i].ParentId = diet.Id
+			}
+
+			if err := tx.Create(&images).Error; err != nil {
+				tx.Rollback()
+				go func() {
+					for file := range uploadedFiles {
+						deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
+					}
+				}()
+				return "", errors.New("db error2")
+			}
+		}
+
 		// 기존 레코드 업데이트
 		if err := tx.Model(&diet).Updates(diet).Error; err != nil {
 			tx.Rollback()
 			// 이미 업로드된 파일들을 S3에서 삭제
 			go func() {
 				for file := range uploadedFiles {
-					deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl, uidString)
+					deleteFromS3(file, service.s3svc, service.bucket, service.bucketUrl)
 				}
 			}()
 			return "", err
@@ -259,7 +305,7 @@ func (service *dietService) RemoveDiets(ids []uint, uid uint) (string, error) {
 		return "", errors.New("db error")
 	}
 
-	result = tx.Model(&model.Image{}).Where("diet_id IN (?)", ids).Select("level").Updates(map[string]interface{}{"level": 10})
+	result = tx.Model(&model.Image{}).Where("parent_id IN (?)", ids).Select("level").Updates(map[string]interface{}{"level": 10})
 
 	if result.Error != nil {
 		tx.Rollback()

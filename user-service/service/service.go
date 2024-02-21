@@ -29,14 +29,17 @@ type UserService interface {
 	AutoLogin(email string, user model.User) (string, error)                 //자동로그인
 	KakaoLogin(idToken string, userReqeust dto.UserRequest) (string, error)  //카카오로그인
 	GoogleLogin(idToken string, userRequest dto.UserRequest) (string, error) //구글로그인
-	findOrCreateUser(user model.User) (model.User, error)                    //로그인처리
-	SetUser(user dto.UserRequest) (string, error)                            //유저업데이트
-	GetUser(id uint) (dto.UserResponse, error)                               //유저조회
+	AppleLogin(idToken string, userRequest dto.UserRequest) (string, error)
+	findOrCreateUser(user model.User) (model.User, error) //로그인처리
+	SetUser(user dto.UserRequest) (string, error)         //유저업데이트
+	GetUser(id uint) (dto.UserResponse, error)            //유저조회
 	AdminLogin(email string, password string) (string, error)
 	GetMainServices() ([]dto.MainServiceResponse, error)
 	SendAuthCode(number string) (string, error)
 	VerifyAuthCode(number, code string) (string, error)
 	RemoveUser(id uint) (string, error)
+	LinkEmail(uid uint, idToken string, snsType uint) (string, error) // 0:카카오 1:구글 2:애플
+	GetVersion() (dto.AppVersionResponse, error)
 }
 
 type userService struct {
@@ -46,14 +49,14 @@ type userService struct {
 	bucketUrl string
 }
 
-type KakaoPublicKey struct {
+type PublicKey struct {
 	Kid string `json:"kid"`
 	N   string `json:"n"`
 	E   string `json:"e"`
 }
 
 type JWKS struct {
-	Keys []KakaoPublicKey `json:"keys"`
+	Keys []PublicKey `json:"keys"`
 }
 
 func (service *userService) SendAuthCode(number string) (string, error) {
@@ -103,7 +106,7 @@ func (service *userService) VerifyAuthCode(number, code string) (string, error) 
 		return "", errors.New("db error")
 	}
 	if authCode.Code != code {
-		return "", errors.New("코드 불일치")
+		return "", errors.New("wrong code")
 	}
 	if err := service.db.Create(&model.VerifiedNumbers{PhoneNumber: authCode.PhoneNumber}).Error; err != nil {
 		return "", errors.New("db error2")
@@ -141,7 +144,7 @@ func (service *userService) AutoLogin(email string, user model.User) (string, er
 	// 데이터베이스에서 사용자 조회
 	var u model.User
 	if err := service.db.Where(model.User{Email: email}).First(&u).Error; err != nil {
-		return "", err
+		return "", errors.New("db error")
 	}
 	if !u.UseAutoLogin {
 		return "", errors.New("not use auto login")
@@ -155,6 +158,49 @@ func (service *userService) AutoLogin(email string, user model.User) (string, er
 	return tokenString, nil
 }
 
+func (service *userService) AppleLogin(idToken string, userRequest dto.UserRequest) (string, error) {
+	jwks, err := getApplePublicKeys()
+	if err != nil {
+		return "", err
+	}
+
+	parsedToken, err := verifyAppleIDToken(idToken, jwks)
+	if err != nil {
+		return "", err
+	}
+
+	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+		email, ok := claims["email"].(string)
+		if !ok {
+			return "", errors.New("email not found in token claims")
+		}
+
+		var user model.User
+
+		var temp dto.TempUser
+		if err := util.CopyStruct(userRequest, &temp); err != nil {
+			return "", err
+		}
+		if err := util.CopyStruct(temp, &user); err != nil {
+			return "", err
+		}
+
+		user.Email = email
+		u, err := service.findOrCreateUser(user)
+		if err != nil {
+			return "", err
+		}
+
+		// JWT 토큰 생성
+		tokenString, err := util.GenerateJWT(u)
+		if err != nil {
+			return "", err
+		}
+		return tokenString, nil
+	}
+	return "", errors.New("invalid token")
+
+}
 func (service *userService) KakaoLogin(idToken string, userRequest dto.UserRequest) (string, error) {
 	jwks, err := getKakaoPublicKeys()
 	if err != nil {
@@ -185,13 +231,13 @@ func (service *userService) KakaoLogin(idToken string, userRequest dto.UserReque
 		user.Email = email
 		u, err := service.findOrCreateUser(user)
 		if err != nil {
-			return "", errors.New("db error k")
+			return "", err
 		}
 
 		// JWT 토큰 생성
 		tokenString, err := util.GenerateJWT(u)
 		if err != nil {
-			return "", errors.New("db error k2")
+			return "", err
 		}
 		return tokenString, nil
 	}
@@ -238,18 +284,95 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 		return model.User{}, err
 	}
 
-	err := service.db.Where("phone_number = ?", user.PhoneNum).First(&model.VerifiedNumbers{}).Error
-	if err != nil {
-		return model.User{}, errors.New("인증안된 번호")
+	if err := service.db.Where("phone_number = ?", user.PhoneNum).First(&model.VerifiedNumbers{}).Error; err != nil {
+		return model.User{}, errors.New("-1")
 	}
 
+	//// 연동 로그인 해야함 ////
+
 	// 데이터베이스에서 사용자 조회 및 없으면 생성
-	err = service.db.Where(model.User{Email: user.Email}).FirstOrCreate(&user).Error
+	err := service.db.Where(model.User{Email: user.Email}).FirstOrCreate(&user).Error
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, errors.New("db error")
 	}
 
 	return user, nil
+}
+
+//// 연동 내역 조회 해야함 ////
+
+func (service *userService) LinkEmail(uid uint, idToken string, snsType uint) (string, error) {
+	if snsType == 0 { //카카오
+		jwks, err := getKakaoPublicKeys()
+		if err != nil {
+			return "", err
+		}
+
+		parsedToken, err := verifyKakaoTokenSignature(idToken, jwks)
+		if err != nil {
+			return "", err
+		}
+
+		if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+			email, ok := claims["email"].(string)
+			if !ok {
+				return "", errors.New("email not found in token claims")
+			}
+			if err := saveLinkedEmail(uid, email, service); err != nil {
+				return "", err
+			}
+		}
+
+	} else if snsType == 1 { // 구글
+		email, err := validateGoogleIDToken(idToken)
+		if err != nil {
+			return "", err
+		}
+		if err := saveLinkedEmail(uid, email, service); err != nil {
+			return "", err
+		}
+
+	} else if snsType == 2 { // 애플
+		jwks, err := getApplePublicKeys()
+		if err != nil {
+			return "", err
+		}
+
+		parsedToken, err := verifyAppleIDToken(idToken, jwks)
+		if err != nil {
+			return "", err
+		}
+
+		if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+			email, ok := claims["email"].(string)
+			if !ok {
+				return "", errors.New("email not found in token claims")
+			}
+			if err := saveLinkedEmail(uid, email, service); err != nil {
+				return "", err
+			}
+		}
+	} else {
+		return "", errors.New("invalid snsType")
+	}
+	return "200", nil
+}
+
+func saveLinkedEmail(uid uint, email string, service *userService) error {
+	var user model.User
+	if err := service.db.Where("id = ? ", uid).First(&user).Error; err != nil {
+		return errors.New("db error")
+	}
+	if user.Email == email {
+		return errors.New("wrong request")
+	}
+
+	linkedEmail := model.LinkedEmail{Email: email, Uid: uid}
+	err := service.db.Create(&linkedEmail).Error
+	if err != nil {
+		return errors.New("db error2")
+	}
+	return nil
 }
 
 func (service *userService) SetUser(userRequest dto.UserRequest) (string, error) {
@@ -264,6 +387,10 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 		if err := util.ValidatePhoneNumber(userRequest.PhoneNum); err != nil {
 			return "", err
 		}
+	}
+
+	if err := service.db.Where("phone_number = ?", userRequest.PhoneNum).First(&model.VerifiedNumbers{}).Error; err != nil {
+		return "", errors.New("-1")
 	}
 
 	var fileName, thumbnailFileName string
@@ -504,4 +631,17 @@ func (service *userService) RemoveUser(id uint) (string, error) {
 		return "", errors.New("db error")
 	}
 	return "200", nil
+}
+
+func (service *userService) GetVersion() (dto.AppVersionResponse, error) {
+	var version model.AppVersion
+	result := service.db.Last(&version)
+	if result.Error != nil {
+		return dto.AppVersionResponse{}, errors.New("db error")
+	}
+	var versionResponse dto.AppVersionResponse
+	if err := util.CopyStruct(version, &versionResponse); err != nil {
+		return dto.AppVersionResponse{}, err
+	}
+	return versionResponse, nil
 }

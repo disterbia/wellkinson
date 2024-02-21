@@ -24,6 +24,60 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
+// Apple 공개키 가져오기
+func getApplePublicKeys() (JWKS, error) {
+	resp, err := http.Get("https://appleid.apple.com/auth/keys")
+	if err != nil {
+		return JWKS{}, err
+	}
+	defer resp.Body.Close()
+
+	var jwks JWKS
+	if err := json.NewDecoder(resp.Body).Decode(&jwks); err != nil {
+		return JWKS{}, err
+	}
+	return jwks, nil
+}
+
+// Apple 공개키로 서명 검증
+func verifyAppleIDToken(token string, jwks JWKS) (*jwt.Token, error) {
+	kid, err := extractKidFromToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	var key *rsa.PublicKey
+	for _, jwk := range jwks.Keys {
+		if jwk.Kid == kid {
+			nBytes, err := base64.RawURLEncoding.DecodeString(jwk.N)
+			if err != nil {
+				return nil, err
+			}
+			eBytes, err := base64.RawURLEncoding.DecodeString(jwk.E)
+			if err != nil {
+				return nil, err
+			}
+
+			n := big.NewInt(0).SetBytes(nBytes)
+			e := big.NewInt(0).SetBytes(eBytes).Int64()
+			key = &rsa.PublicKey{N: n, E: int(e)}
+			break
+		}
+	}
+
+	if key == nil {
+		return nil, errors.New("appropriate public key not found")
+	}
+
+	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return key, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return parsedToken, nil
+}
+
 // 카카오 공개키 가져오기
 func getKakaoPublicKeys() (JWKS, error) {
 	resp, err := http.Get("https://kauth.kakao.com/.well-known/jwks.json")

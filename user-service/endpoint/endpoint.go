@@ -120,3 +120,37 @@ func RemoveEndpoint(s service.UserService) endpoint.Endpoint {
 		return dto.BasicResponse{Code: code}, nil
 	}
 }
+
+func LinkEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqMap := request.(dto.LinkRequest)
+
+		code, err := s.LinkEmail(reqMap.Id, reqMap.IdToken, reqMap.SnsType)
+
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}
+
+func MakeAppleLoginEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(dto.LoginRequest)
+		token, err := s.AppleLogin(req.IdToken, req.UserRequest)
+		if err != nil {
+			return dto.LoginResponse{Err: err.Error()}, err
+		}
+		return dto.LoginResponse{Jwt: token}, nil
+	}
+}
+
+func GetVersionEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		version, err := s.GetVersion()
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return version, nil
+	}
+}

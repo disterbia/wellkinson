@@ -14,7 +14,7 @@ type UserRequest struct {
 	UseAutoLogin         bool   `json:"use_auto_login"`
 	UsePrivacyProtection bool   `json:"user_privacy_protection"`
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
-	UserType             string `json:"user_type" example:"0:해당없음 1:파킨슨 환자 2:보호자"`
+	UserType             uint   `json:"user_type"`
 	UseServices          []int  `json:"use_services"`
 	ProfileImage         string `json:"profile_image" example:"base64 encoding string"`
 }
@@ -30,7 +30,7 @@ type UserResponse struct {
 	UseAutoLogin         bool                  `json:"use_auto_login"`
 	UsePrivacyProtection bool                  `json:"user_privacy_protection"`
 	UseSleepTracking     bool                  `json:"use_sleep_tracking"`
-	UserType             string                `json:"user_type" example:"0:해당없음 1:파킨슨 환자 2:보호자"`
+	UserType             uint                  `json:"user_type"`
 	Email                string                `json:"email"`
 	Created              string                `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	Updated              string                `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
@@ -60,7 +60,7 @@ type TempUser struct {
 	UseAutoLogin         bool   `json:"use_auto_login"`
 	UsePrivacyProtection bool   `json:"user_privacy_protection"`
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
-	UserType             string `json:"user_type" example:"0:해당없음 1:파킨슨 환자 2:보호자"`
+	UserType             uint   `json:"user_type"`
 	UseServices          []int  `json:"use_services"`
 }
 
@@ -72,6 +72,18 @@ type LoginRequest struct {
 type VerifyRequest struct {
 	PhoneNumber string `json:"phone_number" example:"01000000000"`
 	Code        string `json:"code" example:"인증번호 6자리"`
+}
+
+type LinkRequest struct {
+	Id      uint   `json:"-"`
+	IdToken string `json:"id_token"`
+	SnsType uint   `json:"sns_type"`
+}
+
+type AppVersionResponse struct {
+	LatestVersion string `json:"latest_version"`
+	AndroidLink   string `json:"android_link"`
+	IosLink       string `json:"ios_link"`
 }
 
 type LoginResponse struct {

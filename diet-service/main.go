@@ -45,7 +45,7 @@ func main() {
 	})
 
 	if err != nil {
-		log.Println("Database connection error:", err)
+		log.Println("aws connection error:", err)
 		return
 	}
 
