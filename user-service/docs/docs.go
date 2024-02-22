@@ -220,7 +220,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "성공시 유저 객체 반환/ ture:남성",
+                        "description": "성공시 유저 객체 반환/ ture:남성 user_Type- 0:해당없음 1:파킨슨 환자 2:보호자 sns_type- 0:카카오 1:구글 2:애플",
                         "schema": {
                             "$ref": "#/definitions/dto.UserResponse"
                         }
@@ -389,7 +389,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "요청 DTO",
+                        "description": "요청 DTO sns_type 0:카카오 1:구글 2:애플",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -778,6 +778,9 @@ const docTemplate = `{
                 },
                 "profile_image": {
                     "$ref": "#/definitions/dto.ImageResponse"
+                },
+                "sns_type": {
+                    "type": "integer"
                 },
                 "updated": {
                     "type": "string",

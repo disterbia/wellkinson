@@ -26,7 +26,7 @@ func GetLimiter(ip string) *rate.Limiter {
 
 	limiter, exists := ips[ip]
 	if !exists {
-		limiter = rate.NewLimiter(5, 10) // 레이트 리미팅 설정 조정
+		limiter = rate.NewLimiter(10, 10) // 레이트 리미팅 설정 조정
 		ips[ip] = limiter
 	}
 

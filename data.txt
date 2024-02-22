@@ -782,4 +782,5 @@ VALUES
 (5, '후광');
 
 
-
+INSERT INTO app_versions (latest_version,android_link,ios_link) VALUES
+('1.0.0','https://play.google.com/store/apps/details?id=kr.wellkinson.app&hl=ko-KR','https://apps.apple.com/kr/app/%EC%9B%B0%ED%82%A8%EC%8A%A8/id6462056484')

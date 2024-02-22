@@ -27,8 +27,9 @@ type User struct {
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
 	UserType             uint   `json:"user_type"`
 	Email                string
-	SnsType              uint
-	ProfileImage         Image `json:"profile_image" gorm:"foreignkey:ParentId"`
+	SnsType              uint          `json:"sns_type"`
+	ProfileImage         Image         `json:"profile_image" gorm:"foreignkey:ParentId"`
+	LinkedEmails         []LinkedEmail `json:"linked_emails" gorm:"foreignkey:Uid"`
 }
 
 type Alarm struct {
@@ -270,7 +271,7 @@ type LinkedEmail struct {
 	Id      uint
 	Email   string
 	Uid     uint
-	SnsType uint
+	SnsType uint `json:"sns_type"`
 }
 
 type AppVersion struct {

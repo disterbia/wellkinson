@@ -125,7 +125,7 @@ func LinkEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqMap := request.(dto.LinkRequest)
 
-		code, err := s.LinkEmail(reqMap.Id, reqMap.IdToken, reqMap.SnsType)
+		code, err := s.LinkEmail(reqMap.Id, reqMap.IdToken)
 
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err

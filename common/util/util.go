@@ -5,6 +5,8 @@ import (
 	"common/model"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -100,4 +102,26 @@ func CopyStruct(input interface{}, output interface{}) error {
 	}
 
 	return nil
+}
+
+func DecodeJwt(tokenString string) string {
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// MapClaims 타입으로 주장(claims) 확인
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		// 'iss' 주장 확인
+		if iss, ok := claims["iss"].(string); ok {
+			fmt.Println("Issuer (iss):", iss)
+			return iss
+		} else {
+			fmt.Println("'iss' 주장이 없습니다.")
+			return ""
+		}
+	} else {
+		log.Fatal("주장을 MapClaims로 변환할 수 없습니다.")
+		return ""
+	}
 }

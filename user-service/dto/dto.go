@@ -31,17 +31,25 @@ type UserResponse struct {
 	UsePrivacyProtection bool                  `json:"user_privacy_protection"`
 	UseSleepTracking     bool                  `json:"use_sleep_tracking"`
 	UserType             uint                  `json:"user_type"`
+	SnsType              uint                  `json:"sns_type"`
 	Email                string                `json:"email"`
 	Created              string                `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	Updated              string                `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	UseServices          []MainServiceResponse `json:"use_services"`
 	ProfileImage         ImageResponse         `json:"profile_image"`
+	LinkedEmails         []LinkedResponse      `json:"linked_emails"`
 }
 
 type ImageResponse struct {
 	Url          string `json:"url"`
 	ThumbnailUrl string `json:"thumbnail_url"`
 }
+
+type LinkedResponse struct {
+	SnsType uint   `json:"sns_type"`
+	Email   string `json:"email"`
+}
+
 type MainServiceResponse struct {
 	Id    uint   `json:"id"`
 	Title string `json:"title"`
@@ -77,7 +85,6 @@ type VerifyRequest struct {
 type LinkRequest struct {
 	Id      uint   `json:"-"`
 	IdToken string `json:"id_token"`
-	SnsType uint   `json:"sns_type"`
 }
 
 type AppVersionResponse struct {

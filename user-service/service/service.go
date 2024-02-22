@@ -38,7 +38,7 @@ type UserService interface {
 	SendAuthCode(number string) (string, error)
 	VerifyAuthCode(number, code string) (string, error)
 	RemoveUser(id uint) (string, error)
-	LinkEmail(uid uint, idToken string, snsType uint) (string, error) // 0:카카오 1:구글 2:애플
+	LinkEmail(uid uint, idToken string) (string, error) // 0:카카오 1:구글 2:애플
 	GetVersion() (dto.AppVersionResponse, error)
 }
 
@@ -285,15 +285,30 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 	}
 
 	if err := service.db.Where("phone_number = ?", user.PhoneNum).First(&model.VerifiedNumbers{}).Error; err != nil {
-		return model.User{}, errors.New("-1")
+		return model.User{}, errors.New("-1") //인증해야함
 	}
 
-	//// 연동 로그인 해야함 ////
+	// 연동 로그인
+	result := service.db.Where(model.User{Email: user.Email}).First(&user)
 
-	// 데이터베이스에서 사용자 조회 및 없으면 생성
-	err := service.db.Where(model.User{Email: user.Email}).FirstOrCreate(&user).Error
-	if err != nil {
-		return model.User{}, errors.New("db error")
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		//연동 이메일 목록에 없다면 생성
+		var linkedEmail model.LinkedEmail
+		result := service.db.Where("email = ?", user.Email).First(&linkedEmail)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			err := service.db.Create(&user).Error
+			if err != nil {
+				return model.User{}, errors.New("db error")
+			}
+		} else if result.Error != nil {
+			return model.User{}, errors.New("db error2")
+			// 있다면 해당 이메일의 uid로 조회
+		} else {
+			if err := service.db.Where(model.User{Id: linkedEmail.Uid}).First(&user).Error; err != nil {
+				return model.User{}, errors.New("db error3")
+			}
+		}
+
 	}
 
 	return user, nil
@@ -301,8 +316,10 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 
 //// 연동 내역 조회 해야함 ////
 
-func (service *userService) LinkEmail(uid uint, idToken string, snsType uint) (string, error) {
-	if snsType == 0 { //카카오
+func (service *userService) LinkEmail(uid uint, idToken string) (string, error) {
+	iss := util.DecodeJwt(idToken)
+
+	if strings.Contains(iss, "kakao") { //카카오
 		jwks, err := getKakaoPublicKeys()
 		if err != nil {
 			return "", err
@@ -318,21 +335,21 @@ func (service *userService) LinkEmail(uid uint, idToken string, snsType uint) (s
 			if !ok {
 				return "", errors.New("email not found in token claims")
 			}
-			if err := saveLinkedEmail(uid, email, service); err != nil {
+			if err := saveLinkedEmail(uid, email, service, uint(util.KakaoSnsType)); err != nil {
 				return "", err
 			}
 		}
 
-	} else if snsType == 1 { // 구글
+	} else if strings.Contains(iss, "google") { // 구글
 		email, err := validateGoogleIDToken(idToken)
 		if err != nil {
 			return "", err
 		}
-		if err := saveLinkedEmail(uid, email, service); err != nil {
+		if err := saveLinkedEmail(uid, email, service, uint(util.GoogleSnsType)); err != nil {
 			return "", err
 		}
 
-	} else if snsType == 2 { // 애플
+	} else if strings.Contains(iss, "apple") { // 애플
 		jwks, err := getApplePublicKeys()
 		if err != nil {
 			return "", err
@@ -348,7 +365,7 @@ func (service *userService) LinkEmail(uid uint, idToken string, snsType uint) (s
 			if !ok {
 				return "", errors.New("email not found in token claims")
 			}
-			if err := saveLinkedEmail(uid, email, service); err != nil {
+			if err := saveLinkedEmail(uid, email, service, uint(util.AppleSnsType)); err != nil {
 				return "", err
 			}
 		}
@@ -358,7 +375,7 @@ func (service *userService) LinkEmail(uid uint, idToken string, snsType uint) (s
 	return "200", nil
 }
 
-func saveLinkedEmail(uid uint, email string, service *userService) error {
+func saveLinkedEmail(uid uint, email string, service *userService, snsType uint) error {
 	var user model.User
 	if err := service.db.Where("id = ? ", uid).First(&user).Error; err != nil {
 		return errors.New("db error")
@@ -367,7 +384,7 @@ func saveLinkedEmail(uid uint, email string, service *userService) error {
 		return errors.New("wrong request")
 	}
 
-	linkedEmail := model.LinkedEmail{Email: email, Uid: uid}
+	linkedEmail := model.LinkedEmail{Email: email, Uid: uid, SnsType: snsType}
 	err := service.db.Create(&linkedEmail).Error
 	if err != nil {
 		return errors.New("db error2")
@@ -560,7 +577,8 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 
 func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 	var user model.User
-	result := service.db.Joins("ProfileImage", "level != 10 AND type = ?", util.UserProfileImageType).First(&user, id)
+	result := service.db.Joins("ProfileImage", "level != 10 AND type = ?", util.UserProfileImageType).
+		Preload("LinkedEmails").First(&user, id)
 	if result.Error != nil {
 		return dto.UserResponse{}, errors.New("db error")
 	}
@@ -571,7 +589,7 @@ func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 		return dto.UserResponse{}, errors.New("db error2")
 	}
 
-	var mainServices []dto.MainServiceResponse
+	mainServices := make([]dto.MainServiceResponse, 0)
 	for _, v := range useServices {
 		mainServices = append(mainServices, dto.MainServiceResponse{
 			Id:    v.ServiceId,
@@ -583,6 +601,7 @@ func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 	if err := util.CopyStruct(user, &userResponse); err != nil {
 		return dto.UserResponse{}, err
 	}
+
 	userResponse.UseServices = mainServices
 
 	if userResponse.ProfileImage.Url != "" {
