@@ -51,7 +51,7 @@ func AdminLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 구글로그인 성공시 호출
 // @Accept  json
 // @Produce  json
-// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자"
+// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자 / 최초 로그인 이후 로그인시 fcm_token 만 필요함"
 // @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요"
@@ -80,7 +80,7 @@ func GoogleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 카카오로그인 성공시 호출
 // @Accept  json
 // @Produce  json
-// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자"
+// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자 / 최초 로그인 이후 로그인시 fcm_token,device_id 만 필요함"
 // @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요"
@@ -111,7 +111,7 @@ func KakaoLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 애플로그인 성공시 호출
 // @Accept  json
 // @Produce  json
-// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자"
+// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자 / 최초 로그인 이후 로그인시 fcm_token,device_id 만 필요함"
 // @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요"
@@ -143,6 +143,7 @@ func AppleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
+// @Param request body dto.AutoLoginRequest true "요청 DTO"
 // @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Security jwt
@@ -150,14 +151,20 @@ func AppleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 func AutoLoginHandler(autoLoginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 토큰 검증 및 처리
-
 		_, email, err := util.VerifyJWT(c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		response, err := autoLoginEndpoint(c.Request.Context(), email)
+		var req dto.AutoLoginRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		req.Email = email
+		response, err := autoLoginEndpoint(c.Request.Context(), req)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

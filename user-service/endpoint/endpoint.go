@@ -3,7 +3,6 @@
 package endpoint
 
 import (
-	"common/model"
 	"context"
 	"user-service/dto"
 	"user-service/service"
@@ -28,8 +27,8 @@ func MakeAdminLoginEndpoint(s service.UserService) endpoint.Endpoint {
 
 func MakeAutoLoginEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		email := request.(string)
-		token, err := s.AutoLogin(email, model.User{})
+		autoRequest := request.(dto.AutoLoginRequest)
+		token, err := s.AutoLogin(autoRequest)
 		if err != nil {
 			return dto.LoginResponse{Err: err.Error()}, err
 		}

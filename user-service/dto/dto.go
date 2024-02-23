@@ -99,7 +99,9 @@ type LoginResponse struct {
 }
 
 type AutoLoginRequest struct {
-	Jwt string `json:"jwt"`
+	Email    string `json:"-"`
+	FcmToken string `json:"fcm_token"`
+	DeviceId string `json:"device_id"`
 }
 
 type SuccessResponse struct {

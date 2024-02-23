@@ -26,7 +26,7 @@ import (
 )
 
 type UserService interface {
-	AutoLogin(email string, user model.User) (string, error)                 //자동로그인
+	AutoLogin(autoLoginRequest dto.AutoLoginRequest) (string, error)         //자동로그인
 	KakaoLogin(idToken string, userReqeust dto.UserRequest) (string, error)  //카카오로그인
 	GoogleLogin(idToken string, userRequest dto.UserRequest) (string, error) //구글로그인
 	AppleLogin(idToken string, userRequest dto.UserRequest) (string, error)
@@ -139,11 +139,13 @@ func (service *userService) AdminLogin(email string, password string) (string, e
 
 }
 
-func (service *userService) AutoLogin(email string, user model.User) (string, error) {
-
+func (service *userService) AutoLogin(autoLoginRequest dto.AutoLoginRequest) (string, error) {
+	if autoLoginRequest.FcmToken == "" || autoLoginRequest.DeviceId == "" {
+		return "", errors.New("check fcm_token,device_id")
+	}
 	// 데이터베이스에서 사용자 조회
 	var u model.User
-	if err := service.db.Where(model.User{Email: email}).First(&u).Error; err != nil {
+	if err := service.db.Where(model.User{Email: autoLoginRequest.Email}).First(&u).Error; err != nil {
 		return "", errors.New("db error")
 	}
 	if !u.UseAutoLogin {
@@ -155,10 +157,16 @@ func (service *userService) AutoLogin(email string, user model.User) (string, er
 		return "", err
 	}
 
+	if err := service.db.Model(&u).Updates(model.User{FCMToken: autoLoginRequest.FcmToken, DeviceID: autoLoginRequest.DeviceId}).Error; err != nil {
+		return "", errors.New("db error2")
+	}
 	return tokenString, nil
 }
 
 func (service *userService) AppleLogin(idToken string, userRequest dto.UserRequest) (string, error) {
+	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
+		return "", errors.New("check fcm_token,device_id")
+	}
 	jwks, err := getApplePublicKeys()
 	if err != nil {
 		return "", err
@@ -202,6 +210,9 @@ func (service *userService) AppleLogin(idToken string, userRequest dto.UserReque
 
 }
 func (service *userService) KakaoLogin(idToken string, userRequest dto.UserRequest) (string, error) {
+	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
+		return "", errors.New("check fcm_token,device_id")
+	}
 	jwks, err := getKakaoPublicKeys()
 	if err != nil {
 		return "", err
@@ -246,6 +257,9 @@ func (service *userService) KakaoLogin(idToken string, userRequest dto.UserReque
 }
 
 func (service *userService) GoogleLogin(idToken string, userRequest dto.UserRequest) (string, error) {
+	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
+		return "", errors.New("check fcm_token,device_id")
+	}
 	email, err := validateGoogleIDToken(idToken)
 	if err != nil {
 		return "", err
@@ -288,6 +302,9 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 		return model.User{}, errors.New("-1") //인증해야함
 	}
 
+	fcmToken := user.FCMToken
+	deviceId := user.DeviceID
+
 	// 연동 로그인
 	result := service.db.Where(model.User{Email: user.Email}).First(&user)
 
@@ -309,6 +326,10 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 			}
 		}
 
+	}
+
+	if err := service.db.Model(&user).Updates(model.User{FCMToken: fcmToken, DeviceID: deviceId}).Error; err != nil {
+		return model.User{}, errors.New("db error4")
 	}
 
 	return user, nil
