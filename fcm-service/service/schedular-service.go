@@ -3,9 +3,9 @@
 package service
 
 import (
-	"common/model"
 	"context"
 	"encoding/json"
+	"fcm-service/common/model"
 	"log"
 	"strconv"
 	"time"

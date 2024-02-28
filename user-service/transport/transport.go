@@ -3,8 +3,8 @@
 package transport
 
 import (
-	"common/util"
 	"net/http"
+	"user-service/common/util"
 	"user-service/dto"
 
 	kitEndpoint "github.com/go-kit/kit/endpoint"

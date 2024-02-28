@@ -2,10 +2,10 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
 	"context"
 	"errors"
+	"exercise-service/common/model"
+	"exercise-service/common/util"
 	"exercise-service/dto"
 	pb "exercise-service/proto"
 	"log"

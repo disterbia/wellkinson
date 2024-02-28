@@ -2,11 +2,11 @@
 package main
 
 import (
+	"exercise-service/db"
 	_ "exercise-service/docs"
 	"exercise-service/endpoint"
 	"exercise-service/service"
 	"exercise-service/transport"
-	"fcm-service/db"
 	"log"
 	"os"
 

@@ -2,8 +2,8 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
+	"emotion-service/common/model"
+	"emotion-service/common/util"
 	"emotion-service/dto"
 	"errors"
 

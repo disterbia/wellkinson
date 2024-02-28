@@ -2,7 +2,7 @@
 package transport
 
 import (
-	"common/util"
+	"diet-service/common/util"
 	"diet-service/dto"
 	"net/http"
 	"sync"

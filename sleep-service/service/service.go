@@ -2,12 +2,12 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
 	"context"
 	"encoding/json"
 	"errors"
 	"log"
+	"sleep-service/common/model"
+	"sleep-service/common/util"
 	"sleep-service/dto"
 	pb "sleep-service/proto"
 	"time"

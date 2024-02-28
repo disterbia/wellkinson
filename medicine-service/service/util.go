@@ -2,8 +2,8 @@
 package service
 
 import (
-	"common/util"
 	"encoding/json"
+	"medicine-service/common/util"
 	"medicine-service/dto"
 )
 

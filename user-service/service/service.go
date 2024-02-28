@@ -3,8 +3,6 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -17,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"user-service/common/model"
+	"user-service/common/util"
 	"user-service/dto"
 
 	"github.com/aws/aws-sdk-go/aws"

@@ -2,7 +2,7 @@
 package transport
 
 import (
-	"common/util"
+	"medicine-service/common/util"
 	"medicine-service/dto"
 	"net/http"
 	"sync"

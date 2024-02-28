@@ -2,7 +2,7 @@
 package transport
 
 import (
-	"common/util"
+	"emotion-service/common/util"
 	"emotion-service/dto"
 	"net/http"
 	"sync"

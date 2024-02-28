@@ -2,9 +2,9 @@
 package service
 
 import (
+	"alarm-service/common/model"
+	"alarm-service/common/util"
 	pb "alarm-service/proto"
-	"common/model"
-	"common/util"
 	"context"
 	"encoding/json"
 	"errors"

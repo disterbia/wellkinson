@@ -1,7 +1,7 @@
 // /face-service/dto/dto.go
 package dto
 
-import "common/model"
+import "face-service/common/model"
 
 type GetParams struct {
 	StartDate string `form:"start_date" example:"YYYY-MM-DD"`

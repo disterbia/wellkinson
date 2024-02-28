@@ -2,9 +2,9 @@
 package transport
 
 import (
-	"common/util"
 	"net/http"
 	"sync"
+	"vocal-service/common/util"
 	"vocal-service/dto"
 
 	"github.com/gin-gonic/gin"

@@ -3,8 +3,8 @@
 package transport
 
 import (
+	"alarm-service/common/util"
 	"alarm-service/dto"
-	"common/util"
 	"net/http"
 	"strconv"
 	"sync"

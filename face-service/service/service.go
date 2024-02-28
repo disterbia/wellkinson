@@ -2,9 +2,9 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
 	"errors"
+	"face-service/common/model"
+	"face-service/common/util"
 	"face-service/dto"
 
 	"gorm.io/gorm"

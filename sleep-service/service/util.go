@@ -2,9 +2,9 @@
 package service
 
 import (
-	"common/util"
 	"encoding/json"
 	"errors"
+	"sleep-service/common/util"
 	"sleep-service/dto"
 )
 

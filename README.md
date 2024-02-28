@@ -1,4 +1,26 @@
-AUTO_INCREMENT=\d+CREATE TABLE `alarms` (
+/home/ubuntu/.ssh/authorized_keys // 퍼블릭키 변경
+
+sudo apt update
+sudo apt install -y mariadb-server
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo mysql_secure_installation
+sudo mysql -u root -p
+etc/mysql/mariadb.conf.d/50-server.cnf 
+sudo ufw allow 3306/tcp
+
+sudo apt install net-tools
+netstat -nlpt
+[mysqld]
+bind-address = 0.0.0.0
+sudo systemctl restart mariadb
+
+CREATE DATABASE wellkinson;
+CREATE USER 'mark'@'%' IDENTIFIED BY '6853';
+GRANT ALL PRIVILEGES ON wellkinson.* TO 'mark'@'%';
+FLUSH PRIVILEGES;
+
+CREATE TABLE `alarms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` int(11) NOT NULL COMMENT '유저아이디',
   `type` tinyint(4) NOT NULL COMMENT '타입코드 1: 운동 2:약',
@@ -72,20 +94,6 @@ CREATE TABLE `emotions` (
   CONSTRAINT `emotions_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
-CREATE TABLE `exercise_infos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `date_performed` varchar(40) NOT NULL,
-  `exercise_id` int(11) NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  KEY `exercise_id` (`exercise_id`),
-  CONSTRAINT `exercise_infos_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `exercise_infos_ibfk_2` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
 CREATE TABLE `exercises` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` int(11) NOT NULL,
@@ -102,6 +110,22 @@ CREATE TABLE `exercises` (
   KEY `uid` (`uid`),
   CONSTRAINT `exercises_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+
+CREATE TABLE `exercise_infos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `date_performed` varchar(40) NOT NULL,
+  `exercise_id` int(11) NOT NULL,
+  `created` datetime DEFAULT current_timestamp(),
+  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `uid` (`uid`),
+  KEY `exercise_id` (`exercise_id`),
+  CONSTRAINT `exercise_infos_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `exercise_infos_ibfk_2` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
 
 CREATE TABLE `face_exams` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -150,22 +174,6 @@ CREATE TABLE `images` (
   CONSTRAINT `images_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='사용자별 업로드한 이미지 정보';
 
-CREATE TABLE `inquire_replies` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `inquire_id` int(11) NOT NULL,
-  `reply_type` tinyint(1) NOT NULL COMMENT '답변 or 추가 문의',
-  `content` text NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `level` tinyint(4) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  KEY `inquire_id` (`inquire_id`),
-  CONSTRAINT `inquire_replies_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `inquire_replies_ibfk_2` FOREIGN KEY (`inquire_id`) REFERENCES `Inquires` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
 CREATE TABLE `inquires` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` int(11) NOT NULL,
@@ -179,6 +187,23 @@ CREATE TABLE `inquires` (
   KEY `uid` (`uid`),
   CONSTRAINT `inquires_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+CREATE TABLE `inquire_replies` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `inquire_id` int(11) NOT NULL,
+  `reply_type` tinyint(1) NOT NULL COMMENT '답변 or 추가 문의',
+  `content` text NOT NULL,
+  `created` datetime DEFAULT current_timestamp(),
+  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `level` tinyint(4) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `uid` (`uid`),
+  KEY `inquire_id` (`inquire_id`),
+  CONSTRAINT `inquire_replies_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `inquire_replies_ibfk_2` FOREIGN KEY (`inquire_id`) REFERENCES `inquires` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
 
 CREATE TABLE `linked_emails` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -325,20 +350,6 @@ CREATE TABLE `user_services` (
   CONSTRAINT `user_services_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `user_services_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `main_services` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='유저별 이용하고 싶은 서비스';
-
-CREATE TABLE `use_services` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저아이디',
-  `service_id` int(11) NOT NULL COMMENT '서비스 아이디',
-  `title` varchar(40) NOT NULL COMMENT '서비스명',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  KEY `service_id` (`service_id`),
-  CONSTRAINT `use_services_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `use_services_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `main_services` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='유저별 이용하고 싶은 서비스';
 
 CREATE TABLE `verified_numbers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

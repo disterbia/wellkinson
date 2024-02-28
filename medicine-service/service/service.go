@@ -2,12 +2,12 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
 	"context"
 	"errors"
 	"fmt"
 	"log"
+	"medicine-service/common/model"
+	"medicine-service/common/util"
 	"medicine-service/dto"
 	pb "medicine-service/proto"
 	"time"

@@ -2,8 +2,8 @@
 package service
 
 import (
+	"admin-video-service/common/model"
 	"admin-video-service/dto"
-	"common/model"
 	"encoding/json"
 	"errors"
 	"io"

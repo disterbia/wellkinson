@@ -2,9 +2,9 @@
 package main
 
 import (
-	"fcm-service/db"
 	"log"
 	"os"
+	"sleep-service/db"
 	_ "sleep-service/docs"
 	"sleep-service/endpoint"
 	"sleep-service/service"

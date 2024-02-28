@@ -2,8 +2,8 @@
 package transport
 
 import (
+	"admin-video-service/common/util"
 	"admin-video-service/dto"
-	"common/util"
 	"net/http"
 	"sync"
 

@@ -2,11 +2,11 @@
 package main
 
 import (
+	"diet-service/db"
 	_ "diet-service/docs"
 	"diet-service/endpoint"
 	"diet-service/service"
 	"diet-service/transport"
-	"fcm-service/db"
 	"log"
 	"os"
 

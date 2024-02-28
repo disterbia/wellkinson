@@ -2,8 +2,8 @@
 package service
 
 import (
-	"common/util"
 	"encoding/json"
+	"exercise-service/common/util"
 	"exercise-service/dto"
 )
 

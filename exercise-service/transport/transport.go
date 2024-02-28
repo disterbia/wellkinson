@@ -2,7 +2,7 @@
 package transport
 
 import (
-	"common/util"
+	"exercise-service/common/util"
 	"exercise-service/dto"
 	"net/http"
 	"sync"

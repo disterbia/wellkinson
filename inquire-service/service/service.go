@@ -3,10 +3,10 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
 	"context"
 	"errors"
+	"inquire-service/common/model"
+	"inquire-service/common/util"
 	"log"
 
 	"inquire-service/dto"

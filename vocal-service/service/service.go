@@ -2,9 +2,9 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
 	"errors"
+	"vocal-service/common/model"
+	"vocal-service/common/util"
 	"vocal-service/dto"
 
 	"gorm.io/gorm"

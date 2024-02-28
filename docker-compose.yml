@@ -1,0 +1,85 @@
+version: '3.8'
+services:
+  gateway:
+    image: disterbia94/wellkinson_gateway
+    ports:
+      - "50000:50000"
+    depends_on:
+      - admin
+      - alarm
+      - diet
+      - email
+      - emotion
+      - exercise
+      - face
+      - fcm
+      - inquire
+      - medicine
+      - sleep
+      - user
+      - vocal
+
+  admin:
+    image: disterbia94/wellkinson_admin_video_service
+    ports:
+      - "44400:44400"
+
+  alarm:
+    image: disterbia94/wellkinson_alarm_service
+    ports:
+      - "44401:44401"
+
+  diet:
+    image: disterbia94/wellkinson_diet_service
+    ports:
+      - "44402:44402"
+
+  email:
+    image: disterbia94/wellkinson_email_service
+
+  emotion:
+    image: disterbia94/wellkinson_emotion_service
+    ports:
+      - "44403:44403"
+
+  exercise:
+    image: disterbia94/wellkinson_exercise_service
+    ports:
+      - "44404:44404"
+
+  face:
+    image: disterbia94/wellkinson_face_service
+    ports:
+      - "44405:44405"
+
+  fcm:
+    image: disterbia94/wellkinson_fcm_service
+
+  inquire:
+    image: disterbia94/wellkinson_inquire_service
+    ports:
+      - "44406:44406"
+
+  medicine:
+    image: disterbia94/wellkinson_medicine_service
+    ports:
+      - "44407:44407"
+
+  sleep:
+    image: disterbia94/wellkinson_sleep_service
+    ports:
+      - "44408:44408"
+
+  user:
+    image: disterbia94/wellkinson_user_service
+    ports:
+      - "44409:44409"
+
+  vocal:
+    image: disterbia94/wellkinson_vocal_service
+    ports:
+      - "44410:44410"
+
+networks:
+  default:
+    name: my_network

@@ -4,8 +4,8 @@ go 1.21.5
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-kit/kit v0.13.0
 	github.com/joho/godotenv v1.5.1
 	github.com/robfig/cron/v3 v3.0.1
 	google.golang.org/api v0.154.0

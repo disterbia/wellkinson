@@ -3,11 +3,12 @@
 package service
 
 import (
+	"alarm-service/common/model"
+	"alarm-service/common/util"
 	"alarm-service/dto"
-	"common/model"
-	"common/util"
 	"encoding/json"
 	"errors"
+	"log"
 
 	"gorm.io/gorm"
 )
@@ -47,6 +48,7 @@ func (service *alarmService) GetAlarms(id uint, page uint) ([]dto.AlarmResponse,
 	var alarms []model.Alarm
 	offset := int(page) * pageSize
 
+	log.Println("fdffsd")
 	result := service.db.Where("uid = ? ", id).Order("id DESC").Offset(offset).Limit(pageSize).Find(&alarms)
 	if result.Error != nil {
 		return nil, result.Error

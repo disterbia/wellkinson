@@ -3,7 +3,7 @@
 package transport
 
 import (
-	"common/util"
+	"inquire-service/common/util"
 	"inquire-service/dto"
 	"net/http"
 	"strconv"

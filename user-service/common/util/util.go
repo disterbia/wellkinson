@@ -2,7 +2,6 @@
 package util
 
 import (
-	"common/model"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"user-service/common/model"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"

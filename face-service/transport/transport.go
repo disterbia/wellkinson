@@ -2,7 +2,7 @@
 package transport
 
 import (
-	"common/util"
+	"face-service/common/util"
 	"face-service/dto"
 	"net/http"
 	"sync"

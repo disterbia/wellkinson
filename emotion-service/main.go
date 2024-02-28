@@ -2,11 +2,11 @@
 package main
 
 import (
+	"emotion-service/db"
 	_ "emotion-service/docs"
 	"emotion-service/endpoint"
 	"emotion-service/service"
 	"emotion-service/transport"
-	"fcm-service/db"
 	"log"
 	"os"
 

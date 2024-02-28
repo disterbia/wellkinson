@@ -2,8 +2,8 @@
 package service
 
 import (
-	"common/model"
-	"common/util"
+	"diet-service/common/model"
+	"diet-service/common/util"
 	"diet-service/dto"
 	"encoding/base64"
 	"errors"

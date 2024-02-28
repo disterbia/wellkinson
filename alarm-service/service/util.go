@@ -2,8 +2,8 @@
 package service
 
 import (
+	"alarm-service/common/util"
 	"alarm-service/dto"
-	"common/util"
 )
 
 func validateAlarm(alarm dto.AlarmRequest) error {
