@@ -4,11 +4,14 @@ FROM golang:1.21.5 AS builder
 # 작업 디렉토리 설정
 WORKDIR /msa
 
-# 나머지 소스 코드 및 go.mod, go.sum 파일 복사
-COPY . .
+# 의존성 파일 복사
+COPY go.mod go.sum ./
 
 # 의존성 다운로드
 RUN go mod download
+
+# 나머지 소스 코드 복사
+COPY . .
 
 # swag 설치
 RUN go install github.com/swaggo/swag/cmd/swag@v1.8.12

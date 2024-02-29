@@ -6,14 +6,19 @@ sudo systemctl start mariadb
 sudo systemctl enable mariadb
 sudo mysql_secure_installation
 sudo mysql -u root -p
-etc/mysql/mariadb.conf.d/50-server.cnf 
 sudo ufw allow 3306/tcp
 
 sudo apt install net-tools
 netstat -nlpt
+
+etc/mysql/mariadb.conf.d/50-server.cnf 
 [mysqld]
 bind-address = 0.0.0.0
+
 sudo systemctl restart mariadb
+
+
+<!-- SQL -->
 
 CREATE DATABASE wellkinson;
 CREATE USER 'mark'@'%' IDENTIFIED BY '6853';

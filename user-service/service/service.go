@@ -121,7 +121,7 @@ func NewUserService(db *gorm.DB, s3svc *s3.S3, bucket string, bucketUrl string) 
 
 func (service *userService) AdminLogin(email string, password string) (string, error) {
 	var u model.User
-	if err := service.db.Where(model.User{Email: email, PhoneNum: password}).First(&u).Error; err != nil {
+	if err := service.db.Debug().Where("email=? AND phone_num=?", email, password).First(&u).Error; err != nil {
 		return "", err
 	}
 
@@ -145,7 +145,7 @@ func (service *userService) AutoLogin(autoLoginRequest dto.AutoLoginRequest) (st
 	}
 	// 데이터베이스에서 사용자 조회
 	var u model.User
-	if err := service.db.Where(model.User{Email: autoLoginRequest.Email}).First(&u).Error; err != nil {
+	if err := service.db.Where("email = ?", autoLoginRequest.Email).First(&u).Error; err != nil {
 		return "", errors.New("db error")
 	}
 	if !u.UseAutoLogin {
@@ -306,7 +306,7 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 	deviceId := user.DeviceID
 
 	// 연동 로그인
-	result := service.db.Where(model.User{Email: user.Email}).First(&user)
+	result := service.db.Where("email = ? ", user.Email).First(&user)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		//연동 이메일 목록에 없다면 생성
@@ -321,7 +321,7 @@ func (service *userService) findOrCreateUser(user model.User) (model.User, error
 			return model.User{}, errors.New("db error2")
 			// 있다면 해당 이메일의 uid로 조회
 		} else {
-			if err := service.db.Where(model.User{Id: linkedEmail.Uid}).First(&user).Error; err != nil {
+			if err := service.db.Where("id = ?", linkedEmail.Uid).First(&user).Error; err != nil {
 				return model.User{}, errors.New("db error3")
 			}
 		}
