@@ -47,16 +47,16 @@ func AdminLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 }
 
 // @Tags 로그인 /user
-// @Summary 구글로그인
-// @Description 구글로그인 성공시 호출
+// @Summary sns 로그인
+// @Description sns 로그인 성공시 호출
 // @Accept  json
 // @Produce  json
-// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자 / 최초 로그인 이후 로그인시 fcm_token 만 필요함"
+// @Param request body dto.LoginRequest true "요청 DTO - idToken 필수, user- user_type: 0:해당없음 1:파킨슨 환자 2:보호자 / 최초 로그인 이후 로그인시 fcm_token,device_id 만 필요함"
 // @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요"
-// @Router /google-login [post]
-func GoogleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 인증필요 , "-2" = 이미 가입한 번호"
+// @Router /sns-login [post]
+func SnsLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.LoginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -72,68 +72,6 @@ func GoogleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 
 		resp := response.(dto.LoginResponse)
 		c.JSON(http.StatusOK, resp)
-	}
-}
-
-// @Tags 로그인 /user
-// @Summary 카카오로그인
-// @Description 카카오로그인 성공시 호출
-// @Accept  json
-// @Produce  json
-// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자 / 최초 로그인 이후 로그인시 fcm_token,device_id 만 필요함"
-// @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
-// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요"
-// @Router /kakao-login [post]
-func KakaoLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-		var req dto.LoginRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		response, err := loginEndpoint(c.Request.Context(), req)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		resp := response.(dto.LoginResponse)
-		c.JSON(http.StatusOK, resp)
-
-	}
-}
-
-// @Tags 로그인 /user
-// @Summary 애플로그인
-// @Description 애플로그인 성공시 호출
-// @Accept  json
-// @Produce  json
-// @Param request body dto.LoginRequest true "요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자 / 최초 로그인 이후 로그인시 fcm_token,device_id 만 필요함"
-// @Success 200 {object} dto.SuccessResponse "성공시 JWT 토큰 반환"
-// @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요"
-// @Router /apple-login [post]
-func AppleLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-		var req dto.LoginRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		response, err := loginEndpoint(c.Request.Context(), req)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		resp := response.(dto.LoginResponse)
-		c.JSON(http.StatusOK, resp)
-
 	}
 }
 

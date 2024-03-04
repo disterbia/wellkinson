@@ -26,13 +26,10 @@ import (
 )
 
 type UserService interface {
-	AutoLogin(autoLoginRequest dto.AutoLoginRequest) (string, error)         //자동로그인
-	KakaoLogin(idToken string, userReqeust dto.UserRequest) (string, error)  //카카오로그인
-	GoogleLogin(idToken string, userRequest dto.UserRequest) (string, error) //구글로그인
-	AppleLogin(idToken string, userRequest dto.UserRequest) (string, error)
-	findOrCreateUser(user model.User) (model.User, error) //로그인처리
-	SetUser(user dto.UserRequest) (string, error)         //유저업데이트
-	GetUser(id uint) (dto.UserResponse, error)            //유저조회
+	AutoLogin(autoLoginRequest dto.AutoLoginRequest) (string, error) //자동로그인
+	SnsLogin(idToken string, userRequest dto.UserRequest) (string, error)
+	SetUser(user dto.UserRequest) (string, error) //유저업데이트
+	GetUser(id uint) (dto.UserResponse, error)    //유저조회
 	AdminLogin(email string, password string) (string, error)
 	GetMainServices() ([]dto.MainServiceResponse, error)
 	SendAuthCode(number string) (string, error)
@@ -163,119 +160,27 @@ func (service *userService) AutoLogin(autoLoginRequest dto.AutoLoginRequest) (st
 	return tokenString, nil
 }
 
-func (service *userService) AppleLogin(idToken string, userRequest dto.UserRequest) (string, error) {
-	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
-		return "", errors.New("check fcm_token,device_id")
-	}
-	jwks, err := getApplePublicKeys()
-	if err != nil {
-		return "", err
-	}
-
-	parsedToken, err := verifyAppleIDToken(idToken, jwks)
-	if err != nil {
-		return "", err
-	}
-
-	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
-		email, ok := claims["email"].(string)
-		if !ok {
-			return "", errors.New("email not found in token claims")
-		}
-
-		var user model.User
-
-		var temp dto.TempUser
-		if err := util.CopyStruct(userRequest, &temp); err != nil {
-			return "", err
-		}
-		if err := util.CopyStruct(temp, &user); err != nil {
-			return "", err
-		}
-
-		user.Email = email
-		u, err := service.findOrCreateUser(user)
-		if err != nil {
-			return "", err
-		}
-
-		// JWT 토큰 생성
-		tokenString, err := util.GenerateJWT(u)
-		if err != nil {
-			return "", err
-		}
-		return tokenString, nil
-	}
-	return "", errors.New("invalid token")
-
-}
-func (service *userService) KakaoLogin(idToken string, userRequest dto.UserRequest) (string, error) {
-	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
-		return "", errors.New("check fcm_token,device_id")
-	}
-	jwks, err := getKakaoPublicKeys()
-	if err != nil {
-		return "", err
-	}
-
-	parsedToken, err := verifyKakaoTokenSignature(idToken, jwks)
-	if err != nil {
-		return "", err
-	}
-
-	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
-		email, ok := claims["email"].(string)
-		if !ok {
-			return "", errors.New("email not found in token claims")
-		}
-
-		var user model.User
-
-		var temp dto.TempUser
-		if err := util.CopyStruct(userRequest, &temp); err != nil {
-			return "", err
-		}
-		if err := util.CopyStruct(temp, &user); err != nil {
-			return "", err
-		}
-
-		user.Email = email
-		u, err := service.findOrCreateUser(user)
-		if err != nil {
-			return "", err
-		}
-
-		// JWT 토큰 생성
-		tokenString, err := util.GenerateJWT(u)
-		if err != nil {
-			return "", err
-		}
-		return tokenString, nil
-	}
-	return "", errors.New("invalid token")
-
-}
-
-func (service *userService) GoogleLogin(idToken string, userRequest dto.UserRequest) (string, error) {
-	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
-		return "", errors.New("check fcm_token,device_id")
-	}
-	email, err := validateGoogleIDToken(idToken)
-	if err != nil {
-		return "", err
-	}
+func (service *userService) SnsLogin(idToken string, userRequest dto.UserRequest) (string, error) {
+	iss := util.DecodeJwt(idToken)
 
 	var user model.User
-	var temp dto.TempUser
-	if err := util.CopyStruct(userRequest, &temp); err != nil {
-		return "", err
-	}
-	if err := util.CopyStruct(temp, &user); err != nil {
-		return "", err
-	}
+	var err error
 
-	user.Email = email
-	u, err := service.findOrCreateUser(user)
+	if strings.Contains(iss, "kakao") { // 카카오
+		if user, err = KakaoLogin(idToken, userRequest); err != nil {
+			return "", err
+		}
+	} else if strings.Contains(iss, "google") { // 구글
+		if user, err = GoogleLogin(idToken, userRequest); err != nil {
+			return "", err
+		}
+	} else if strings.Contains(iss, "apple") { // 애플
+		if user, err = AppleLogin(idToken, userRequest); err != nil {
+			return "", err
+		}
+
+	} //
+	u, err := findOrCreateUser(user, service)
 	if err != nil {
 		return "", err
 	}
@@ -285,37 +190,133 @@ func (service *userService) GoogleLogin(idToken string, userRequest dto.UserRequ
 	if err != nil {
 		return "", err
 	}
-
 	return tokenString, nil
 }
-
-func (service *userService) findOrCreateUser(user model.User) (model.User, error) {
-	// 유효성 검사 수행
-	if err := util.ValidateDate(user.Birthday); err != nil {
+func AppleLogin(idToken string, userRequest dto.UserRequest) (model.User, error) {
+	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
+		return model.User{}, errors.New("check fcm_token,device_id")
+	}
+	jwks, err := getApplePublicKeys()
+	if err != nil {
 		return model.User{}, err
 	}
-	if err := util.ValidatePhoneNumber(user.PhoneNum); err != nil {
+
+	parsedToken, err := verifyAppleIDToken(idToken, jwks)
+	if err != nil {
 		return model.User{}, err
 	}
 
+	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+		email, ok := claims["email"].(string)
+		if !ok {
+			return model.User{}, errors.New("email not found in token claims")
+		}
+
+		var user model.User
+
+		var temp dto.TempUser
+		if err := util.CopyStruct(userRequest, &temp); err != nil {
+			return model.User{}, err
+		}
+		if err := util.CopyStruct(temp, &user); err != nil {
+			return model.User{}, err
+		}
+
+		user.Email = email
+		return user, nil
+
+	}
+	return model.User{}, errors.New("invalid token")
+
+}
+func KakaoLogin(idToken string, userRequest dto.UserRequest) (model.User, error) {
+	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
+		return model.User{}, errors.New("check fcm_token,device_id")
+	}
+	jwks, err := getKakaoPublicKeys()
+	if err != nil {
+		return model.User{}, err
+	}
+
+	parsedToken, err := verifyKakaoTokenSignature(idToken, jwks)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+		email, ok := claims["email"].(string)
+		if !ok {
+			return model.User{}, errors.New("email not found in token claims")
+		}
+
+		var user model.User
+
+		var temp dto.TempUser
+		if err := util.CopyStruct(userRequest, &temp); err != nil {
+			return model.User{}, err
+		}
+		if err := util.CopyStruct(temp, &user); err != nil {
+			return model.User{}, err
+		}
+
+		user.Email = email
+		return user, nil
+	}
+	return model.User{}, errors.New("invalid token")
+
+}
+
+func GoogleLogin(idToken string, userRequest dto.UserRequest) (model.User, error) {
+	if userRequest.FCMToken == "" || userRequest.DeviceID == "" {
+		return model.User{}, errors.New("check fcm_token,device_id")
+	}
+	email, err := validateGoogleIDToken(idToken)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	var user model.User
+	var temp dto.TempUser
+	if err := util.CopyStruct(userRequest, &temp); err != nil {
+		return model.User{}, err
+	}
+	if err := util.CopyStruct(temp, &user); err != nil {
+		return model.User{}, err
+	}
+
+	user.Email = email
+	return user, nil
+}
+
+func findOrCreateUser(user model.User, service *userService) (model.User, error) {
 	if err := service.db.Where("phone_number = ?", user.PhoneNum).First(&model.VerifiedNumbers{}).Error; err != nil {
-		return model.User{}, errors.New("-1") //인증해야함
+		return model.User{}, errors.New("-1") // 인증해야함
 	}
 
 	fcmToken := user.FCMToken
 	deviceId := user.DeviceID
 
-	// 연동 로그인
 	result := service.db.Where("email = ? ", user.Email).First(&user)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		//연동 이메일 목록에 없다면 생성
+		// 연동 로그인
+		// 연동 이메일 목록에 없다면 유저생성 (같은번호 있으면 db에서 생성안됨. 같은번호 없으면 회원가입과 같음)
 		var linkedEmail model.LinkedEmail
 		result := service.db.Where("email = ?", user.Email).First(&linkedEmail)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			// 유효성 검사 수행
+			if err := util.ValidateDate(user.Birthday); err != nil {
+				return model.User{}, errors.New("-3")
+			}
+			if err := util.ValidatePhoneNumber(user.PhoneNum); err != nil {
+				return model.User{}, errors.New("-3")
+			}
+			if user.UserType > 2 {
+				return model.User{}, errors.New("-3")
+			}
 			err := service.db.Create(&user).Error
 			if err != nil {
-				return model.User{}, errors.New("db error")
+				return model.User{}, errors.New("-2") //이미 가입된 번호
 			}
 		} else if result.Error != nil {
 			return model.User{}, errors.New("db error2")

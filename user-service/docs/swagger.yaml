@@ -8,6 +8,13 @@ definitions:
       latest_version:
         type: string
     type: object
+  dto.AutoLoginRequest:
+    properties:
+      device_id:
+        type: string
+      fcm_token:
+        type: string
+    type: object
   dto.BasicResponse:
     properties:
       code:
@@ -28,6 +35,11 @@ definitions:
   dto.LinkRequest:
     properties:
       id_token:
+        type: string
+    type: object
+  dto.LinkedResponse:
+    properties:
+      email:
         type: string
       sns_type:
         type: integer
@@ -105,6 +117,10 @@ definitions:
         type: boolean
       is_first:
         type: boolean
+      linked_emails:
+        items:
+          $ref: '#/definitions/dto.LinkedResponse'
+        type: array
       name:
         type: string
       phone_num:
@@ -176,36 +192,6 @@ paths:
       summary: 관리자 로그인
       tags:
       - 로그인 /user
-  /apple-login:
-    post:
-      consumes:
-      - application/json
-      description: 애플로그인 성공시 호출
-      parameters:
-      - description: '요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자'
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 성공시 JWT 토큰 반환
-          schema:
-            $ref: '#/definitions/dto.SuccessResponse'
-        "400":
-          description: 요청 처리 실패시 오류 메시지 반환
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: '요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요'
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: 애플로그인
-      tags:
-      - 로그인 /user
   /auto-login:
     post:
       consumes:
@@ -217,6 +203,12 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: 요청 DTO
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AutoLoginRequest'
       produces:
       - application/json
       responses:
@@ -311,66 +303,6 @@ paths:
       summary: 최신버전 조회
       tags:
       - 공통 /user
-  /google-login:
-    post:
-      consumes:
-      - application/json
-      description: 구글로그인 성공시 호출
-      parameters:
-      - description: '요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자'
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 성공시 JWT 토큰 반환
-          schema:
-            $ref: '#/definitions/dto.SuccessResponse'
-        "400":
-          description: 요청 처리 실패시 오류 메시지 반환
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: '요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요'
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: 구글로그인
-      tags:
-      - 로그인 /user
-  /kakao-login:
-    post:
-      consumes:
-      - application/json
-      description: 카카오로그인 성공시 호출
-      parameters:
-      - description: '요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자'
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 성공시 JWT 토큰 반환
-          schema:
-            $ref: '#/definitions/dto.SuccessResponse'
-        "400":
-          description: 요청 처리 실패시 오류 메시지 반환
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: '요청 처리 실패시 오류 메시지 반환: 오류메시지 "-1" = 번호인증 필요'
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: 카카오로그인
-      tags:
-      - 로그인 /user
   /link-email:
     post:
       consumes:
@@ -382,7 +314,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: 요청 DTO sns_type 0:카카오 1:구글 2:애플
+      - description: 요청 DTO
         in: body
         name: request
         required: true
@@ -475,7 +407,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: 요청 DTO - 업데이트 할 데이터/ ture:남성
+      - description: 요청 DTO - 업데이트 할 데이터/ ture:남성 user_Type- 0:해당없음 1:파킨슨 환자 2:보호자
         in: body
         name: request
         required: true
@@ -499,6 +431,37 @@ paths:
       summary: 유저 데이터 변경
       tags:
       - 회원상태 변경(본인)  /user
+  /sns-login:
+    post:
+      consumes:
+      - application/json
+      description: sns 로그인 성공시 호출
+      parameters:
+      - description: '요청 DTO - idToken,기본값 데이터 user_type: 0:해당없음 1:파킨슨 환자 2:보호자 /
+          최초 로그인 이후 로그인시 fcm_token 만 필요함'
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공시 JWT 토큰 반환
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: 요청 처리 실패시 오류 메시지 반환
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: '요청 처리 실패시 오류 메시지 반환: 오류메시지 "-2" = 이미 가입한 번호'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: sns 로그인
+      tags:
+      - 로그인 /user
   /verify-code:
     post:
       consumes:

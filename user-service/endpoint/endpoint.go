@@ -46,26 +46,17 @@ func MakeGetUserEndpoint(s service.UserService) endpoint.Endpoint {
 		return result, nil
 	}
 }
-func MakeGoogleLoginEndpoint(s service.UserService) endpoint.Endpoint {
+func MakeSnsLoginEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(dto.LoginRequest)
-		token, err := s.GoogleLogin(req.IdToken, req.UserRequest)
+		token, err := s.SnsLogin(req.IdToken, req.UserRequest)
 		if err != nil {
 			return dto.LoginResponse{Err: err.Error()}, err
 		}
 		return dto.LoginResponse{Jwt: token}, nil
 	}
 }
-func MakeKakaoLoginEndpoint(s service.UserService) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(dto.LoginRequest)
-		token, err := s.KakaoLogin(req.IdToken, req.UserRequest)
-		if err != nil {
-			return dto.LoginResponse{Err: err.Error()}, err
-		}
-		return dto.LoginResponse{Jwt: token}, nil
-	}
-}
+
 func MakeSetUserEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		user := request.(dto.UserRequest)
@@ -130,17 +121,6 @@ func LinkEndpoint(s service.UserService) endpoint.Endpoint {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}
 		return dto.BasicResponse{Code: code}, nil
-	}
-}
-
-func MakeAppleLoginEndpoint(s service.UserService) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(dto.LoginRequest)
-		token, err := s.AppleLogin(req.IdToken, req.UserRequest)
-		if err != nil {
-			return dto.LoginResponse{Err: err.Error()}, err
-		}
-		return dto.LoginResponse{Jwt: token}, nil
 	}
 }
 

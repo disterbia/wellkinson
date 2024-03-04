@@ -97,9 +97,7 @@ func main() {
 	usvc := service.NewUserService(database, s3svc, bucket, bucketUrl)
 
 	adminLoginEndpoint := endpoint.MakeAdminLoginEndpoint(usvc)
-	googleLoginEndpoint := endpoint.MakeGoogleLoginEndpoint(usvc)
-	kakoLoginEndpoint := endpoint.MakeKakaoLoginEndpoint(usvc)
-	appleLoginEndpoint := endpoint.MakeAppleLoginEndpoint(usvc)
+	snsLoginEndpoint := endpoint.MakeSnsLoginEndpoint(usvc)
 	autoLoginEndpoint := endpoint.MakeAutoLoginEndpoint(usvc)
 	setUserEndpoint := endpoint.MakeSetUserEndpoint(usvc)
 	getUserEndpoint := endpoint.MakeGetUserEndpoint(usvc)
@@ -115,9 +113,7 @@ func main() {
 	rateLimiterMiddleware := RateLimitMiddleware()
 
 	router.POST("/admin-login", transport.AdminLoginHandler(adminLoginEndpoint))
-	router.POST("/google-login", transport.GoogleLoginHandler(googleLoginEndpoint))
-	router.POST("/kakao-login", transport.KakaoLoginHandler(kakoLoginEndpoint))
-	router.POST("/apple-login", transport.AppleLoginHandler(appleLoginEndpoint))
+	router.POST("/sns-login", transport.SnsLoginHandler(snsLoginEndpoint))
 	router.POST("/auto-login", transport.AutoLoginHandler(autoLoginEndpoint))
 	router.POST("/set-user", transport.SetUserHandler(setUserEndpoint))
 	router.POST("/send-code/:number", rateLimiterMiddleware, transport.SendCodeHandler(sendCodeEndpoint))
