@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
+
 	"sort"
 	"strconv"
 	"sync"
@@ -178,8 +178,6 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 				return
 			}
 
-			contentType := http.DetectContentType(imgData)
-			fmt.Println("Detected Content Type:", contentType)
 			contentType, ext, err := getImageFormat(imgData)
 			if err != nil {
 				errorsChan <- fmt.Errorf("invalid image format: %v", err)

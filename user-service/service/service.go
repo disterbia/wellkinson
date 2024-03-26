@@ -518,7 +518,7 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 		field := userRequestValue.Field(i)
 		fieldName := userRequestType.Field(i).Tag.Get("json")
 
-		if fieldName == "-" || fieldName == "user_services" {
+		if fieldName == "-" || fieldName == "user_services" || fieldName == "profile_image" {
 			continue
 		}
 		if !field.IsZero() {
@@ -527,7 +527,7 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 	}
 
 	//유저 정보 업데이트
-	result := service.db.Model(&model.User{}).Debug().Where("id = ?", userRequest.Id).Updates(updateFields)
+	result := service.db.Model(&model.User{}).Where("id = ?", userRequest.Id).Updates(updateFields)
 	if result.Error != nil {
 		log.Println(result.Error.Error())
 		tx.Rollback()
@@ -641,7 +641,7 @@ func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 	}
 
 	var useServices []model.UserService
-	result = service.db.Where("uid = ?", id).Find(&useServices, id)
+	result = service.db.Debug().Where("uid = ?", id).Find(&useServices)
 	if result.Error != nil {
 		return dto.UserResponse{}, errors.New("db error2")
 	}
