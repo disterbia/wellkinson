@@ -82,10 +82,11 @@ CREATE TABLE `diets` (
   `foods` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`foods`)),
   `created` datetime DEFAULT current_timestamp(),
   `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `date` varchar(40) NOT NULL COMMENT '식단 날짜',
   PRIMARY KEY (`id`),
   KEY `uid` (`uid`),
   CONSTRAINT `diets_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci
 
 CREATE TABLE `emotions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

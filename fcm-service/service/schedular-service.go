@@ -49,7 +49,7 @@ func initializeFirebase() {
 func sendPendingNotifications(db *gorm.DB) {
 	now := time.Now()
 	var alarms []model.Alarm
-	db.Where("start_at <= ? AND end_at >= ?", now.Format("2006-01-02"), now.Format("2006-01-02")).Find(&alarms)
+	db.Where("(start_at ='' OR start_at <= ?) AND (end_at ='' OR end_at >= ?)", now.Format("2006-01-02"), now.Format("2006-01-02")).Find(&alarms)
 
 	for _, alarm := range alarms {
 		if shouldSendNotification(now, alarm) {
@@ -95,7 +95,7 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 	}
 
 	notification_count := calculateNotificationCount(db, alarm.Uid)
-
+	log.Println(user.FCMToken)
 	message := &messaging.Message{
 		Data: map[string]string{
 			"start_at":           alarm.StartAt,

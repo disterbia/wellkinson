@@ -85,7 +85,8 @@ type Diet struct {
 	TimestampModel
 	Id     uint
 	Uid    uint
-	Name   string
+	Memo   string
+	Date   string
 	Time   string
 	Type   uint
 	Images []Image         `gorm:"foreignkey:ParentId"`

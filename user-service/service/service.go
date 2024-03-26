@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -37,6 +38,7 @@ type UserService interface {
 	RemoveUser(id uint) (string, error)
 	LinkEmail(uid uint, idToken string) (string, error) // 0:카카오 1:구글 2:애플
 	GetVersion() (dto.AppVersionResponse, error)
+	RemoveProfile(uid uint) (string, error)
 }
 
 type userService struct {
@@ -57,6 +59,16 @@ type JWKS struct {
 }
 
 func (service *userService) SendAuthCode(number string) (string, error) {
+	//존재하는 번호인지 체크
+	result := service.db.Debug().Where("phone_number=?", number).Find(&model.VerifiedNumbers{})
+	if result.Error != nil {
+		return "", errors.New("db error")
+
+	} else if result.RowsAffected > 0 {
+		// 레코드가 존재할 때
+		return "", errors.New("-1")
+	}
+
 	err := util.ValidatePhoneNumber(number)
 	if err != nil {
 		return "", err
@@ -103,7 +115,7 @@ func (service *userService) VerifyAuthCode(number, code string) (string, error) 
 		return "", errors.New("db error")
 	}
 	if authCode.Code != code {
-		return "", errors.New("wrong code")
+		return "", errors.New("-1")
 	}
 	if err := service.db.Create(&model.VerifiedNumbers{PhoneNumber: authCode.PhoneNumber}).Error; err != nil {
 		return "", errors.New("db error2")
@@ -289,9 +301,6 @@ func GoogleLogin(idToken string, userRequest dto.UserRequest) (model.User, error
 }
 
 func findOrCreateUser(user model.User, service *userService) (model.User, error) {
-	if err := service.db.Where("phone_number = ?", user.PhoneNum).First(&model.VerifiedNumbers{}).Error; err != nil {
-		return model.User{}, errors.New("-1") // 인증해야함
-	}
 
 	fcmToken := user.FCMToken
 	deviceId := user.DeviceID
@@ -304,6 +313,9 @@ func findOrCreateUser(user model.User, service *userService) (model.User, error)
 		var linkedEmail model.LinkedEmail
 		result := service.db.Where("email = ?", user.Email).First(&linkedEmail)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			if err := service.db.Where("phone_number = ?", user.PhoneNum).First(&model.VerifiedNumbers{}).Error; err != nil {
+				return model.User{}, errors.New("-1") // 인증해야함
+			}
 			// 유효성 검사 수행
 			if err := util.ValidateDate(user.Birthday); err != nil {
 				return model.User{}, errors.New("-3")
@@ -497,9 +509,27 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 		}
 	}()
 
+	updateFields := make(map[string]interface{})
+
+	userRequestValue := reflect.ValueOf(userRequest)
+	userRequestType := userRequestValue.Type()
+
+	for i := 0; i < userRequestValue.NumField(); i++ {
+		field := userRequestValue.Field(i)
+		fieldName := userRequestType.Field(i).Tag.Get("json")
+
+		if fieldName == "-" || fieldName == "user_services" {
+			continue
+		}
+		if !field.IsZero() {
+			updateFields[fieldName] = field.Interface()
+		}
+	}
+
 	//유저 정보 업데이트
-	result := service.db.Model(&model.User{}).Where("id = ?", userRequest.Id).Updates(user)
+	result := service.db.Model(&model.User{}).Debug().Where("id = ?", userRequest.Id).Updates(updateFields)
 	if result.Error != nil {
+		log.Println(result.Error.Error())
 		tx.Rollback()
 
 		// 이미 업로드된 파일들을 S3에서 삭제
@@ -517,6 +547,7 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 		// 기존 이미지 레코드 논리삭제
 		result = service.db.Model(&model.Image{}).Where("parent_id = ? AND type =?", user.Id, util.UserProfileImageType).Select("level").Updates(map[string]interface{}{"level": 10})
 		if result.Error != nil {
+			log.Println(result.Error.Error())
 			tx.Rollback()
 			if userRequest.ProfileImage != "" {
 				go func() {
@@ -529,6 +560,7 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 		// 이미지 레코드 재 생성
 
 		if err := tx.Create(&image).Error; err != nil {
+			log.Println(err)
 			tx.Rollback()
 			if userRequest.ProfileImage != "" {
 				go func() {
@@ -542,8 +574,9 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 
 	//서비스항목 조회
 	mainServices := make([]model.MainService, 0)
-	result = service.db.Where("id IN ? ", userRequest.UseServices).Find(&mainServices)
+	result = service.db.Where("id IN ? ", userRequest.UserServices).Find(&mainServices)
 	if result.Error != nil {
+		log.Println(result.Error.Error())
 		tx.Rollback()
 
 		if userRequest.ProfileImage != "" {
@@ -556,8 +589,9 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 	}
 
 	//유저별 사용 서비스 삭제 후
-	result = service.db.Where("uid = ?", userRequest.Id).Delete(&model.UseService{})
+	result = service.db.Where("uid = ?", userRequest.Id).Delete(&model.UserService{})
 	if result.Error != nil {
+		log.Println(result.Error.Error())
 		tx.Rollback()
 
 		if userRequest.ProfileImage != "" {
@@ -571,9 +605,9 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 
 	//유저별 사용 서비스 생성
 	if len(mainServices) > 0 {
-		var useService []model.UseService
+		var useService []model.UserService
 		for _, v := range mainServices {
-			useService = append(useService, model.UseService{
+			useService = append(useService, model.UserService{
 				Uid:       user.Id,
 				ServiceId: v.Id,
 				Title:     v.Title,
@@ -582,6 +616,7 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 
 		result = service.db.Create(&useService)
 		if result.Error != nil {
+			log.Println(result.Error.Error())
 			tx.Rollback()
 			if userRequest.ProfileImage != "" {
 				go func() {
@@ -599,13 +634,13 @@ func (service *userService) SetUser(userRequest dto.UserRequest) (string, error)
 
 func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 	var user model.User
-	result := service.db.Joins("ProfileImage", "level != 10 AND type = ?", util.UserProfileImageType).
+	result := service.db.Debug().Preload("ProfileImage", "level != ? AND type = ?", 10, util.UserProfileImageType).
 		Preload("LinkedEmails").First(&user, id)
 	if result.Error != nil {
 		return dto.UserResponse{}, errors.New("db error")
 	}
 
-	var useServices []model.UseService
+	var useServices []model.UserService
 	result = service.db.Where("uid = ?", id).Find(&useServices, id)
 	if result.Error != nil {
 		return dto.UserResponse{}, errors.New("db error2")
@@ -624,7 +659,7 @@ func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 		return dto.UserResponse{}, err
 	}
 
-	userResponse.UseServices = mainServices
+	userResponse.UserServices = mainServices
 
 	if userResponse.ProfileImage.Url != "" {
 		urlkey := extractKeyFromUrl(userResponse.ProfileImage.Url, service.bucket, service.bucketUrl)
@@ -638,11 +673,11 @@ func (service *userService) GetUser(id uint) (dto.UserResponse, error) {
 			Bucket: aws.String(service.bucket),
 			Key:    aws.String(thumbnailUrlkey),
 		})
-		urlStr, err := url.Presign(1 * time.Second) // URL은 1초 동안 유효
+		urlStr, err := url.Presign(5 * time.Second) // URL은 5초 동안 유효
 		if err != nil {
 			return dto.UserResponse{}, err
 		}
-		thumbnailUrlStr, err := thumbnailUrl.Presign(1 * time.Second) // URL은 1초 동안 유효 CachedNetworkImage 에서 캐싱해서 쓰면됨
+		thumbnailUrlStr, err := thumbnailUrl.Presign(5 * time.Second) // URL은 5초 동안 유효 CachedNetworkImage 에서 캐싱해서 쓰면됨
 		if err != nil {
 			return dto.UserResponse{}, err
 		}
@@ -685,4 +720,14 @@ func (service *userService) GetVersion() (dto.AppVersionResponse, error) {
 		return dto.AppVersionResponse{}, err
 	}
 	return versionResponse, nil
+}
+
+func (service *userService) RemoveProfile(uid uint) (string, error) {
+
+	// 기존 이미지 레코드 논리삭제
+	result := service.db.Model(&model.Image{}).Where("parent_id = ? AND type =?", uid, util.UserProfileImageType).Select("level").Updates(map[string]interface{}{"level": 10})
+	if result.Error != nil {
+		return "", errors.New("db error2")
+	}
+	return "200", nil
 }

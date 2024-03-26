@@ -6,7 +6,6 @@ import (
 	"alarm-service/common/model"
 	"alarm-service/common/util"
 	"alarm-service/dto"
-	"encoding/json"
 	"errors"
 	"log"
 
@@ -66,6 +65,7 @@ func (service *alarmService) SaveAlarm(alarmRequest dto.AlarmRequest) (string, e
 	if err := validateAlarm(alarmRequest); err != nil {
 		return "", err
 	}
+
 	var alarm model.Alarm
 	result := service.db.Where("id=? AND uid=?", alarmRequest.Id, alarmRequest.Uid).First(&model.Alarm{})
 
@@ -73,28 +73,7 @@ func (service *alarmService) SaveAlarm(alarmRequest dto.AlarmRequest) (string, e
 		return "", err
 	}
 	alarm.Uid = alarmRequest.Uid //  json: "-" 이라서
-	// JSON 배열을 Go 슬라이스로 변환
-	var weekdaySlice []int
-	err := json.Unmarshal(alarm.Week, &weekdaySlice)
-	if err != nil {
-		return "", err
-	}
-
-	seen := make(map[int]bool)
-	unique := []int{}
-
-	for _, v := range weekdaySlice {
-		// 숫자가 0과 6 사이인지 확인
-		if v >= 0 && v <= 6 {
-			// 중복되지 않은 경우, 결과 슬라이스에 추가
-			if !seen[v] {
-				seen[v] = true
-				unique = append(unique, v)
-			}
-		}
-	}
-
-	newWeekdays, err := json.Marshal(unique)
+	newWeekdays, _, err := validateWeek(alarm.Week)
 	if err != nil {
 		return "", err
 	}

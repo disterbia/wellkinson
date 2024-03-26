@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"reflect"
 	"sleep-service/common/model"
 	"sleep-service/common/util"
 	"sleep-service/dto"
@@ -87,7 +88,27 @@ func (service *sleepService) SaveSleepAlarm(sleepRequest dto.SleepAlarmRequest) 
 		return "", errors.New("db error")
 	} else {
 		// 레코드가 존재하면 업데이트
-		if err := service.db.Model(&sleep).Updates(sleep).Error; err != nil {
+
+		updateFields := make(map[string]interface{})
+
+		userRequestValue := reflect.ValueOf(sleepRequest)
+		userRequestType := userRequestValue.Type()
+		for i := 0; i < userRequestValue.NumField(); i++ {
+			field := userRequestValue.Field(i)
+			fieldName := userRequestType.Field(i).Tag.Get("json")
+			if fieldName == "-" {
+				continue
+			}
+			if !field.IsZero() {
+				if fieldName == "weekdays" {
+					// weekdays 필드를 JSON 형식으로 변환
+					updateFields[fieldName], _ = json.Marshal(field.Interface())
+				} else {
+					updateFields[fieldName] = field.Interface()
+				}
+			}
+		}
+		if err := service.db.Model(&sleep).Debug().Updates(updateFields).Error; err != nil {
 			return "", err
 		}
 		ar := &pb.AlarmRequest{
@@ -122,7 +143,7 @@ func (service *sleepService) SaveSleepAlarm(sleepRequest dto.SleepAlarmRequest) 
 func (service *sleepService) GetSleepAlarms(id uint) ([]dto.SleepAlarmResponse, error) {
 	var sleepAlarms []model.SleepAlarm
 	var alarmsResponses []dto.SleepAlarmResponse
-	err := service.db.Where("uid = ? ", id).Find(&sleepAlarms).Error
+	err := service.db.Where("uid = ? ", id).Order("end_time").Find(&sleepAlarms).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}

@@ -72,6 +72,9 @@ func ValidateDate(dateStr string) error {
 }
 
 func ValidateTime(timeStr string) error {
+	if len(timeStr) != 5 {
+		return errors.New("invalid time format, should be HH:MM")
+	}
 	_, err := time.Parse("15:04", timeStr)
 	if err != nil {
 		return errors.New("invalid time format, should be HH:MM")
@@ -106,7 +109,7 @@ func CopyStruct(input interface{}, output interface{}) error {
 func DecodeJwt(tokenString string) string {
 	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// MapClaims 타입으로 주장(claims) 확인
@@ -120,7 +123,7 @@ func DecodeJwt(tokenString string) string {
 			return ""
 		}
 	} else {
-		log.Fatal("주장을 MapClaims로 변환할 수 없습니다.")
+		log.Println("주장을 MapClaims로 변환할 수 없습니다.")
 		return ""
 	}
 }

@@ -65,12 +65,12 @@ func SnsLoginHandler(loginEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 
 		response, err := loginEndpoint(c.Request.Context(), req)
+		resp := response.(dto.LoginResponse)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		resp := response.(dto.LoginResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }
@@ -348,6 +348,36 @@ func GetVersionHandeler(getUserEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 
 		resp := response.(dto.AppVersionResponse)
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
+// @Tags 회원상태 변경(본인)  /user
+// @Summary 프로필 사진 삭제
+// @Description 기본이미지로 변경시 호출
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Bearer {jwt_token}"
+// @Success 200 {object} dto.BasicResponse "성공시 200 반환"
+// @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
+// @Security jwt
+// @Router /remove-profile [post]
+func RemoveProfileHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 토큰 검증 및 처리
+		id, _, err := util.VerifyJWT(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		response, err := removeEndpoint(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := response.(dto.BasicResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }

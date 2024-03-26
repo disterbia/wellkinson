@@ -25,22 +25,29 @@ type DietPresetResponse struct {
 type DietRequest struct {
 	Id     uint     `json:"id"`
 	Uid    uint     `json:"-"`
-	Name   string   `json:"name"`
+	Memo   string   `json:"memo"`
 	Time   string   `json:"time" example:"HH:mm"`
+	Date   string   `json:"date" example:"YYYY-MM-DD"`
 	Type   uint     `json:"type"`
 	Images []string `json:"images" example:"base64 encoding string"`
 	Foods  []string `json:"foods"`
 }
 
-type DietResponse struct {
+type DietCopy struct {
 	Id      uint            `json:"id"`
-	Name    string          `json:"name"`
+	Memo    string          `json:"memo"`
 	Time    string          `json:"time"`
 	Type    uint            `json:"type"`
+	Date    string          `json:"date" example:"YYYY-MM-DD"`
 	Images  []ImageResponse `json:"images"`
 	Foods   []string        `json:"foods"`
 	Created string          `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	Updated string          `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+}
+
+type DietResponse struct {
+	Date  string     `json:"date"  example:"YYYY-MM-DD"`
+	Diets []DietCopy `json:"diets"`
 }
 
 type ImageResponse struct {

@@ -61,8 +61,8 @@ func SaveExerciseHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 운동 조회시 호출
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param  start_date  query string  true  "시작날짜 yyyy-mm-dd"
-// @Param  end_date  query string  true  "종료날짜 yyyy-mm-dd"
+// @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"
+// @Param  end_date  query string  false  "종료날짜 yyyy-mm-dd"
 // @Success 200 {object} []dto.ExerciseDateInfo "운동정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"

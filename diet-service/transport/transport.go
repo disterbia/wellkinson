@@ -107,7 +107,7 @@ func GetPresetsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /remove-preset [post]
+// @Router /remove-presets [post]
 func RemovePresetHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, _, err := util.VerifyJWT(c)
@@ -219,8 +219,8 @@ func GetDietsHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 }
 
 // @Tags 식단 /diet
-// @Summary 추가한 식단 삭제
-// @Description 추가한 식단 삭제시 호출
+// @Summary 식단 삭제
+// @Description 식단 삭제시 호출
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"

@@ -3,6 +3,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"medicine-service/common/util"
 	"medicine-service/dto"
 	pb "medicine-service/proto"
+	"reflect"
 	"time"
 
 	"google.golang.org/grpc"
@@ -20,7 +22,7 @@ type MedicineService interface {
 	SaveMedicine(medicineRequest dto.MedicineRequest) (string, error)
 	RemoveMedicines(ids []uint, uid uint) (string, error)
 	GetTakens(id uint, startDateStr, endDateStr string) ([]dto.MedicineDateInfo, error)
-	GetMedicines(id uint) ([]dto.MedicineResponse, error)
+	GetMedicines(id uint) ([]dto.MedicineOriginResponse, error)
 	TakeMedicine(takeMedicine dto.TakeMedicine) (string, error)
 	UnTakeMedicine(takeMedicine dto.UnTakeMedicine) (string, error)
 	SearchMedicines(keyword string) ([]string, error)
@@ -41,6 +43,7 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 	if err := validateMedicine(medicineRequest); err != nil {
 		return "", err
 	}
+
 	var medicine model.Medicine
 
 	result := service.db.Where("id=? AND uid=?", medicineRequest.Id, medicineRequest.Uid).First(&model.Medicine{})
@@ -93,8 +96,27 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 	} else if result.Error != nil {
 		return "", errors.New("db error")
 	} else {
+		updateFields := make(map[string]interface{})
+
+		userRequestValue := reflect.ValueOf(medicineRequest)
+		userRequestType := userRequestValue.Type()
+		for i := 0; i < userRequestValue.NumField(); i++ {
+			field := userRequestValue.Field(i)
+			fieldName := userRequestType.Field(i).Tag.Get("json")
+			if fieldName == "-" {
+				continue
+			}
+			if !field.IsZero() {
+				if fieldName == "weekdays" || fieldName == "timestamp" {
+					// weekdays 필드를 JSON 형식으로 변환
+					updateFields[fieldName], _ = json.Marshal(field.Interface())
+				} else {
+					updateFields[fieldName] = field.Interface()
+				}
+			}
+		}
 		// 레코드가 존재하면 업데이트
-		if err := service.db.Model(&medicine).Updates(medicine).Error; err != nil {
+		if err := service.db.Model(&medicine).Updates(updateFields).Error; err != nil {
 			return "", err
 		}
 		for _, v := range medicineRequest.Timestamp {
@@ -168,19 +190,29 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 	}
 
 	var medicines []model.Medicine
-	var medicineResponse []dto.MedicineResponse
-	err = service.db.Where("uid = ? AND start_at <= ? AND end_at >= ?", id, endDate, startDate).Find(&medicines).Error
+	var medicineTemp []dto.MedicineOriginResponse
+	var medicineBridge []dto.MedicinBridge
+	var medicineResponses []dto.MedicineResponse
+	err = service.db.Where("uid = ? AND (start_at ='' OR start_at <= ?) AND (end_at ='' OR end_at >= ?)", id, endDate, startDate).Find(&medicines).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}
 
-	if err := util.CopyStruct(medicines, &medicineResponse); err != nil {
+	if err := util.CopyStruct(medicines, &medicineTemp); err != nil {
+		return nil, err
+	}
+
+	if err := util.CopyStruct(medicineTemp, &medicineBridge); err != nil {
+		return nil, err
+	}
+
+	if err := util.CopyStruct(medicineBridge, &medicineResponses); err != nil {
 		return nil, err
 	}
 
 	// 해당 약물 복용내역 조회
 	var medicineIds []uint
-	for _, medicine := range medicineResponse {
+	for _, medicine := range medicineResponses {
 		medicineIds = append(medicineIds, medicine.Id)
 	}
 	var takenMedicines []model.MedicineTake
@@ -189,49 +221,77 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 		return nil, err
 	}
 
-	// 복용내역 응답형식으로 가공 및 복용일 반영
-	takenMap := make(map[uint]map[string]bool)
+	//// 복용내역 응답형식으로 가공 및 복용일 반영
+	// takenMap := make(map[uint]map[string]bool)
+	// for _, tm := range takenMedicines {
+	// 	if takenMap[tm.MedicineId] == nil {
+	// 		takenMap[tm.MedicineId] = make(map[string]bool)
+	// 	}
+	// 	takenMap[tm.MedicineId][tm.DateTaken] = true
+	// }
+
+	takenMap := make(map[uint]map[string]map[string]bool)
 	for _, tm := range takenMedicines {
 		if takenMap[tm.MedicineId] == nil {
-			takenMap[tm.MedicineId] = make(map[string]bool)
+			takenMap[tm.MedicineId] = make(map[string]map[string]bool)
 		}
-		takenMap[tm.MedicineId][tm.DateTaken] = true
+		if takenMap[tm.MedicineId][tm.DateTaken] == nil {
+			takenMap[tm.MedicineId][tm.DateTaken] = make(map[string]bool)
+		}
+		takenMap[tm.MedicineId][tm.DateTaken][tm.TimeTaken] = true
 	}
 
 	// 전체날짜에서 약물 복용날짜 체크
 	medicineDates := make([]dto.MedicineDateInfo, 0)
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
-		var dailyMediciens []dto.MedicineTakenInfo
-		for _, m := range medicineResponse {
-			startAt, _ := time.Parse("2006-01-02", m.StartAt)
-			endAt, _ := time.Parse("2006-01-02", m.EndAt)
+		var dayMedicineResponses []dto.MedicineResponse
+		for i, m := range medicineTemp {
+			startAt, errStart := time.Parse("2006-01-02", m.StartAt)
+			endAt, errEnd := time.Parse("2006-01-02", m.EndAt)
 
-			if d.After(startAt) && d.Before(endAt) && isMedicineDay(m.Weekdays, d.Weekday()) {
-				taken := takenMap[m.Id][d.Format("2006-01-02")]
-				dailyMediciens = append(dailyMediciens, dto.MedicineTakenInfo{Medicine: m, Taken: taken})
+			// startAt 또는 endAt이 null (또는 파싱 에러)일 경우, 무기한으로 간주
+			if errStart != nil {
+				startAt = time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC) // 무기한 시작일 경우의 처리
+			}
+			if errEnd != nil {
+				endAt = time.Date(2099, 12, 31, 0, 0, 0, 0, time.UTC) // 무기한 종료일 경우의 처리
+			}
+
+			if !d.Before(startAt) && d.Before(endAt.AddDate(0, 0, 1)) && isMedicineDay(m.Weekdays, d.Weekday()) {
+				var a = make(map[string]bool)
+				for _, v := range m.Timestamp {
+
+					taken := takenMap[m.Id][d.Format("2006-01-02")][v]
+					a[v] = taken
+					log.Println(d.Format("2006-01-02"), v, taken)
+
+				}
+				tempMedicineResponse := medicineResponses[i]
+				tempMedicineResponse.Timestamp = a
+				dayMedicineResponses = append(dayMedicineResponses, tempMedicineResponse)
 			}
 		}
-		if len(dailyMediciens) > 0 {
-			medicineDates = append(medicineDates, dto.MedicineDateInfo{Date: d.Format("2006-01-02"), Medicines: dailyMediciens})
+		if len(medicineResponses) > 0 {
+			medicineDates = append(medicineDates, dto.MedicineDateInfo{Date: d.Format("2006-01-02"), Medicines: dayMedicineResponses})
 		}
 	}
 
 	return medicineDates, nil
 }
 
-func (service *medicineService) GetMedicines(id uint) ([]dto.MedicineResponse, error) {
+func (service *medicineService) GetMedicines(id uint) ([]dto.MedicineOriginResponse, error) {
 	var medicines []model.Medicine
-	var medicineResponses []dto.MedicineResponse
+	var medicineTemp []dto.MedicineOriginResponse
 
 	err := service.db.Where("uid = ?", id).Find(&medicines).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}
-	if err := util.CopyStruct(medicines, &medicineResponses); err != nil {
+	if err := util.CopyStruct(medicines, &medicineTemp); err != nil {
 		return nil, err
 	}
 
-	return medicineResponses, nil
+	return medicineTemp, nil
 }
 
 func (service *medicineService) TakeMedicine(takeMedicine dto.TakeMedicine) (string, error) {

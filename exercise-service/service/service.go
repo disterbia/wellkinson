@@ -3,12 +3,14 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"exercise-service/common/model"
 	"exercise-service/common/util"
 	"exercise-service/dto"
 	pb "exercise-service/proto"
 	"log"
+	"reflect"
 	"time"
 
 	"google.golang.org/grpc"
@@ -41,6 +43,7 @@ func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr s
 	if err != nil {
 		return nil, err
 	}
+
 	endDate, err := time.Parse("2006-01-02", endDateStr)
 
 	if err != nil {
@@ -49,7 +52,7 @@ func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr s
 
 	var exercises []model.Exercise
 	var exerciseResponse []dto.ExerciseResponse
-	err = service.db.Where("uid = ? AND plan_start_at <= ? AND plan_end_at >= ?", id, endDate, startDate).Find(&exercises).Error
+	err = service.db.Debug().Where("uid = ? AND plan_start_at <= ? AND plan_end_at >= ?", id, endDate, startDate).Find(&exercises).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}
@@ -89,7 +92,7 @@ func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr s
 			planStartAt, _ := time.Parse("2006-01-02", e.PlanStartAt)
 			planEndAt, _ := time.Parse("2006-01-02", e.PlanEndAt)
 
-			if d.After(planStartAt) && d.Before(planEndAt) && isExerciseDay(e.Weekdays, d.Weekday()) {
+			if !d.Before(planStartAt) && d.Before(planEndAt.AddDate(0, 0, 1)) && isExerciseDay(e.Weekdays, d.Weekday()) {
 				performed := performedMap[e.Id][d.Format("2006-01-02")]
 				dailyExercises = append(dailyExercises, dto.ExerciseDoneInfo{Exercise: e, Done: performed})
 			}
@@ -140,9 +143,14 @@ func (service *exerciseService) DoExercise(exerciseDo dto.ExerciseDo) (string, e
 
 func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest) (string, error) {
 
+	if exerciseRequest.PlanEndAt == "" {
+		exerciseRequest.PlanEndAt = "2099-01-01"
+	}
+
 	if err := validateExercise(exerciseRequest); err != nil {
 		return "", err
 	}
+
 	var exercise model.Exercise
 
 	result := service.db.Where("id=? AND uid=?", exerciseRequest.Id, exerciseRequest.Uid).First(&model.Exercise{})
@@ -183,7 +191,27 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 		return "", errors.New("db error")
 	} else {
 		// 레코드가 존재하면 업데이트
-		if err := service.db.Model(&exercise).Updates(exercise).Error; err != nil {
+		updateFields := make(map[string]interface{})
+
+		userRequestValue := reflect.ValueOf(exerciseRequest)
+		userRequestType := userRequestValue.Type()
+		for i := 0; i < userRequestValue.NumField(); i++ {
+			field := userRequestValue.Field(i)
+			fieldName := userRequestType.Field(i).Tag.Get("json")
+			if fieldName == "-" {
+				continue
+			}
+			if !field.IsZero() {
+				if fieldName == "weekdays" {
+					// weekdays 필드를 JSON 형식으로 변환
+					updateFields[fieldName], _ = json.Marshal(field.Interface())
+				} else {
+					updateFields[fieldName] = field.Interface()
+				}
+			}
+		}
+
+		if err := service.db.Model(&exercise).Updates(updateFields).Error; err != nil {
 			return "", err
 		}
 		ar := &pb.AlarmRequest{

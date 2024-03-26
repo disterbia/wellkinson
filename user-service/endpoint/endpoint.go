@@ -133,3 +133,14 @@ func GetVersionEndpoint(s service.UserService) endpoint.Endpoint {
 		return version, nil
 	}
 }
+
+func RemoveProfileEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		id := request.(uint)
+		code, err := s.RemoveProfile(id)
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return dto.BasicResponse{Code: code}, nil
+	}
+}

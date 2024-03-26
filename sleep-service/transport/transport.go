@@ -23,7 +23,7 @@ var userLocks sync.Map
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /save-sleep [post]
+// @Router /save-sleep-alarm [post]
 func SaveSleepHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _, err := util.VerifyJWT(c)
@@ -217,7 +217,7 @@ func SaveSleepTimeHandler(doEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
-// @Router /remove-sleep-times/{id} [post]
+// @Router /remove-sleep-time/{id} [post]
 func RemoveSleepTimeHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, _, err := util.VerifyJWT(c)

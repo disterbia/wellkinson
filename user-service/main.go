@@ -55,7 +55,7 @@ func RateLimitMiddleware() gin.HandlerFunc {
 		limiter, exists := ipLimiters[ip]
 		if !exists {
 			// 새로운 리미터 생성
-			limiter = rate.NewLimiter(rate.Every(24*time.Hour/5), 5)
+			limiter = rate.NewLimiter(rate.Every(24*time.Hour/4), 4)
 			ipLimiters[ip] = limiter
 		}
 		ipLimitersMutex.Unlock()
@@ -73,7 +73,7 @@ func main() {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 	dbPath := os.Getenv("DB_PATH")
 	database, err := db.NewDB(dbPath)
@@ -107,6 +107,7 @@ func main() {
 	verifyEndpoint := endpoint.VerifyEndpoint(usvc)
 	removeEndpoint := endpoint.RemoveEndpoint(usvc)
 	linkEndpoint := endpoint.LinkEndpoint(usvc)
+	removeProfileEndpoint := endpoint.RemoveProfileEndpoint(usvc)
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -120,6 +121,7 @@ func main() {
 	router.POST("/verify-code", transport.VerifyHandler(verifyEndpoint))
 	router.POST("/remove-user", transport.RemoveHandler(removeEndpoint))
 	router.POST("/link-email", transport.LinkHandler(linkEndpoint))
+	router.POST("/remove-profile", transport.RemoveProfileHandler(removeProfileEndpoint))
 
 	router.GET("/get-user", transport.GetUserHandler(getUserEndpoint))
 	router.GET("/get-version", transport.GetVersionHandeler(getversionEndpoint))

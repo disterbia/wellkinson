@@ -15,7 +15,7 @@ func validateSleep(sleepRequest dto.SleepAlarmRequest) error {
 	if err := util.ValidateTime(sleepRequest.EndTime); err != nil {
 		return err
 	}
-	if sleepRequest.IsActive {
+	if sleepRequest.IsActive != nil && *sleepRequest.IsActive {
 		if err := util.ValidateTime(sleepRequest.AlarmTime); err != nil {
 			return err
 		}
@@ -43,6 +43,10 @@ func validateWeek(weekdays json.RawMessage) (json.RawMessage, []int32, error) {
 	err := json.Unmarshal(weekdays, &weekdaySlice)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if len(weekdaySlice) == 0 {
+		return nil, nil, errors.New("must weekday")
 	}
 
 	seen := make(map[int32]bool)

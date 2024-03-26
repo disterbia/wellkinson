@@ -171,20 +171,21 @@ type Video struct {
 
 type Medicine struct {
 	TimestampModel
-	Id           uint
-	Uid          uint
-	Timestamp    json.RawMessage `gorm:"type:json"`
-	Weekdays     json.RawMessage `gorm:"type:json"`
-	Dose         float32
-	IntervalType uint8   `json:"interval_type"`
-	IsActive     bool    `json:"is_active"`
-	LeastStore   float32 `json:"least_store"`
-	MedicineType string  `json:"medicine_type"`
-	Name         string
-	Store        float32
-	StartAt      string `json:"start_at"`
-	EndAt        string `json:"end_at"`
-	UsePrivacy   bool   `json:"use_privacy"`
+	Id            uint
+	Uid           uint
+	Timestamp     json.RawMessage `gorm:"type:json"`
+	Weekdays      json.RawMessage `gorm:"type:json"`
+	Dose          float32
+	IntervalType  uint8   `json:"interval_type"`
+	IsActive      bool    `json:"is_active"`
+	LeastStore    float32 `json:"least_store"`
+	UseLeastStore bool    `json:"use_least_store"`
+	MedicineType  string  `json:"medicine_type"`
+	Name          string
+	Store         float32
+	StartAt       string `json:"start_at"`
+	EndAt         string `json:"end_at"`
+	UsePrivacy    bool   `json:"use_privacy"`
 }
 
 type MedicineTake struct {

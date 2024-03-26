@@ -14,7 +14,7 @@ import (
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatalf("Error loading .env file")
 	}
 	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {

@@ -3,6 +3,7 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"exercise-service/common/util"
 	"exercise-service/dto"
 )
@@ -28,6 +29,10 @@ func validateWeek(weekdays json.RawMessage) (json.RawMessage, []int32, error) {
 	err := json.Unmarshal(weekdays, &weekdaySlice)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if len(weekdaySlice) == 0 {
+		return nil, nil, errors.New("must weekday")
 	}
 
 	seen := make(map[int32]bool)

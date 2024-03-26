@@ -10,7 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/gif"
 	"image/jpeg"
+	"image/png"
 	"log"
 	"math/big"
 	"net/http"
@@ -236,7 +238,7 @@ func uploadImagesToS3(imgData []byte, thumbnailData []byte, contentType string, 
 }
 
 func reduceImageSize(data []byte) ([]byte, error) {
-	img, _, err := image.Decode(bytes.NewReader(data))
+	img, format, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +251,21 @@ func reduceImageSize(data []byte) ([]byte, error) {
 		resizedImg := resize.Resize(uint(newWidth), uint(newHeight), img, resize.Lanczos3)
 
 		var buf bytes.Buffer
-		err := jpeg.Encode(&buf, resizedImg, nil)
+		switch format {
+		case "jpeg":
+			err = jpeg.Encode(&buf, resizedImg, nil)
+		case "png":
+			err = png.Encode(&buf, resizedImg)
+		case "gif":
+			err = gif.Encode(&buf, resizedImg, nil)
+		case "webp":
+			// WebP 인코딩은 지원하지 않으므로 PNG 형식으로 인코딩
+			err = png.Encode(&buf, resizedImg)
+		// 여기에 필요한 다른 형식을 추가할 수 있습니다.
+		default:
+			log.Printf("Unsupported format: %s\n", format)
+			return nil, err
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -262,7 +278,7 @@ func reduceImageSize(data []byte) ([]byte, error) {
 }
 
 func createThumbnail(data []byte) ([]byte, error) {
-	img, _, err := image.Decode(bytes.NewReader(data))
+	img, format, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +291,19 @@ func createThumbnail(data []byte) ([]byte, error) {
 		thumbnail := resize.Resize(uint(newWidth), uint(newHeight), img, resize.Lanczos3)
 
 		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, thumbnail, nil)
+		switch format {
+		case "jpeg":
+			err = jpeg.Encode(&buf, thumbnail, nil)
+		case "png":
+			err = png.Encode(&buf, thumbnail)
+		case "gif":
+			err = gif.Encode(&buf, thumbnail, nil)
+		case "webp":
+			err = png.Encode(&buf, thumbnail)
+		default:
+			log.Printf("Unsupported format: %s\n", format)
+			return nil, err
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -295,11 +323,21 @@ func getImageFormat(imgData []byte) (contentType, extension string, err error) {
 	if err != nil {
 		return "", "", err
 	}
-
-	contentType = "image/" + format
-	extension = "." + format
-	if format == "jpeg" {
+	switch format {
+	case "jpeg":
+		contentType = "image/jpeg"
 		extension = ".jpg"
+	case "png":
+		contentType = "image/png"
+		extension = ".png"
+	case "gif":
+		contentType = "image/gif"
+		extension = ".gif"
+	case "wepb":
+		contentType = "image/wepb"
+		extension = ".wepb"
+	default:
+		return "", "", fmt.Errorf("unsupported image format: %s", format)
 	}
 
 	return contentType, extension, nil

@@ -56,7 +56,7 @@ func SaveEmotionHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 
 // @Tags 기분 /emotion
 // @Summary 기분 조회
-// @Description 기분 조회시 호출 (10개씩)
+// @Description 기분 조회시 호출
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
 // @Param  start_date  query string  false  "시작날짜 yyyy-mm-dd"

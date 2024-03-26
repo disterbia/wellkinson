@@ -137,7 +137,7 @@ func GetTakensHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 등록 약물 조회시 호출
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Success 200 {object} []dto.MedicineResponse "등록 약물 정보"
+// @Success 200 {object} []dto.MedicineOriginResponse "등록 약물 정보"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /get-medicines [get]
@@ -155,7 +155,7 @@ func GetMedicinesHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.([]dto.MedicineResponse)
+		resp := response.([]dto.MedicineOriginResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }

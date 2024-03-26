@@ -16,3 +16,7 @@ var KakaoSnsType = 0
 var GoogleSnsType = 1
 
 var AppleSnsType = 2
+
+var Interval_everyday = 0 //매일
+var Interval_mine = 1     // 자발적으로
+var Interval_days = 2     // 특정한요일

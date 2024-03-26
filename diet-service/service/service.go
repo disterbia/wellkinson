@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -40,34 +42,37 @@ func NewDietService(db *gorm.DB, s3svc *s3.S3, bucket string, bucketUrl string) 
 }
 
 func (service *dietService) GetDiets(id uint, startDate, endDate string) ([]dto.DietResponse, error) {
+	var diets []model.Diet
+	dietResponses := make([]dto.DietResponse, 0)
 
-	var diet []model.Diet
-
+	// 데이터베이스 쿼리를 통해 diets 데이터 조회
 	query := service.db.Where("uid = ?", id)
 	if startDate != "" {
-		query = query.Where("created >= ?", startDate)
+		query = query.Where("date >= ?", startDate)
 	}
 	if endDate != "" {
-		query = query.Where("created <= ?", endDate+" 23:59:59")
+		query = query.Where("date <= ?", endDate+" 23:59:59")
 	}
-	query = query.Order("id DESC")
-	result := query.Preload("Images", "level != 10 AND type = ? ", util.DietImageType).Find(&diet)
+	result := query.Preload("Images", "level != 10 AND type = ?", util.DietImageType).Find(&diets)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	var dietResponses []dto.DietResponse
-	if err := util.CopyStruct(diet, &dietResponses); err != nil {
-		return nil, err
-	}
+	// diets 데이터를 diet_date 별로 그룹화
+	dietMap := make(map[string][]dto.DietCopy)
+	for _, diet := range diets {
+		var dietCopy dto.DietCopy
+		if err := util.CopyStruct(&diet, &dietCopy); err != nil {
+			return nil, err
+		}
 
-	for i := range dietResponses {
-		for j := range dietResponses[i].Images {
-			// S3 객체 키를 추출 (URL에서)
-			urlkey := extractKeyFromUrl(dietResponses[i].Images[j].Url, service.bucket, service.bucketUrl)
-			thumbnailUrlkey := extractKeyFromUrl(dietResponses[i].Images[j].ThumbnailUrl, service.bucket, service.bucketUrl)
-			// 사전 서명된 URL을 생성
+		// 이미지 URL 처리
+		for j, image := range dietCopy.Images {
+			// S3 객체 키 추출 및 사전 서명된 URL 생성 로직
+			urlkey := extractKeyFromUrl(image.Url, service.bucket, service.bucketUrl)
+			thumbnailUrlkey := extractKeyFromUrl(image.ThumbnailUrl, service.bucket, service.bucketUrl)
+
 			url, _ := service.s3svc.GetObjectRequest(&s3.GetObjectInput{
 				Bucket: aws.String(service.bucket),
 				Key:    aws.String(urlkey),
@@ -76,18 +81,38 @@ func (service *dietService) GetDiets(id uint, startDate, endDate string) ([]dto.
 				Bucket: aws.String(service.bucket),
 				Key:    aws.String(thumbnailUrlkey),
 			})
-			urlStr, err := url.Presign(1 * time.Second) // URL은 1초 동안 유효
+
+			urlStr, err := url.Presign(1 * time.Minute) // 예를 들어, URL은 1분 동안 유효
 			if err != nil {
 				return nil, err
 			}
-			thumbnailUrlStr, err := thumbnailUrl.Presign(1 * time.Second) // URL은 1초 동안 유효 CachedNetworkImage 에서 캐싱해서 쓰면됨
+			thumbnailUrlStr, err := thumbnailUrl.Presign(1 * time.Minute)
 			if err != nil {
 				return nil, err
 			}
-			dietResponses[i].Images[j].Url = urlStr // 사전 서명된 URL로 업데이트
-			dietResponses[i].Images[j].ThumbnailUrl = thumbnailUrlStr
+
+			dietCopy.Images[j].Url = urlStr
+			dietCopy.Images[j].ThumbnailUrl = thumbnailUrlStr
 		}
+
+		// diet_date 기준으로 데이터 그룹화
+		dietMap[diet.Date] = append(dietMap[diet.Date], dietCopy)
 	}
+
+	// 그룹화된 데이터를 dto.DietResponse 슬라이스로 변환
+	for date, diets := range dietMap {
+		dietResponse := dto.DietResponse{
+			Date:  date,
+			Diets: diets,
+		}
+		dietResponses = append(dietResponses, dietResponse)
+	}
+
+	// 선택적: dietResponses를 DietDate 기준으로 정렬할 수 있음
+	sort.Slice(dietResponses, func(i, j int) bool {
+		return dietResponses[i].Date < dietResponses[j].Date
+	})
+
 	return dietResponses, nil
 }
 
@@ -96,6 +121,10 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 	if err := util.ValidateTime(dietRequest.Time); err != nil {
 		return "", err
 	}
+	if err := util.ValidateDate(dietRequest.Date); err != nil {
+		return "", err
+	}
+
 	emptyImage := len(dietRequest.Images) == 0
 	// 트랜잭션 시작
 	tx := service.db.Begin()
@@ -149,6 +178,8 @@ func (service *dietService) SaveDiet(dietRequest dto.DietRequest) (string, error
 				return
 			}
 
+			contentType := http.DetectContentType(imgData)
+			fmt.Println("Detected Content Type:", contentType)
 			contentType, ext, err := getImageFormat(imgData)
 			if err != nil {
 				errorsChan <- fmt.Errorf("invalid image format: %v", err)

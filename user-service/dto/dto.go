@@ -6,16 +6,16 @@ type UserRequest struct {
 	Email                string `json:"-"`
 	Birthday             string `json:"birthday" example:"YYYY-MM-DD"`
 	DeviceID             string `json:"device_id"`
-	Gender               bool   `json:"gender"` // true:남 false: 여
+	Gender               *bool  `json:"gender"` // true:남 false: 여
 	FCMToken             string `json:"fcm_token"`
-	IsFirst              bool   `json:"is_first"`
+	IsFirst              *bool  `json:"is_first"`
 	Name                 string `json:"name"`
 	PhoneNum             string `json:"phone_num" example:"01000000000"`
-	UseAutoLogin         bool   `json:"use_auto_login"`
-	UsePrivacyProtection bool   `json:"user_privacy_protection"`
-	UseSleepTracking     bool   `json:"use_sleep_tracking"`
+	UseAutoLogin         *bool  `json:"use_auto_login"`
+	UsePrivacyProtection *bool  `json:"user_privacy_protection"`
+	UseSleepTracking     *bool  `json:"use_sleep_tracking"`
 	UserType             uint   `json:"user_type"`
-	UseServices          []int  `json:"use_services"`
+	UserServices         []int  `json:"user_services"`
 	ProfileImage         string `json:"profile_image" example:"base64 encoding string"`
 }
 
@@ -35,7 +35,7 @@ type UserResponse struct {
 	Email                string                `json:"email"`
 	Created              string                `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	Updated              string                `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	UseServices          []MainServiceResponse `json:"use_services"`
+	UserServices         []MainServiceResponse `json:"user_services"`
 	ProfileImage         ImageResponse         `json:"profile_image"`
 	LinkedEmails         []LinkedResponse      `json:"linked_emails"`
 }
@@ -69,7 +69,7 @@ type TempUser struct {
 	UsePrivacyProtection bool   `json:"user_privacy_protection"`
 	UseSleepTracking     bool   `json:"use_sleep_tracking"`
 	UserType             uint   `json:"user_type"`
-	UseServices          []int  `json:"use_services"`
+	UserServices         []int  `json:"user_services"`
 }
 
 type LoginRequest struct {

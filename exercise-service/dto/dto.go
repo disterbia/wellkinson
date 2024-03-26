@@ -19,12 +19,13 @@ type ExerciseRequest struct {
 	ExerciseEndAt   string `json:"exercise_end_at" example:"HH:mm"`
 	PlanStartAt     string `json:"plan_start_at" example:"YYYY-MM-DD"`
 	PlanEndAt       string `json:"plan_end_at" example:"YYYY-MM-DD"`
-	UseAlarm        bool   `json:"use_alarm"`
+	UseAlarm        *bool  `json:"use_alarm"`
 	Weekdays        []uint `json:"weekdays"`
 }
 
 type ExerciseResponse struct {
 	Id              uint   `json:"id"`
+	Title           string `json:"title"`
 	ExerciseStartAt string `json:"exercise_start_at" example:"HH:mm"`
 	ExerciseEndAt   string `json:"exercise_end_at"  example:"HH:mm"`
 	PlanStartAt     string `json:"plan_start_at"  example:"YYYY-MM-DD"`

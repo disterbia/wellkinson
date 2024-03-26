@@ -245,7 +245,7 @@ type MainService struct {
 	Level uint
 }
 
-type UseService struct {
+type UserService struct {
 	TimestampModel
 	Id        uint
 	Uid       uint
