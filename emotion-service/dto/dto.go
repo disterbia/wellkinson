@@ -6,15 +6,15 @@ type GetEmotionsParams struct {
 	EndDate   string `form:"end_date" example:"yyyy-mm-dd"`
 }
 type EmotionRequest struct {
-	Id      uint   `json:"id"`
-	Uid     uint   `json:"-"`
-	Emotion string `json:"emotion" example:"기분명"`
-	State   string `json:"state" example:"기분내용"`
+	Id      uint    `json:"id"`
+	Uid     uint    `json:"-"`
+	Emotion *uint   `json:"emotion"`
+	State   *string `json:"state" example:"기분내용"`
 }
 
 type EmotionResponse struct {
 	Id      uint   `json:"id"`
-	Emotion string `json:"emotion" example:"기분명"`
+	Emotion uint   `json:"emotion" `
 	State   string `json:"state" example:"기분내용"`
 	Created string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	Updated string `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`

@@ -194,6 +194,7 @@ type MedicineTake struct {
 	Uid        uint
 	DateTaken  string `json:"date_taken"`
 	TimeTaken  string `json:"time_taken"`
+	RealTaken  string `json:"real_taken"`
 	Dose       float32
 	MedicineId uint `json:"medicine_id"`
 }

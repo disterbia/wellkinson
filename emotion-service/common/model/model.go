@@ -109,7 +109,7 @@ type Emotion struct {
 	TimestampModel
 	Id      uint
 	Uid     uint
-	Emotion string
+	Emotion uint
 	State   string
 }
 

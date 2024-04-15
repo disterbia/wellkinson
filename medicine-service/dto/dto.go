@@ -53,22 +53,22 @@ type MedicineTakenInfo2 struct {
 	Taken    bool             `json:"taken"`
 }
 type MedicineResponse struct {
-	Id            uint            `json:"id"`
-	Timestamp     map[string]bool `json:"timestamp"`
-	Weekdays      []uint          `json:"weekdays"`
-	Dose          float32         `json:"dose"`
-	IntervalType  uint8           `json:"interval_type"`
-	IsActive      bool            `json:"is_active"`
-	LeastStore    float32         `json:"least_store"`
-	UseLeastStore bool            `json:"use_least_store"`
-	MedicineType  string          `json:"medicine_type"`
-	Name          string          `json:"name"`
-	Store         float32         `json:"store"`
-	StartAt       string          `json:"start_at" example:"YYYY-MM-dd"`
-	EndAt         string          `json:"end_at"  example:"YYYY-MM:dd"`
-	UsePrivacy    bool            `json:"use_privacy"`
-	Created       string          `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated       string          `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Id            uint              `json:"id"`
+	Timestamp     map[string]string `json:"timestamp"`
+	Weekdays      []uint            `json:"weekdays"`
+	Dose          float32           `json:"dose"`
+	IntervalType  uint8             `json:"interval_type"`
+	IsActive      bool              `json:"is_active"`
+	LeastStore    float32           `json:"least_store"`
+	UseLeastStore bool              `json:"use_least_store"`
+	MedicineType  string            `json:"medicine_type"`
+	Name          string            `json:"name"`
+	Store         float32           `json:"store"`
+	StartAt       string            `json:"start_at" example:"YYYY-MM-dd"`
+	EndAt         string            `json:"end_at"  example:"YYYY-MM:dd"`
+	UsePrivacy    bool              `json:"use_privacy"`
+	Created       string            `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Updated       string            `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 }
 
 type TakeMedicine struct {
@@ -76,6 +76,7 @@ type TakeMedicine struct {
 	MedicineId uint    `json:"medicine_id"`
 	DateTaken  string  `json:"date_taken"  example:"YYYY-MM-DD"`
 	TimeTaken  string  `json:"time_taken"  example:"HH:mm"`
+	RealTaken  string  `json:"real_taken"  example:"HH:mm"`
 	Dose       float32 `json:"dose"`
 }
 

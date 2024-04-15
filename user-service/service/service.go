@@ -411,7 +411,7 @@ func (service *userService) LinkEmail(uid uint, idToken string) (string, error) 
 
 func saveLinkedEmail(uid uint, email string, service *userService, snsType uint) error {
 	var user model.User
-	if err := service.db.Where("id = ? ", uid).First(&user).Error; err != nil {
+	if err := service.db.Where("email = ? ", email).First(&user).Error; err != nil {
 		return errors.New("db error")
 	}
 	if user.Email == email {
@@ -419,10 +419,24 @@ func saveLinkedEmail(uid uint, email string, service *userService, snsType uint)
 	}
 
 	linkedEmail := model.LinkedEmail{Email: email, Uid: uid, SnsType: snsType}
-	err := service.db.Create(&linkedEmail).Error
-	if err != nil {
-		return errors.New("db error2")
+
+	result := service.db.Where(linkedEmail).First(&model.LinkedEmail{})
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		// 레코드가 존재하지 않으면 새 레코드 생성
+		err := service.db.Create(&linkedEmail).Error
+		if err != nil {
+			return errors.New("db error2")
+		}
+	} else if result.Error != nil {
+		return errors.New("db error3")
+	} else {
+		// 레코드가 존재하면 삭제
+		if err := service.db.Where(linkedEmail).Delete(&model.LinkedEmail{}).Error; err != nil {
+			return errors.New("db error4")
+		}
 	}
+
 	return nil
 }
 

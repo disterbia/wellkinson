@@ -18,6 +18,21 @@ bind-address = 0.0.0.0
 sudo systemctl restart mariadb
 
 
+sudo apt-get update
+sudo apt-get install docker.io
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+
+
+docker-compose up -d
+docker-compose pull // 도커헙 새로푸쉬되었을때 가져오고 docker-compose up -d
+
+//sudo 빼는법
+sudo grep docker /etc/group // 존재하는 그룹이 있다면 아래 명령어 없다면 sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+
 <!-- SQL -->
 
 CREATE DATABASE wellkinson;

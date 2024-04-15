@@ -6,6 +6,7 @@ import (
 	"emotion-service/common/util"
 	"emotion-service/dto"
 	"errors"
+	"reflect"
 
 	"gorm.io/gorm"
 )
@@ -32,6 +33,7 @@ func (service *emotionService) SaveEmotion(emotionRequest dto.EmotionRequest) (s
 	if err := util.CopyStruct(emotionRequest, &emotion); err != nil {
 		return "", err
 	}
+
 	emotion.Uid = emotionRequest.Uid
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -43,8 +45,22 @@ func (service *emotionService) SaveEmotion(emotionRequest dto.EmotionRequest) (s
 	} else if result.Error != nil {
 		return "", errors.New("db error")
 	} else {
+		updateFields := make(map[string]interface{})
+
+		userRequestValue := reflect.ValueOf(emotionRequest)
+		userRequestType := userRequestValue.Type()
+		for i := 0; i < userRequestValue.NumField(); i++ {
+			field := userRequestValue.Field(i)
+			fieldName := userRequestType.Field(i).Tag.Get("json")
+			if fieldName == "-" {
+				continue
+			}
+			if !field.IsZero() {
+				updateFields[fieldName] = field.Interface()
+			}
+		}
 		// 레코드가 존재하면 업데이트
-		if err := service.db.Model(&emotion).Updates(emotion).Error; err != nil {
+		if err := service.db.Model(&emotion).Updates(updateFields).Error; err != nil {
 			return "", err
 		}
 	}

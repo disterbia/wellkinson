@@ -142,7 +142,7 @@ func main() {
 		userProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	vocalServiceURL, _ := url.Parse("http://vocal:44410")
+	vocalServiceURL, _ := url.Parse("http://localhost:44410")
 	vocalProxy := httputil.NewSingleHostReverseProxy(vocalServiceURL)
 	router.Any("/vocal/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")

@@ -288,7 +288,7 @@ func RemoveHandler(removeEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			return
 		}
 
-		resp := response.(dto.UserResponse)
+		resp := response.(dto.BasicResponse)
 		c.JSON(http.StatusOK, resp)
 	}
 }

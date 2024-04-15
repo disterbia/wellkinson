@@ -11,8 +11,8 @@ var UserProfileImageType = 0
 
 var DietImageType = 1
 
-var KakaoSnsType = 0
+var KakaoSnsType = 1
 
-var GoogleSnsType = 1
+var GoogleSnsType = 2
 
-var AppleSnsType = 2
+var AppleSnsType = 3

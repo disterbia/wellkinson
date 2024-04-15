@@ -13,23 +13,24 @@ type TimestampModel struct {
 }
 type User struct {
 	TimestampModel
-	Id                   uint
-	IsAdmin              bool
-	Birthday             string
-	DeviceID             string `json:"device_id"`
-	Gender               bool
-	FCMToken             string `json:"fcm_token"`
-	IsFirst              bool   `json:"is_first"`
-	Name                 string
-	PhoneNum             string `json:"phone_num"`
-	UseAutoLogin         bool   `json:"use_auto_login"`
-	UsePrivacyProtection bool   `json:"use_privacy_protection"`
-	UseSleepTracking     bool   `json:"use_sleep_tracking"`
-	UserType             uint   `json:"user_type"`
-	Email                string
-	SnsType              uint          `json:"sns_type"`
-	ProfileImage         Image         `json:"profile_image" gorm:"foreignkey:ParentId"`
-	LinkedEmails         []LinkedEmail `json:"linked_emails" gorm:"foreignkey:Uid"`
+	Id                    uint
+	IsAdmin               bool
+	Birthday              string
+	DeviceID              string `json:"device_id"`
+	Gender                bool
+	IndemnificationClause bool   `json:"indemnification_clause"`
+	FCMToken              string `json:"fcm_token"`
+	IsFirst               bool   `json:"is_first"`
+	Name                  string
+	PhoneNum              string `json:"phone_num"`
+	UseAutoLogin          bool   `json:"use_auto_login"`
+	UsePrivacyProtection  bool   `json:"use_privacy_protection"`
+	UseSleepTracking      bool   `json:"use_sleep_tracking"`
+	UserType              uint   `json:"user_type"`
+	Email                 string
+	SnsType               uint          `json:"sns_type"`
+	ProfileImage          Image         `json:"profile_image" gorm:"foreignkey:ParentId"`
+	LinkedEmails          []LinkedEmail `json:"linked_emails" gorm:"foreignkey:Uid"`
 }
 
 type Alarm struct {

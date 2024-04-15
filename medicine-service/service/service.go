@@ -230,15 +230,15 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 	// 	takenMap[tm.MedicineId][tm.DateTaken] = true
 	// }
 
-	takenMap := make(map[uint]map[string]map[string]bool)
+	takenMap := make(map[uint]map[string]map[string]string)
 	for _, tm := range takenMedicines {
 		if takenMap[tm.MedicineId] == nil {
-			takenMap[tm.MedicineId] = make(map[string]map[string]bool)
+			takenMap[tm.MedicineId] = make(map[string]map[string]string)
 		}
 		if takenMap[tm.MedicineId][tm.DateTaken] == nil {
-			takenMap[tm.MedicineId][tm.DateTaken] = make(map[string]bool)
+			takenMap[tm.MedicineId][tm.DateTaken] = make(map[string]string)
 		}
-		takenMap[tm.MedicineId][tm.DateTaken][tm.TimeTaken] = true
+		takenMap[tm.MedicineId][tm.DateTaken][tm.TimeTaken] = tm.RealTaken
 	}
 
 	// 전체날짜에서 약물 복용날짜 체크
@@ -258,7 +258,7 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 			}
 
 			if !d.Before(startAt) && d.Before(endAt.AddDate(0, 0, 1)) && isMedicineDay(m.Weekdays, d.Weekday()) {
-				var a = make(map[string]bool)
+				var a = make(map[string]string)
 				for _, v := range m.Timestamp {
 
 					taken := takenMap[m.Id][d.Format("2006-01-02")][v]
@@ -296,14 +296,20 @@ func (service *medicineService) GetMedicines(id uint) ([]dto.MedicineOriginRespo
 
 func (service *medicineService) TakeMedicine(takeMedicine dto.TakeMedicine) (string, error) {
 	var medicineTake model.MedicineTake
+	var medicine model.Medicine
 	if err := util.ValidateTime(takeMedicine.TimeTaken); err != nil {
+		return "", err
+	}
+	if err := util.ValidateTime(takeMedicine.RealTaken); err != nil {
 		return "", err
 	}
 	if err := util.ValidateDate(takeMedicine.DateTaken); err != nil {
 		return "", err
 	}
 
-	result := service.db.Where("medicine_id = ? AND uid = ? AND date_taken = ? AND time_taken = ? ", takeMedicine.MedicineId, takeMedicine.Uid, takeMedicine.DateTaken, takeMedicine.TimeTaken).First(&medicineTake)
+	tx := service.db.Begin()
+	result := service.db.Where("medicine_id = ? AND uid = ? AND date_taken = ? AND time_taken = ? AND real_taken = ?",
+		takeMedicine.MedicineId, takeMedicine.Uid, takeMedicine.DateTaken, takeMedicine.TimeTaken, takeMedicine.RealTaken).First(&medicineTake)
 
 	if result.RowsAffected == 0 {
 
@@ -311,13 +317,33 @@ func (service *medicineService) TakeMedicine(takeMedicine dto.TakeMedicine) (str
 		if err := util.CopyStruct(takeMedicine, &medicineTake); err != nil {
 			return "", err
 		}
-		if err := service.db.Create(&medicineTake).Error; err != nil {
+		if err := tx.Create(&medicineTake).Error; err != nil {
 			return "", errors.New("db error")
 		}
+		err := tx.Where("id = ? AND uid = ?", takeMedicine.MedicineId, takeMedicine.Uid).First(&medicine).Error
+		if err != nil {
+			tx.Rollback()
+			return "", errors.New("db error2")
+		} else {
+			store := medicine.Store
+			dose := takeMedicine.Dose
+			if store < dose {
+				tx.Rollback()
+				return "", errors.New("over dose")
+			} else {
+				err := tx.Model(&medicine).Select("store").Updates(map[string]interface{}{"store": store - dose}).Error
+				if err != nil {
+					tx.Rollback()
+					return "", errors.New("db error3")
+				}
+			}
+		}
+
 	} else {
 		return "", errors.New("duplicated")
 
 	}
+	tx.Commit()
 	return "200", nil
 }
 
@@ -331,10 +357,28 @@ func (service *medicineService) UnTakeMedicine(unTakeMedicine dto.UnTakeMedicine
 		return "", err
 	}
 
-	result := service.db.Where("medicine_id = ? AND uid=? AND date_taken = ? AND time_taken = ?", unTakeMedicine.MedicineId, unTakeMedicine.Uid, unTakeMedicine.DateTaken, unTakeMedicine.TimeTaken).Delete(&model.MedicineTake{})
+	var medicineTake model.MedicineTake
+	var medicine model.Medicine
+
+	result := service.db.Where("medicine_id = ? AND uid=? AND date_taken = ? AND time_taken = ?",
+		unTakeMedicine.MedicineId, unTakeMedicine.Uid, unTakeMedicine.DateTaken, unTakeMedicine.TimeTaken).First(&medicineTake)
 	if result.Error != nil {
 		return "", errors.New("db error2")
 	}
+	tx := service.db.Begin()
+
+	result2 := tx.Where("medicine_id = ? AND uid=? AND date_taken = ? AND time_taken = ?",
+		unTakeMedicine.MedicineId, unTakeMedicine.Uid, unTakeMedicine.DateTaken, unTakeMedicine.TimeTaken).Delete(&model.MedicineTake{})
+	if result2.Error != nil {
+		return "", errors.New("db error2")
+	}
+
+	err := tx.Model(&medicine).Where("id = ? AND uid = ?", medicineTake.MedicineId, medicineTake.Uid).UpdateColumn("store", gorm.Expr("store + ?", medicineTake.Dose)).Error
+	if err != nil {
+		tx.Rollback()
+		return "", errors.New("db error3")
+	}
+	tx.Commit()
 
 	return "200", nil
 }
