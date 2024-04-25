@@ -25,6 +25,9 @@ RUN go build -o admin_video_service .
 # 최종 실행 이미지
 FROM alpine:latest
 
+# tzdata 패키지 설치
+RUN apk --no-cache add tzdata
+
 # 작업 디렉토리 설정
 WORKDIR /msa
 

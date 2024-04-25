@@ -11,7 +11,7 @@ sudo ufw allow 3306/tcp
 sudo apt install net-tools
 netstat -nlpt
 
-etc/mysql/mariadb.conf.d/50-server.cnf 
+/etc/mysql/mariadb.conf.d/50-server.cnf 
 [mysqld]
 bind-address = 0.0.0.0
 
@@ -22,7 +22,6 @@ sudo apt-get update
 sudo apt-get install docker.io
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
-
 
 
 docker-compose up -d

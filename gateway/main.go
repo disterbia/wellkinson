@@ -162,7 +162,7 @@ func main() {
 	setupSwaggerUIProxy(router, "/vocal-service/swagger/*proxyPath", "http://vocal:44410/swagger/")
 
 	// API 게이트웨이 서버 시작
-	router.Run(":50001")
+	router.Run(":50000")
 }
 
 // Swagger 문서에 대한 리버스 프록시를 설정

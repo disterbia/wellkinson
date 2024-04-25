@@ -25,8 +25,14 @@ RUN go build -o face_service .
 # 최종 실행 이미지
 FROM alpine:latest
 
+# tzdata 패키지 설치
+RUN apk --no-cache add tzdata
+
 # 작업 디렉토리 설정
 WORKDIR /msa
+
+# tzdata 패키지 설치
+RUN apk --no-cache add tzdata
 
 # 빌더 스테이지에서 생성된 실행 파일 복사
 COPY --from=builder /msa/face_service .
