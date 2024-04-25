@@ -26,7 +26,7 @@ func GetLimiter(ip string) *rate.Limiter {
 
 	limiter, exists := ips[ip]
 	if !exists {
-		limiter = rate.NewLimiter(10, 10) // 레이트 리미팅 설정 조정
+		limiter = rate.NewLimiter(20, 20) // 레이트 리미팅 설정 조정
 		ips[ip] = limiter
 	}
 
@@ -79,7 +79,7 @@ func main() {
 		adminProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	alarmServiceURL, _ := url.Parse("http://localhost:44401")
+	alarmServiceURL, _ := url.Parse("http://alarm:44401")
 	alarmProxy := httputil.NewSingleHostReverseProxy(alarmServiceURL)
 	router.Any("/alarm/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")
@@ -93,21 +93,21 @@ func main() {
 		dietProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	emotionServiceURL, _ := url.Parse("http://localhost:44403")
+	emotionServiceURL, _ := url.Parse("http://emotion:44403")
 	emotionProxy := httputil.NewSingleHostReverseProxy(emotionServiceURL)
 	router.Any("/emotion/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")
 		emotionProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	exerciseServiceURL, _ := url.Parse("http://localhost:44404")
+	exerciseServiceURL, _ := url.Parse("http://exercise:44404")
 	exerciseProxy := httputil.NewSingleHostReverseProxy(exerciseServiceURL)
 	router.Any("/exercise/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")
 		exerciseProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	faceServiceURL, _ := url.Parse("http://localhost:44405")
+	faceServiceURL, _ := url.Parse("http://face:44405")
 	faceProxy := httputil.NewSingleHostReverseProxy(faceServiceURL)
 	router.Any("/face/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")
@@ -121,28 +121,28 @@ func main() {
 		inquireProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	medicineServiceURL, _ := url.Parse("http://localhost:44407")
+	medicineServiceURL, _ := url.Parse("http://medicine:44407")
 	medicineProxy := httputil.NewSingleHostReverseProxy(medicineServiceURL)
 	router.Any("/medicine/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")
 		medicineProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	sleepServiceURL, _ := url.Parse("http://localhost:44408")
+	sleepServiceURL, _ := url.Parse("http://sleep:44408")
 	sleepProxy := httputil.NewSingleHostReverseProxy(sleepServiceURL)
 	router.Any("/sleep/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")
 		sleepProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	userServiceURL, _ := url.Parse("http://localhost:44409")
+	userServiceURL, _ := url.Parse("http://user:44409")
 	userProxy := httputil.NewSingleHostReverseProxy(userServiceURL)
 	router.Any("/user/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path") // '/user' 접두사 제거
 		userProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	vocalServiceURL, _ := url.Parse("http://localhost:44410")
+	vocalServiceURL, _ := url.Parse("http://vocal:44410")
 	vocalProxy := httputil.NewSingleHostReverseProxy(vocalServiceURL)
 	router.Any("/vocal/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path")

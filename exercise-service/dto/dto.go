@@ -31,6 +31,7 @@ type ExerciseResponse struct {
 	PlanStartAt     string `json:"plan_start_at"  example:"YYYY-MM-DD"`
 	PlanEndAt       string `json:"plan_end_at"  example:"YYYY-MM-DD"`
 	UseAlarm        bool   `json:"use_alarm"`
+	Repeat          uint   `json:"repeat"`
 	Weekdays        []uint `json:"weekdays"`
 	Created         string `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
 	Updated         string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`

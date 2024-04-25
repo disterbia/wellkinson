@@ -9,6 +9,7 @@ type UserRequest struct {
 	Gender                *bool  `json:"gender"` // true:남 false: 여
 	FCMToken              string `json:"fcm_token"`
 	IsFirst               *bool  `json:"is_first"`
+	SnsType               uint   `json:"sns_type"`
 	Name                  string `json:"name"`
 	PhoneNum              string `json:"phone_num" example:"01000000000"`
 	UseAutoLogin          *bool  `json:"use_auto_login"`
@@ -66,6 +67,7 @@ type TempUser struct {
 	FCMToken              string `json:"fcm_token"`
 	IndemnificationClause bool   `json:"indemnification_clause"`
 	IsFirst               bool   `json:"is_first"`
+	SnsType               uint   `json:"sns_type"`
 	Name                  string `json:"name"`
 	PhoneNum              string `json:"phone_num" example:"01000000000"`
 	UseAutoLogin          bool   `json:"use_auto_login"`

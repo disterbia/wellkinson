@@ -4,35 +4,43 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"medicine-service/common/model"
 	"medicine-service/common/util"
 	"medicine-service/dto"
 )
 
 func validateMedicine(medicine dto.MedicineRequest) error {
-	if medicine.StartAt != "" {
-		if err := util.ValidateDate(medicine.StartAt); err != nil {
-			return err
-		}
-	}
-	if medicine.EndAt != "" {
-		if err := util.ValidateDate(medicine.EndAt); err != nil {
-			return err
-		}
-	}
-
-	if medicine.Timestamp != nil && len(medicine.Timestamp) != 0 {
-		for _, v := range medicine.Timestamp {
-			if err := util.ValidateTime(v); err != nil {
+	if medicine.IntervalType != 1 {
+		if medicine.StartAt != "" {
+			if err := util.ValidateDate(medicine.StartAt); err != nil {
 				return err
 			}
 		}
-	}
+		if medicine.EndAt != "" {
+			if err := util.ValidateDate(medicine.EndAt); err != nil {
+				return err
+			}
+		}
 
+		if medicine.Timestamp != nil && len(medicine.Timestamp) != 0 {
+			for _, v := range medicine.Timestamp {
+				if err := util.ValidateTime(v); err != nil {
+					return err
+				}
+			}
+		} else {
+			return errors.New(("invalid time format, should be HH:MM"))
+		}
+	}
 	return nil
 }
 
-func validateWeek(weekdays json.RawMessage) (json.RawMessage, []int32, error) {
+func validateWeek(medicine model.Medicine) (json.RawMessage, []int32, error) {
+	if medicine.IntervalType == 1 {
+		return json.RawMessage("[]"), []int32{}, nil
+	}
 	// JSON 배열을 Go 슬라이스로 변환
+	weekdays := medicine.Weekdays
 	var weekdaySlice []int32
 	err := json.Unmarshal(weekdays, &weekdaySlice)
 	if err != nil {
@@ -53,6 +61,8 @@ func validateWeek(weekdays json.RawMessage) (json.RawMessage, []int32, error) {
 				seen[v] = true
 				unique = append(unique, v)
 			}
+		} else {
+			return nil, nil, errors.New("weekday mus 0-6")
 		}
 	}
 

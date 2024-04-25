@@ -54,7 +54,7 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 
 	medicine.Uid = medicineRequest.Uid //  json: "-" 이라서
 
-	newWeekdays, unique, err := validateWeek(medicine.Weekdays)
+	newWeekdays, unique, err := validateWeek(medicine)
 	if err != nil {
 		return "", err
 	}
@@ -67,6 +67,10 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 	if medicine.UsePrivacy {
 		bodyMessage = medicine.Name + " " + fmt.Sprintf("%v", medicine.Dose) + " " + medicine.MedicineType + " 먹을 시간입니다. 드시고 나면 잊지 말고 표시해주세요."
 	}
+	if medicine.IntervalType == 1 {
+		medicine.Timestamp = json.RawMessage("[]")
+		medicine.Weekdays = json.RawMessage("[]")
+	}
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		// 레코드가 존재하지 않으면 새 레코드 생성
 		medicine.Id = 0
@@ -75,27 +79,33 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 			return "", err
 		}
 
-		for _, v := range medicineRequest.Timestamp {
-			ar := &pb.AlarmRequest{
-				ParentId:  int32(medicine.Id),
-				Uid:       int32(medicine.Uid),
-				Body:      bodyMessage,
-				Type:      int32(util.MedicineType),
-				StartAt:   medicine.StartAt,
-				EndAt:     medicine.EndAt,
-				Timestamp: v,
-				Week:      unique,
+		if medicine.IntervalType != 1 {
+
+			for _, v := range medicineRequest.Timestamp {
+				ar := &pb.AlarmRequest{
+					ParentId:  int32(medicine.Id),
+					Uid:       int32(medicine.Uid),
+					Body:      bodyMessage,
+					Type:      int32(util.MedicineType),
+					StartAt:   medicine.StartAt,
+					EndAt:     medicine.EndAt,
+					Timestamp: v,
+					Week:      unique,
+				}
+				ars = append(ars, ar)
 			}
-			ars = append(ars, ar)
+
+			mar.AlarmRequests = ars
+
+			go sendAlarm(service, mar)
 		}
-
-		mar.AlarmRequests = ars
-
-		go sendAlarm(service, mar)
-
 	} else if result.Error != nil {
 		return "", errors.New("db error")
 	} else {
+		if medicine.IntervalType == 1 {
+			medicineRequest.Timestamp = make([]string, 0)
+			medicineRequest.Weekdays = make([]uint, 0)
+		}
 		updateFields := make(map[string]interface{})
 
 		userRequestValue := reflect.ValueOf(medicineRequest)
@@ -119,43 +129,46 @@ func (service *medicineService) SaveMedicine(medicineRequest dto.MedicineRequest
 		if err := service.db.Model(&medicine).Updates(updateFields).Error; err != nil {
 			return "", err
 		}
-		for _, v := range medicineRequest.Timestamp {
-			ar := &pb.AlarmRequest{
-				ParentId:  int32(medicine.Id),
-				Uid:       int32(medicine.Uid),
-				Body:      bodyMessage,
-				Type:      int32(util.MedicineType),
-				StartAt:   medicine.StartAt,
-				EndAt:     medicine.EndAt,
-				Timestamp: v,
-				Week:      unique,
+
+		if medicine.IntervalType != 1 {
+			for _, v := range medicineRequest.Timestamp {
+				ar := &pb.AlarmRequest{
+					ParentId:  int32(medicine.Id),
+					Uid:       int32(medicine.Uid),
+					Body:      bodyMessage,
+					Type:      int32(util.MedicineType),
+					StartAt:   medicine.StartAt,
+					EndAt:     medicine.EndAt,
+					Timestamp: v,
+					Week:      unique,
+				}
+				ars = append(ars, ar)
 			}
-			ars = append(ars, ar)
+
+			mar.AlarmRequests = ars
+			if medicine.IsActive {
+				go updateAlarm(service, mar)
+			} else {
+				b := make([]int32, 1)
+
+				b[0] = int32(medicine.Id)
+
+				arr := &pb.AlarmRemoveRequest{
+					ParentIds: b,
+					Uid:       int32(medicine.Uid),
+					Type:      int32(util.MedicineType),
+				}
+				go removeAlarm(service, arr)
+			}
 		}
 
-		mar.AlarmRequests = ars
-		if medicine.IsActive {
-			go updateAlarm(service, mar)
-		} else {
-			b := make([]int32, 1)
-
-			b[0] = int32(medicine.Id)
-
-			arr := &pb.AlarmRemoveRequest{
-				ParentIds: b,
-				Uid:       int32(medicine.Uid),
-				Type:      int32(util.MedicineType),
-			}
-			go removeAlarm(service, arr)
-		}
 	}
 
 	return "200", nil
 }
 
 func (service *medicineService) RemoveMedicines(ids []uint, uid uint) (string, error) {
-	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.Medicine{})
-
+	result := service.db.Model(&model.Medicine{}).Where("id IN (?) AND uid= ?", ids, uid).Select("is_delete").Updates(map[string]interface{}{"is_delete": true})
 	if result.Error != nil {
 		return "", errors.New("db error")
 	}
@@ -257,13 +270,30 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 				endAt = time.Date(2099, 12, 31, 0, 0, 0, 0, time.UTC) // 무기한 종료일 경우의 처리
 			}
 
-			if !d.Before(startAt) && d.Before(endAt.AddDate(0, 0, 1)) && isMedicineDay(m.Weekdays, d.Weekday()) {
-				var a = make(map[string]string)
+			var a = make(map[string]string)
+
+			// m.Timestamp가 비어있을 경우, takenMap에서 해당 날짜의 모든 시간에 대한 데이터를 가져옴
+
+			for takenTime := range takenMap[m.Id][d.Format("2006-01-02")] {
+				log.Println("aa")
+				log.Println(takenTime)
+				if takenTime != "" {
+					taken := takenMap[m.Id][d.Format("2006-01-02")][takenTime]
+					a[takenTime] = taken
+					tempMedicineResponse := medicineResponses[i]
+					tempMedicineResponse.Timestamp = a
+					dayMedicineResponses = append(dayMedicineResponses, tempMedicineResponse)
+				}
+			}
+
+			if !d.Before(startAt) && d.Before(endAt.AddDate(0, 0, 1)) && (isMedicineDay(m.Weekdays, d.Weekday())) {
+				// var a = make(map[string]string)
+
 				for _, v := range m.Timestamp {
 
 					taken := takenMap[m.Id][d.Format("2006-01-02")][v]
 					a[v] = taken
-					log.Println(d.Format("2006-01-02"), v, taken)
+					// log.Println(d.Format("2006-01-02"), v, taken)
 
 				}
 				tempMedicineResponse := medicineResponses[i]
@@ -283,7 +313,7 @@ func (service *medicineService) GetMedicines(id uint) ([]dto.MedicineOriginRespo
 	var medicines []model.Medicine
 	var medicineTemp []dto.MedicineOriginResponse
 
-	err := service.db.Where("uid = ?", id).Find(&medicines).Error
+	err := service.db.Where("uid = ? AND is_delete = 0  ", id).Find(&medicines).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}
@@ -308,8 +338,8 @@ func (service *medicineService) TakeMedicine(takeMedicine dto.TakeMedicine) (str
 	}
 
 	tx := service.db.Begin()
-	result := service.db.Where("medicine_id = ? AND uid = ? AND date_taken = ? AND time_taken = ? AND real_taken = ?",
-		takeMedicine.MedicineId, takeMedicine.Uid, takeMedicine.DateTaken, takeMedicine.TimeTaken, takeMedicine.RealTaken).First(&medicineTake)
+	result := service.db.Where("medicine_id = ? AND uid = ? AND date_taken = ? AND time_taken = ?",
+		takeMedicine.MedicineId, takeMedicine.Uid, takeMedicine.DateTaken, takeMedicine.TimeTaken).First(&medicineTake)
 
 	if result.RowsAffected == 0 {
 
@@ -317,30 +347,43 @@ func (service *medicineService) TakeMedicine(takeMedicine dto.TakeMedicine) (str
 		if err := util.CopyStruct(takeMedicine, &medicineTake); err != nil {
 			return "", err
 		}
-		if err := tx.Create(&medicineTake).Error; err != nil {
-			return "", errors.New("db error")
-		}
+
 		err := tx.Where("id = ? AND uid = ?", takeMedicine.MedicineId, takeMedicine.Uid).First(&medicine).Error
 		if err != nil {
-			tx.Rollback()
 			return "", errors.New("db error2")
 		} else {
 			store := medicine.Store
 			dose := takeMedicine.Dose
-			if store < dose {
-				tx.Rollback()
-				return "", errors.New("over dose")
-			} else {
-				err := tx.Model(&medicine).Select("store").Updates(map[string]interface{}{"store": store - dose}).Error
-				if err != nil {
-					tx.Rollback()
-					return "", errors.New("db error3")
+			if medicine.UseLeastStore {
+				if store < dose {
+					return "", errors.New("over dose")
+				} else {
+					err := tx.Model(&medicine).Select("store").Updates(map[string]interface{}{"store": store - dose}).Error
+					if err != nil {
+						return "", errors.New("db error3")
+					}
 				}
 			}
 		}
 
+		if err := tx.Create(&medicineTake).Error; err != nil {
+			tx.Rollback()
+			return "", errors.New("db error")
+		}
+
 	} else {
-		return "", errors.New("duplicated")
+		err := tx.Where("id = ? AND uid = ?", takeMedicine.MedicineId, takeMedicine.Uid).First(&medicine).Error
+		if err != nil {
+			return "", errors.New("db error2")
+		}
+		if medicine.IntervalType == 1 {
+			takeMedicine.RealTaken = takeMedicine.TimeTaken
+		}
+		err2 := tx.Model(&medicineTake).UpdateColumn("real_taken", takeMedicine.RealTaken).Error
+		if err2 != nil {
+			tx.Rollback()
+			return "", errors.New("db error3")
+		}
 
 	}
 	tx.Commit()

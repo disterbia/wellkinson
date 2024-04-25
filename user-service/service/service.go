@@ -314,6 +314,7 @@ func findOrCreateUser(user model.User, service *userService) (model.User, error)
 		result := service.db.Where("email = ?", user.Email).First(&linkedEmail)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			if err := service.db.Where("phone_number = ?", user.PhoneNum).First(&model.VerifiedNumbers{}).Error; err != nil {
+
 				return model.User{}, errors.New("-1") // 인증해야함
 			}
 			// 유효성 검사 수행

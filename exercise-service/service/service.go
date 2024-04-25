@@ -86,13 +86,17 @@ func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr s
 
 	// 전체 날짜에서 실행한 날짜 체크
 	exerciseDates := make([]dto.ExerciseDateInfo, 0)
+	repeatMap := make(map[uint]uint)
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		var dailyExercises []dto.ExerciseDoneInfo
 		for _, e := range exerciseResponse {
+
 			planStartAt, _ := time.Parse("2006-01-02", e.PlanStartAt)
 			planEndAt, _ := time.Parse("2006-01-02", e.PlanEndAt)
 
 			if !d.Before(planStartAt) && d.Before(planEndAt.AddDate(0, 0, 1)) && isExerciseDay(e.Weekdays, d.Weekday()) {
+				repeatMap[e.Id] += 1
+				e.Repeat = repeatMap[e.Id]
 				performed := performedMap[e.Id][d.Format("2006-01-02")]
 				dailyExercises = append(dailyExercises, dto.ExerciseDoneInfo{Exercise: e, Done: performed})
 			}
@@ -101,7 +105,6 @@ func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr s
 			exerciseDates = append(exerciseDates, dto.ExerciseDateInfo{Date: d.Format("2006-01-02"), Exercises: dailyExercises})
 		}
 	}
-	log.Println(exerciseDates)
 	return exerciseDates, nil
 }
 
@@ -243,7 +246,7 @@ func (service *exerciseService) SaveExercise(exerciseRequest dto.ExerciseRequest
 }
 
 func (service *exerciseService) RemoveExercises(ids []uint, uid uint) (string, error) {
-	result := service.db.Where("id IN (?) AND uid= ?", ids, uid).Delete(&model.Exercise{})
+	result := service.db.Model(&model.Exercise{}).Where("id IN (?) AND uid= ?", ids, uid).Select("is_delete").Updates(map[string]interface{}{"is_delete": true})
 
 	if result.Error != nil {
 		return "", errors.New("db error")

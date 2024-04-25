@@ -55,7 +55,7 @@ func RateLimitMiddleware() gin.HandlerFunc {
 		limiter, exists := ipLimiters[ip]
 		if !exists {
 			// 새로운 리미터 생성
-			limiter = rate.NewLimiter(rate.Every(24*time.Hour/4), 4)
+			limiter = rate.NewLimiter(rate.Every(time.Hour/10), 10)
 			ipLimiters[ip] = limiter
 		}
 		ipLimitersMutex.Unlock()
