@@ -362,7 +362,7 @@ const docTemplate = `{
                 },
                 "created": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "end_at": {
                     "type": "string",
@@ -384,7 +384,7 @@ const docTemplate = `{
                 },
                 "updated": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "week": {
                     "type": "array",

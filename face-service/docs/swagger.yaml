@@ -28,14 +28,14 @@ definitions:
   dto.FaceScoreResponse:
     properties:
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       score:
         type: integer
       type:
         type: integer
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
     type: object
   dto.SwaggerExercise:

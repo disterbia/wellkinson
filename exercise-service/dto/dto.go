@@ -33,8 +33,8 @@ type ExerciseResponse struct {
 	UseAlarm        bool   `json:"use_alarm"`
 	Repeat          uint   `json:"repeat"`
 	Weekdays        []uint `json:"weekdays"`
-	Created         string `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated         string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created         string `json:"created"  example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated         string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type ExerciseDateInfo struct {

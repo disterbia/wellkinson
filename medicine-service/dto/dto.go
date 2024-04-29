@@ -39,8 +39,8 @@ type MedicineOriginResponse struct {
 	StartAt       string   `json:"start_at" example:"YYYY-MM-dd"`
 	EndAt         string   `json:"end_at"  example:"YYYY-MM:dd"`
 	UsePrivacy    bool     `json:"use_privacy"`
-	Created       string   `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated       string   `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created       string   `json:"created"  example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated       string   `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type MedicineDateInfo struct {
@@ -67,8 +67,8 @@ type MedicineResponse struct {
 	StartAt       string            `json:"start_at" example:"YYYY-MM-dd"`
 	EndAt         string            `json:"end_at"  example:"YYYY-MM:dd"`
 	UsePrivacy    bool              `json:"use_privacy"`
-	Created       string            `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated       string            `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created       string            `json:"created"  example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated       string            `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type TakeMedicine struct {
@@ -101,8 +101,8 @@ type MedicinBridge struct {
 	StartAt       string  `json:"start_at" example:"YYYY-MM-dd"`
 	EndAt         string  `json:"end_at"  example:"YYYY-MM:dd"`
 	UsePrivacy    bool    `json:"use_privacy"`
-	Created       string  `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated       string  `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created       string  `json:"created"  example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated       string  `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type SuccessResponse struct {

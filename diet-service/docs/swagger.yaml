@@ -18,7 +18,7 @@ definitions:
   dto.DietPresetResponse:
     properties:
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       foods:
         items:
@@ -29,7 +29,7 @@ definitions:
       name:
         type: string
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
     type: object
   dto.DietRequest:
@@ -57,7 +57,7 @@ definitions:
   dto.DietResponse:
     properties:
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       foods:
         items:
@@ -76,7 +76,7 @@ definitions:
       type:
         type: integer
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
     type: object
   dto.ErrorResponse:

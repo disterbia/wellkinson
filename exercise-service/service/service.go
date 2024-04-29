@@ -52,7 +52,7 @@ func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr s
 
 	var exercises []model.Exercise
 	var exerciseResponse []dto.ExerciseResponse
-	err = service.db.Debug().Where("uid = ? AND plan_start_at <= ? AND plan_end_at >= ?", id, endDate, startDate).Find(&exercises).Error
+	err = service.db.Debug().Where("uid = ? AND plan_start_at <= ? AND plan_end_at >= ?", id, endDate.Format("2006-01-02"), startDate.Format("2006-01-02")).Find(&exercises).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}
@@ -67,7 +67,7 @@ func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr s
 		exerciseIDs = append(exerciseIDs, exercise.Id)
 	}
 	var performedExercises []model.ExerciseInfo
-	err = service.db.Where("exercise_id IN (?) AND date_performed BETWEEN ? AND ?", exerciseIDs, startDate, endDate).Find(&performedExercises).Error
+	err = service.db.Where("exercise_id IN (?) AND date_performed BETWEEN ? AND ?", exerciseIDs, startDate.Format("2006-01-02"), endDate.Format("2006-01-02")).Find(&performedExercises).Error
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (service *exerciseService) DoExercise(exerciseDo dto.ExerciseDo) (string, e
 	if err != nil {
 		return "", errors.New("must YYYY-MM-DD")
 	}
-	result := service.db.Where("exercise_id = ? AND uid=? AND date_performed = ?", exerciseDo.ExerciseId, exerciseDo.Uid, datePerformed).First(&info)
+	result := service.db.Debug().Where("exercise_id = ? AND uid=? AND date_performed = ?", exerciseDo.ExerciseId, exerciseDo.Uid, datePerformed.Format("2006-01-02")).First(&info)
 
 	if result.RowsAffected == 0 {
 		// 기록이 없으면 새로운 기록 추가
@@ -136,7 +136,7 @@ func (service *exerciseService) DoExercise(exerciseDo dto.ExerciseDo) (string, e
 			return "", errors.New("db error")
 		}
 	} else {
-		result := service.db.Where("exercise_id = ? AND uid=? AND date_performed = ?", exerciseDo.ExerciseId, exerciseDo.Uid, exerciseDo.PerformedDate).Delete(&model.ExerciseInfo{})
+		result := service.db.Debug().Where("exercise_id = ? AND uid=? AND date_performed = ?", exerciseDo.ExerciseId, exerciseDo.Uid, exerciseDo.PerformedDate).Delete(&model.ExerciseInfo{})
 		if result.Error != nil {
 			return "", errors.New("db error2")
 		}

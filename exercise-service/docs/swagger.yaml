@@ -62,7 +62,7 @@ definitions:
   dto.ExerciseResponse:
     properties:
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       exercise_end_at:
         example: HH:mm
@@ -79,7 +79,7 @@ definitions:
         example: YYYY-MM-DD
         type: string
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       use_alarm:
         type: boolean

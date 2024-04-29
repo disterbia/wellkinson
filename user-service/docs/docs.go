@@ -687,7 +687,7 @@ const docTemplate = `{
                 },
                 "created": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "device_id": {
                     "type": "string"
@@ -726,7 +726,7 @@ const docTemplate = `{
                 },
                 "updated": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "use_auto_login": {
                     "type": "boolean"

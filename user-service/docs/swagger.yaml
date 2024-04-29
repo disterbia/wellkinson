@@ -104,7 +104,7 @@ definitions:
         example: YYYY-MM-DD
         type: string
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       device_id:
         type: string
@@ -131,7 +131,7 @@ definitions:
       sns_type:
         type: integer
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       use_auto_login:
         type: boolean

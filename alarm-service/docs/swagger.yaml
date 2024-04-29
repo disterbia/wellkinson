@@ -28,7 +28,7 @@ definitions:
         example: 알람내용
         type: string
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       end_at:
         example: yyyy-mm-dd
@@ -44,7 +44,7 @@ definitions:
       type:
         type: integer
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       week:
         items:

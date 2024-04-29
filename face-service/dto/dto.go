@@ -1,7 +1,9 @@
 // /face-service/dto/dto.go
 package dto
 
-import "face-service/common/model"
+import (
+	"face-service/common/model"
+)
 
 type GetParams struct {
 	StartDate string `form:"start_date" example:"YYYY-MM-DD"`
@@ -17,8 +19,8 @@ type FaceScoreRequest struct {
 type FaceScoreResponse struct {
 	Score   uint   `json:"score"`
 	Type    uint   `json:"type"`
-	Created string `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created string `json:"created"  example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type FaceExamResponse struct {

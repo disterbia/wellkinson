@@ -18,7 +18,7 @@ definitions:
   dto.EmotionResponse:
     properties:
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       emotion:
         example: 기분명
@@ -29,7 +29,7 @@ definitions:
         example: 기분내용
         type: string
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
     type: object
   dto.ErrorResponse:

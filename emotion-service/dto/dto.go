@@ -16,8 +16,8 @@ type EmotionResponse struct {
 	Id      uint   `json:"id"`
 	Emotion uint   `json:"emotion" `
 	State   string `json:"state" example:"기분내용"`
-	Created string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated string `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created string `json:"created" example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated string `json:"updated" example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type SuccessResponse struct {

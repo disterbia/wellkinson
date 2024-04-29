@@ -377,7 +377,7 @@ const docTemplate = `{
             "properties": {
                 "created": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "foods": {
                     "type": "array",
@@ -393,7 +393,7 @@ const docTemplate = `{
                 },
                 "updated": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 }
             }
         },
@@ -435,7 +435,7 @@ const docTemplate = `{
             "properties": {
                 "created": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "foods": {
                     "type": "array",
@@ -463,7 +463,7 @@ const docTemplate = `{
                 },
                 "updated": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 }
             }
         },

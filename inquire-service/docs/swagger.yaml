@@ -24,7 +24,7 @@ definitions:
       content:
         type: string
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       id:
         type: integer
@@ -33,7 +33,7 @@ definitions:
       reply_type:
         type: boolean
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
     type: object
   dto.InquireRequest:
@@ -50,7 +50,7 @@ definitions:
       content:
         type: string
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       email:
         type: string
@@ -63,7 +63,7 @@ definitions:
       title:
         type: string
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
     type: object
 info:

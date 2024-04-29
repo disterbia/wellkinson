@@ -242,7 +242,7 @@ const docTemplate = `{
             "properties": {
                 "created": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "score": {
                     "type": "integer"
@@ -252,7 +252,7 @@ const docTemplate = `{
                 },
                 "updated": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 }
             }
         },

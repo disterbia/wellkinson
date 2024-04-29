@@ -36,12 +36,26 @@ type UserResponse struct {
 	UserType              uint                  `json:"user_type"`
 	SnsType               uint                  `json:"sns_type"`
 	Email                 string                `json:"email"`
-	Created               string                `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated               string                `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created               string                `json:"created" example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated               string                `json:"updated" example:"YYYY-mm-ddTHH:mm:ss "`
 	UserServices          []MainServiceResponse `json:"user_services"`
 	ProfileImage          ImageResponse         `json:"profile_image"`
 	LinkedEmails          []LinkedResponse      `json:"linked_emails"`
 }
+
+// func (r *UserResponse) MarshalJSON() ([]byte, error) {
+// 	type Alias UserResponse
+// 	loc, _ := time.LoadLocation("Asia/Seoul")
+// 	parsedTime, _ := time.Parse(time.RFC3339, r.Created)
+// 	seoulTime := parsedTime.In(loc).Format("2006-01-02 15:04:05")
+// 	return json.Marshal(&struct {
+// 		Created string `json:"created"`
+// 		*Alias
+// 	}{
+// 		Created: seoulTime,
+// 		Alias:   (*Alias)(r),
+// 	})
+// }
 
 type ImageResponse struct {
 	Url          string `json:"url"`

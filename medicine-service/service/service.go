@@ -206,7 +206,8 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 	var medicineTemp []dto.MedicineOriginResponse
 	var medicineBridge []dto.MedicinBridge
 	var medicineResponses []dto.MedicineResponse
-	err = service.db.Where("uid = ? AND (start_at ='' OR start_at <= ?) AND (end_at ='' OR end_at >= ?)", id, endDate, startDate).Find(&medicines).Error
+	err = service.db.Debug().Where("uid = ? AND (start_at ='' OR start_at <= ?) AND (end_at ='' OR end_at >= ?)",
+		id, endDate.Format("2006-01-02"), startDate.Format("2006-01-02")).Find(&medicines).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}
@@ -229,7 +230,8 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 		medicineIds = append(medicineIds, medicine.Id)
 	}
 	var takenMedicines []model.MedicineTake
-	err = service.db.Where("medicine_id IN (?) AND date_taken BETWEEN ? AND ?", medicineIds, startDate, endDate).Find(&takenMedicines).Error
+	err = service.db.Debug().Where("medicine_id IN (?) AND date_taken BETWEEN ? AND ?",
+		medicineIds, startDate.Format("2006-01-02"), endDate.Format("2006-01-02")).Find(&takenMedicines).Error
 	if err != nil {
 		return nil, err
 	}
@@ -275,14 +277,14 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 			// m.Timestamp가 비어있을 경우, takenMap에서 해당 날짜의 모든 시간에 대한 데이터를 가져옴
 
 			for takenTime := range takenMap[m.Id][d.Format("2006-01-02")] {
-				log.Println("aa")
-				log.Println(takenTime)
 				if takenTime != "" {
 					taken := takenMap[m.Id][d.Format("2006-01-02")][takenTime]
 					a[takenTime] = taken
-					tempMedicineResponse := medicineResponses[i]
-					tempMedicineResponse.Timestamp = a
-					dayMedicineResponses = append(dayMedicineResponses, tempMedicineResponse)
+					if !d.Before(startAt) && d.Before(endAt.AddDate(0, 0, 1)) && !(isMedicineDay(m.Weekdays, d.Weekday())) {
+						tempMedicineResponse := medicineResponses[i]
+						tempMedicineResponse.Timestamp = a
+						dayMedicineResponses = append(dayMedicineResponses, tempMedicineResponse)
+					}
 				}
 			}
 

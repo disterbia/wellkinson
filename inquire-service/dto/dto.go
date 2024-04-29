@@ -18,8 +18,8 @@ type InquireResponse struct {
 	Email   string                 `json:"email"`
 	Title   string                 `json:"title"`
 	Content string                 `json:"content"`
-	Created string                 `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated string                 `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created string                 `json:"created" example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated string                 `json:"updated" example:"YYYY-mm-ddTHH:mm:ss "`
 	Replies []InquireReplyResponse `json:"replies"`
 }
 
@@ -36,8 +36,8 @@ type InquireReplyResponse struct {
 	InquireId uint   `json:"inquire_id"`
 	Content   string `json:"content"`
 	ReplyType bool   `json:"reply_type"`
-	Created   string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated   string `json:"updated" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created   string `json:"created" example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated   string `json:"updated" example:"YYYY-mm-ddTHH:mm:ss "`
 }
 type SuccessResponse struct {
 	Jwt string `json:"jwt"`

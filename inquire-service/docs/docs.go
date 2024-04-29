@@ -389,7 +389,7 @@ const docTemplate = `{
                 },
                 "created": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "id": {
                     "type": "integer"
@@ -402,7 +402,7 @@ const docTemplate = `{
                 },
                 "updated": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 }
             }
         },
@@ -428,7 +428,7 @@ const docTemplate = `{
                 },
                 "created": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 },
                 "email": {
                     "type": "string"
@@ -447,7 +447,7 @@ const docTemplate = `{
                 },
                 "updated": {
                     "type": "string",
-                    "example": "YYYY-mm-ddTHH:mm:ssZ (ISO8601) "
+                    "example": "YYYY-mm-ddTHH:mm:ss "
                 }
             }
         }

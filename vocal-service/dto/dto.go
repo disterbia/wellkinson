@@ -15,8 +15,8 @@ type VocalScoreRequest struct {
 type VocalScoreResponse struct {
 	Score   uint   `json:"score"`
 	Type    uint   `json:"type"`
-	Created string `json:"created"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created string `json:"created"  example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type VoiceWordResponse struct {

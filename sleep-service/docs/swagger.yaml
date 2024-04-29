@@ -32,7 +32,7 @@ definitions:
   dto.SleepAlarmResponse:
     properties:
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       end_time:
         example: HH:mm
@@ -45,7 +45,7 @@ definitions:
         example: HH:mm
         type: string
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       weekdays:
         items:

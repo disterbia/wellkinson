@@ -23,8 +23,8 @@ type SleepAlarmResponse struct {
 	AlarmTime string `json:"alarm_time" example:"HH:mm"`
 	Weekdays  []uint `json:"weekdays"`
 	IsActive  bool   `json:"is_active"`
-	Created   string `json:"created" example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
-	Updated   string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ssZ (ISO8601) "`
+	Created   string `json:"created" example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated   string `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type SleepTimeRequest struct {

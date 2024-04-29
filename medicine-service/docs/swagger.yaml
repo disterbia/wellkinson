@@ -60,7 +60,7 @@ definitions:
   dto.MedicineResponse:
     properties:
       created:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       dose:
         type: number
@@ -92,7 +92,7 @@ definitions:
           type: string
         type: array
       updated:
-        example: 'YYYY-mm-ddTHH:mm:ssZ (ISO8601) '
+        example: 'YYYY-mm-ddTHH:mm:ss '
         type: string
       use_privacy:
         type: boolean
