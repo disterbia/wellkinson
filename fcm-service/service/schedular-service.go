@@ -120,10 +120,11 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 	log.Printf("Successfully sent message: %s\n", response)
 
 	newNotification := model.Notification{
-		Uid:    alarm.Uid,
-		Type:   alarm.Type,
-		Body:   alarm.Body,
-		IsRead: false,
+		Uid:      alarm.Uid,
+		Type:     alarm.Type,
+		Body:     alarm.Body,
+		ParentId: alarm.ParentId,
+		IsRead:   false,
 	}
 	db.Create(&newNotification)
 

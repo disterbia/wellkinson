@@ -47,11 +47,12 @@ type Alarm struct {
 
 type Notification struct {
 	TimestampModel
-	Id     uint
-	Uid    uint
-	Type   uint
-	Body   string
-	IsRead bool `json:"is_read"`
+	Id       uint
+	Uid      uint
+	Type     uint
+	Body     string
+	ParentId uint `json:"parent_id"`
+	IsRead   bool `json:"is_read"`
 }
 
 type Inquire struct {
