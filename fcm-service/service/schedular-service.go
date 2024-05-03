@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fcm-service/common/model"
+	"fcm-service/common/util"
 	"log"
 	"strconv"
 	"time"
@@ -96,6 +97,15 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 
 	notification_count := calculateNotificationCount(db, alarm.Uid)
 	log.Println(user.FCMToken)
+	var title string
+	switch alarm.Type {
+	case uint(util.ExerciseType):
+		title = "운동 시간"
+	case uint(util.MedicineType):
+		title = "약물 복용"
+	case uint(util.SleepType):
+		title = "수면 시간"
+	}
 	message := &messaging.Message{
 		Data: map[string]string{
 			"start_at":           alarm.StartAt,
@@ -106,7 +116,7 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 			"timestamp":          strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10),
 		},
 		Notification: &messaging.Notification{
-			Title: "알림 제목",
+			Title: title,
 			Body:  alarm.Body,
 		},
 		Token: user.FCMToken,

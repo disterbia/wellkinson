@@ -48,6 +48,10 @@ type userService struct {
 	bucketUrl string
 }
 
+func NewUserService(db *gorm.DB, s3svc *s3.S3, bucket string, bucketUrl string) UserService {
+	return &userService{db: db, s3svc: s3svc, bucket: bucket, bucketUrl: bucketUrl}
+}
+
 type PublicKey struct {
 	Kid string `json:"kid"`
 	N   string `json:"n"`
@@ -122,10 +126,6 @@ func (service *userService) VerifyAuthCode(number, code string) (string, error) 
 	}
 
 	return "200", nil
-}
-
-func NewUserService(db *gorm.DB, s3svc *s3.S3, bucket string, bucketUrl string) UserService {
-	return &userService{db: db, s3svc: s3svc, bucket: bucket, bucketUrl: bucketUrl}
 }
 
 func (service *userService) AdminLogin(email string, password string) (string, error) {
