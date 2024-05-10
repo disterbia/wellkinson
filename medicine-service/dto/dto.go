@@ -53,22 +53,22 @@ type MedicineTakenInfo2 struct {
 	Taken    bool             `json:"taken"`
 }
 type MedicineResponse struct {
-	Id            uint              `json:"id"`
-	Timestamp     map[string]string `json:"timestamp"`
-	Weekdays      []uint            `json:"weekdays"`
-	Dose          float32           `json:"dose"`
-	IntervalType  uint8             `json:"interval_type"`
-	IsActive      bool              `json:"is_active"`
-	LeastStore    float32           `json:"least_store"`
-	UseLeastStore bool              `json:"use_least_store"`
-	MedicineType  string            `json:"medicine_type"`
-	Name          string            `json:"name"`
-	Store         float32           `json:"store"`
-	StartAt       string            `json:"start_at" example:"YYYY-MM-dd"`
-	EndAt         string            `json:"end_at"  example:"YYYY-MM:dd"`
-	UsePrivacy    bool              `json:"use_privacy"`
-	Created       string            `json:"created"  example:"YYYY-mm-ddTHH:mm:ss "`
-	Updated       string            `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
+	Id            uint                          `json:"id"`
+	Timestamp     map[string]map[string]float32 `json:"timestamp"`
+	Weekdays      []uint                        `json:"weekdays"`
+	Dose          float32                       `json:"dose"`
+	IntervalType  uint8                         `json:"interval_type"`
+	IsActive      bool                          `json:"is_active"`
+	LeastStore    float32                       `json:"least_store"`
+	UseLeastStore bool                          `json:"use_least_store"`
+	MedicineType  string                        `json:"medicine_type"`
+	Name          string                        `json:"name"`
+	Store         float32                       `json:"store"`
+	StartAt       string                        `json:"start_at" example:"YYYY-MM-dd"`
+	EndAt         string                        `json:"end_at"  example:"YYYY-MM:dd"`
+	UsePrivacy    bool                          `json:"use_privacy"`
+	Created       string                        `json:"created"  example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated       string                        `json:"updated"  example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type TakeMedicine struct {

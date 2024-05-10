@@ -18,10 +18,6 @@ import (
 // JWT secret key
 var jwtSecretKey = []byte("adapfit_mark")
 
-type LoginService interface {
-	Login(token string, user model.User) (string, error)
-}
-
 func VerifyJWT(c *gin.Context) (uint, string, error) {
 	// 헤더에서 JWT 토큰 추출
 	tokenString := c.GetHeader("Authorization")

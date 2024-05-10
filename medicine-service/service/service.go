@@ -236,24 +236,18 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 		return nil, err
 	}
 
-	//// 복용내역 응답형식으로 가공 및 복용일 반영
-	// takenMap := make(map[uint]map[string]bool)
-	// for _, tm := range takenMedicines {
-	// 	if takenMap[tm.MedicineId] == nil {
-	// 		takenMap[tm.MedicineId] = make(map[string]bool)
-	// 	}
-	// 	takenMap[tm.MedicineId][tm.DateTaken] = true
-	// }
-
-	takenMap := make(map[uint]map[string]map[string]string)
+	takenMap := make(map[uint]map[string]map[string]map[string]float32)
 	for _, tm := range takenMedicines {
 		if takenMap[tm.MedicineId] == nil {
-			takenMap[tm.MedicineId] = make(map[string]map[string]string)
+			takenMap[tm.MedicineId] = make(map[string]map[string]map[string]float32)
 		}
 		if takenMap[tm.MedicineId][tm.DateTaken] == nil {
-			takenMap[tm.MedicineId][tm.DateTaken] = make(map[string]string)
+			takenMap[tm.MedicineId][tm.DateTaken] = make(map[string]map[string]float32)
 		}
-		takenMap[tm.MedicineId][tm.DateTaken][tm.TimeTaken] = tm.RealTaken
+		if takenMap[tm.MedicineId][tm.DateTaken][tm.TimeTaken] == nil {
+			takenMap[tm.MedicineId][tm.DateTaken][tm.TimeTaken] = make(map[string]float32)
+		}
+		takenMap[tm.MedicineId][tm.DateTaken][tm.TimeTaken][tm.RealTaken] = tm.Dose
 	}
 
 	// 전체날짜에서 약물 복용날짜 체크
@@ -272,7 +266,7 @@ func (service *medicineService) GetTakens(id uint, startDateStr, endDateStr stri
 				endAt = time.Date(2099, 12, 31, 0, 0, 0, 0, time.UTC) // 무기한 종료일 경우의 처리
 			}
 
-			var a = make(map[string]string)
+			var a = make(map[string]map[string]float32)
 
 			// m.Timestamp가 비어있을 경우, takenMap에서 해당 날짜의 모든 시간에 대한 데이터를 가져옴
 
