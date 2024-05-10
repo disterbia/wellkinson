@@ -145,7 +145,7 @@ func GetHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 수신 알림 조회시 호출
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Success 200 {object} []dto.AlarmResponse "알람정보 - type 1:운동 2:약 3:수면"
+// @Success 200 {object} []dto.NotificationResponse "알람정보 - type 1:운동 2:약 3:수면"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Router /get-notis [get]

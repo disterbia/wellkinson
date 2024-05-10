@@ -24,13 +24,14 @@ type AlarmResponse struct {
 }
 
 type NotificationResponse struct {
-	Id       uint   `json:"id"`
-	Type     uint   `json:"type"`
-	Body     string `json:"body" example:"알람내용"`
-	ParentId uint   `json:"parent_id"`
-	IsRead   bool   `json:"is_read"`
-	Created  string `json:"created" example:"YYYY-mm-ddTHH:mm:ss "`
-	Updated  string `json:"updated" example:"YYYY-mm-ddTHH:mm:ss "`
+	Id        uint   `json:"id"`
+	Type      uint   `json:"type"`
+	Body      string `json:"body" example:"알람내용"`
+	ParentId  uint   `json:"parent_id"`
+	IsRead    bool   `json:"is_read"`
+	Timestamp string `json:"timestamp" example:"HH:mm"`
+	Created   string `json:"created" example:"YYYY-mm-ddTHH:mm:ss "`
+	Updated   string `json:"updated" example:"YYYY-mm-ddTHH:mm:ss "`
 }
 
 type SuccessResponse struct {
