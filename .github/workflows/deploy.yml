@@ -29,5 +29,5 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu
-            docker-compose pull {{ github.event.inputs.image }}
-            docker-compose up -d {{ github.event.inputs.service }}
+            docker-compose pull
+            docker-compose up -d
