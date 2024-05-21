@@ -18,50 +18,6 @@ jobs:
     strategy:
       matrix:
         service: [admin-video-service, alarm-service, diet-service, email-service, emotion-service, exercise-service, face-service, fcm-service, gateway, inquire-service, medicine-service, sleep-service, user-service, vocal-service]
-        include:
-          - service: admin-video-service
-            path: admin-video-service
-            image: disterbia94/wellkinson_admin_video_service
-          - service: alarm-service
-            path: alarm-service
-            image: disterbia94/wellkinson_alarm_service
-          - service: diet-service
-            path: diet-service
-            image: disterbia94/wellkinson_diet_service
-          - service: email-service
-            path: email-service
-            image: disterbia94/wellkinson_email_service
-          - service: emotion-service
-            path: emotion-service
-            image: disterbia94/wellkinson_emotion_service
-          - service: exercise-service
-            path: exercise-service
-            image: disterbia94/wellkinson_exercise_service
-          - service: face-service
-            path: face-service
-            image: disterbia94/wellkinson_face_service
-          - service: fcm-service
-            path: fcm-service
-            image: disterbia94/wellkinson_fcm_service
-          - service: gateway
-            path: gateway
-            image: disterbia94/wellkinson_gateway
-          - service: inquire-service
-            path: inquire-service
-            image: disterbia94/wellkinson_inquire_service
-          - service: medicine-service
-            path: medicine-service
-            image: disterbia94/wellkinson_medicine_service
-          - service: sleep-service
-            path: sleep-service
-            image: disterbia94/wellkinson_sleep_service
-          - service: user-service
-            path: user-service
-            image: disterbia94/wellkinson_user_service
-          - service: vocal-service
-            path: vocal-service
-            image: disterbia94/wellkinson_vocal_service
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -78,16 +34,14 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ matrix.path }}
+          context: ./${{ matrix.service }}
           push: true
-          tags: ${{ matrix.image }}
+          tags: disterbia94/wellkinson-${{ matrix.service }}:latest
 
-      - name: Write service name to environment file
-        run: echo "SERVICE=${{ matrix.service }}" >> $GITHUB_ENV
-
-      - name: Write image name to environment file
-        run: echo "IMAGE=${{ matrix.image }}" >> $GITHUB_ENV
-
+  notify-deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
       - name: Trigger deploy workflow
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
@@ -98,4 +52,4 @@ jobs:
             -H "Authorization: Bearer ${{ env.GH_PAT }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches \
-            -d '{"ref":"main","inputs":{"service":"${{ env.SERVICE }}","image":"${{ env.IMAGE }}"}}'
+            -d '{"ref":"main"}'

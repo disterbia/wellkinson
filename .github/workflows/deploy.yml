@@ -2,13 +2,6 @@ name: Deploy to EC2
 
 on:
   workflow_dispatch:
-    inputs:
-      service:
-        description: 'The service to deploy'
-        required: true
-      image:
-        description: 'The Docker Hub image name'
-        required: true
 
 jobs:
   deploy:
