@@ -19,7 +19,7 @@ var userLocks sync.Map
 // @Description 수면알림 생성시 Id 생략
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param request body dto.SleepAlarmRequest true "수면알림 DTO - 수면알림 데이터"
+// @Param request body dto.SleepAlarmRequest true "수면알림 DTO - 수면알림 데이터ㅇㅇ"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"

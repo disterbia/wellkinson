@@ -114,6 +114,7 @@ func sendMedicationReminder(ctx context.Context, alarm model.Alarm, db *gorm.DB)
 			"type":               strconv.FormatUint(uint64(alarm.Type), 10),
 			"notification_count": strconv.FormatUint(uint64(notification_count), 10),
 			"timestamp":          strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10),
+			"parent_id":          strconv.FormatUint(uint64(alarm.ParentId), 10),
 		},
 		Notification: &messaging.Notification{
 			Title: title,

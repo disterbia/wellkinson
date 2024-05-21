@@ -52,7 +52,8 @@ func (service *exerciseService) GetExercises(id uint, startDateStr, endDateStr s
 
 	var exercises []model.Exercise
 	var exerciseResponse []dto.ExerciseResponse
-	err = service.db.Debug().Where("uid = ? AND plan_start_at <= ? AND plan_end_at >= ?", id, endDate.Format("2006-01-02"), startDate.Format("2006-01-02")).Find(&exercises).Error
+	err = service.db.Debug().Where("uid = ? AND plan_start_at <= ? AND plan_end_at >= ? AND is_delete != ? ",
+		id, endDate.Format("2006-01-02"), startDate.Format("2006-01-02"), true).Find(&exercises).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}

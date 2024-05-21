@@ -192,7 +192,7 @@ func (service *sleepService) GetSleepTimes(id uint, startDateStr, endDateStr str
 
 	var sleepTimes []model.SleepTime
 	var sleepTimeResponses []dto.SleepTimeResponse
-	err = service.db.Where("uid = ? AND date_sleep BETWEEN ? AND ?", id, startDate, endDate).Find(&sleepTimes).Error
+	err = service.db.Debug().Where("uid = ? AND DATE(date_sleep) BETWEEN ? AND ?", id, startDate.Format("2006-01-02"), endDate.Format("2006-01-02")).Find(&sleepTimes).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}
