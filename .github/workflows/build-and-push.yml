@@ -76,7 +76,7 @@ jobs:
         with:
           context: ./${{ matrix.path }}
           push: true
-          tags: ${{ matrix.image }}:latest
+          tags: ${{ matrix.image }}
 
       - name: Trigger deploy workflow
         uses: actions/github-script@v3
