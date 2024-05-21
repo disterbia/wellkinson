@@ -1,0 +1,91 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [admin-video-service, alarm-service, diet-service, email-service, emotion-service, exercise-service, face-service, fcm-service, gateway, inquire-service, medicine-service, sleep-service, user-service, vocal-service]
+        include:
+          - service: admin-video-service
+            path: admin-video-service
+            image: disterbia94/wellkinson_admin_video_service
+          - service: alarm-service
+            path: alarm-service
+            image: disterbia94/wellkinson_alarm_service
+          - service: diet-service
+            path: diet-service
+            image: disterbia94/wellkinson_diet_service
+          - service: email-service
+            path: email-service
+            image: disterbia94/wellkinson_email_service
+          - service: emotion-service
+            path: emotion-service
+            image: disterbia94/wellkinson_emotion_service
+          - service: exercise-service
+            path: exercise-service
+            image: disterbia94/wellkinson_exercise_service
+          - service: face-service
+            path: face-service
+            image: disterbia94/wellkinson_face_service
+          - service: fcm-service
+            path: fcm-service
+            image: disterbia94/wellkinson_fcm_service
+          - service: gateway
+            path: gateway
+            image: disterbia94/wellkinson_gateway
+          - service: inquire-service
+            path: inquire-service
+            image: disterbia94/wellkinson_inquire_service
+          - service: medicine-service
+            path: medicine-service
+            image: disterbia94/wellkinson_medicine_service
+          - service: sleep-service
+            path: sleep-service
+            image: disterbia94/wellkinson_sleep_service
+          - service: user-service
+            path: user-service
+            image: disterbia94/wellkinson_user_service
+          - service: vocal-service
+            path: vocal-service
+            image: disterbia94/wellkinson_vocal_service
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./${{ matrix.path }}
+          push: true
+          tags: ${{ matrix.image }}:latest
+
+      - name: Trigger deploy workflow
+        uses: actions/github-script@v3
+        with:
+          script: |
+            github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              ref: context.ref,
+              inputs: { service: '${{ matrix.service }}', image: '${{ matrix.image }}' }
+            });
