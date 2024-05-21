@@ -50,7 +50,7 @@ services:
     image: disterbia94/wellkinson-exercise-service
     environment:
       - TZ=Asia/Seoul
-  
+
   face:
     image: disterbia94/wellkinson-face-service
     environment:
