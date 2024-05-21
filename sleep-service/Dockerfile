@@ -37,4 +37,4 @@ COPY --from=builder /msa/sleep-service .
 COPY --from=builder /msa/.env .
 
 # 애플리케이션 실행
-CMD ["./sleep_service"]
+CMD ["./sleep-service"]

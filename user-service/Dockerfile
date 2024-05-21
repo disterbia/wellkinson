@@ -40,4 +40,4 @@ COPY --from=builder /msa/user-service .
 COPY --from=builder /msa/.env .
 
 # 애플리케이션 실행
-CMD ["./user_service"]
+CMD ["./user-service"]

@@ -37,4 +37,4 @@ COPY --from=builder /msa/emotion-service .
 COPY --from=builder /msa/.env .
 
 # 애플리케이션 실행
-CMD ["./emotion_service"]
+CMD ["./emotion-service"]
