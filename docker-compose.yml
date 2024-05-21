@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   gateway:
-    image: disterbia94/wellkinson_gateway
+    image: disterbia94/wellkinson-gateway
     environment:
       - TZ=Asia/Seoul
     ports:
@@ -22,70 +22,70 @@ services:
       - vocal
 # ...
   admin:
-    image: disterbia94/wellkinson_admin_video_service
+    image: disterbia94/wellkinson-admin-video-service
     environment:
       - TZ=Asia/Seoul
 
   alarm:
-    image: disterbia94/wellkinson_alarm_service
+    image: disterbia94/wellkinson-alarm-service
     environment:
       - TZ=Asia/Seoul
 
   diet:
-    image: disterbia94/wellkinson_diet_service
+    image: disterbia94/wellkinson-diet-service
     environment:
       - TZ=Asia/Seoul
 
   email:
-    image: disterbia94/wellkinson_email_service
+    image: disterbia94/wellkinson-email-service
     environment:
       - TZ=Asia/Seoul
 
   emotion:
-    image: disterbia94/wellkinson_emotion_service
+    image: disterbia94/wellkinson-emotion-service
     environment:
       - TZ=Asia/Seoul
 
   exercise:
-    image: disterbia94/wellkinson_exercise_service
+    image: disterbia94/wellkinson-exercise-service
     environment:
       - TZ=Asia/Seoul
   
   face:
-    image: disterbia94/wellkinson_face_service
+    image: disterbia94/wellkinson-face-service
     environment:
       - TZ=Asia/Seoul
 
   fcm:
-    image: disterbia94/wellkinson_fcm_service
+    image: disterbia94/wellkinson-fcm-service
     environment:
       - TZ=Asia/Seoul
 
   inquire:
-    image: disterbia94/wellkinson_inquire_service
+    image: disterbia94/wellkinson-inquire-service
     environment:
       - TZ=Asia/Seoul
 
   medicine:
-    image: disterbia94/wellkinson_medicine_service
+    image: disterbia94/wellkinson-medicine-service
     environment:
       - TZ=Asia/Seoul
 
   sleep:
-    image: disterbia94/wellkinson_sleep_service
+    image: disterbia94/wellkinson-sleep-service
     environment:
       - TZ=Asia/Seoul
 
   user:
-    image: disterbia94/wellkinson_user_service
+    image: disterbia94/wellkinson-user-service
     environment:
       - TZ=Asia/Seoul
 
   vocal:
-    image: disterbia94/wellkinson_vocal_service
+    image: disterbia94/wellkinson-vocal-service
     environment:
       - TZ=Asia/Seoul
 
 networks:
   default:
-    name: my_network
+    name: my-network

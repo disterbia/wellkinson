@@ -14,7 +14,7 @@ RUN go mod download
 ENV GOOS=linux GOARCH=amd64
 
 # 애플리케이션 빌드
-RUN go build -o email_service .
+RUN go build -o email-service .
 
 # 최종 실행 이미지
 FROM alpine:latest
@@ -26,7 +26,7 @@ RUN apk --no-cache add tzdata
 WORKDIR /msa
 
 # 빌더 스테이지에서 생성된 실행 파일 복사
-COPY --from=builder /msa/email_service .
+COPY --from=builder /msa/email-service .
 # .env 파일 복사 추가
 COPY --from=builder /msa/.env .
 
