@@ -20,13 +20,13 @@ ENV GOOS=linux GOARCH=amd64
 RUN swag init
 
 # 애플리케이션 빌드
-RUN go build -o /msa/diet-service .
+RUN go build -o diet-service .
 
 # 최종 실행 이미지
-FROM alpine:latest
+FROM ubuntu:latest
 
-# tzdata 패키지 설치
-RUN apk --no-cache add tzdata
+# 필요한 패키지 설치
+RUN apt-get update && apt-get install -y tzdata
 
 # 작업 디렉토리 설정
 WORKDIR /msa
