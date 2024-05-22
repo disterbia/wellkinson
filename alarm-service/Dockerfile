@@ -35,7 +35,7 @@ WORKDIR /msa
 COPY --from=builder /msa/alarm-service /msa/alarm-service
 
 # .env 파일 복사 추가
-COPY --from=builder /msa/.env /msa/.env 
+COPY ./.env /msa/.env 
 
 # 애플리케이션 실행
 CMD ["/msa/alarm-service"]
