@@ -32,9 +32,9 @@ RUN apk --no-cache add tzdata
 WORKDIR /msa
 
 # 빌더 스테이지에서 생성된 실행 파일 복사
-COPY --from=builder /msa/vocal-service .
+COPY --from=builder /msa/vocal-service /msa/vocal-service
 # .env 파일 복사 추가
-COPY --from=builder /msa/.env .
+COPY --from=builder /msa/.env /msa/.env 
 
 # 애플리케이션 실행
 CMD ["./vocal-service"]

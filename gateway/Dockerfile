@@ -26,7 +26,7 @@ RUN apk --no-cache add tzdata
 WORKDIR /msa
 
 # 빌더 스테이지에서 생성된 실행 파일 복사
-COPY --from=builder /msa/gateway .
+COPY --from=builder /msa/gateway /msa/gateway
 
 # 애플리케이션 실행
 CMD ["./gateway"]
