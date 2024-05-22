@@ -35,6 +35,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./${{ matrix.service }}
+          platforms: linux/amd64
           push: true
           tags: disterbia94/wellkinson-${{ matrix.service }}:latest
 
