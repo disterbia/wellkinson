@@ -29,4 +29,4 @@ WORKDIR /msa
 COPY --from=builder /msa/gateway /msa/gateway
 
 # 애플리케이션 실행
-CMD ["./gateway"]
+CMD ["/msa/gateway"]

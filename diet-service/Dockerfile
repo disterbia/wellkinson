@@ -37,4 +37,4 @@ COPY --from=builder /msa/diet-service /msa/diet-service
 COPY --from=builder /msa/.env /msa/.env 
 
 # 애플리케이션 실행
-CMD ["./diet-service"]
+CMD ["/msa/diet-service"]

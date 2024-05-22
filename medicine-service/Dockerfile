@@ -37,4 +37,4 @@ COPY --from=builder /msa/medicine-service /msa/medicine-service
 COPY --from=builder /msa/.env /msa/.env 
 
 # 애플리케이션 실행
-CMD ["./medicine-service"]
+CMD ["/msa/medicine-service"]

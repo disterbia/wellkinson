@@ -34,4 +34,4 @@ COPY --from=builder /msa/firebase-adminkey.json /msa/firebase-adminkey.json
 
 
 # 애플리케이션 실행
-CMD ["./fcm-service"]
+CMD ["/msa/fcm-service"]

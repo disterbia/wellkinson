@@ -31,4 +31,4 @@ COPY --from=builder /msa/email-service /msa/email-service
 COPY --from=builder /msa/.env /msa/.env 
 
 # 애플리케이션 실행
-CMD ["./email-service"]
+CMD ["/msa/email-service"]

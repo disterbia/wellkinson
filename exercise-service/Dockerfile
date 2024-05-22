@@ -37,4 +37,4 @@ COPY --from=builder /msa/exercise-service /msa/exercise-service
 COPY --from=builder /msa/.env /msa/.env 
 
 # 애플리케이션 실행
-CMD ["./exercise-service"]
+CMD ["/msa/exercise-service"]
