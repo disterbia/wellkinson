@@ -14,7 +14,7 @@ RUN go mod download
 ENV GOOS=linux GOARCH=amd64
 
 # 애플리케이션 빌드
-RUN go build -o fcm-service .
+RUN go build -o /msa/fcm-service .
 
 # 최종 실행 이미지
 FROM alpine:latest

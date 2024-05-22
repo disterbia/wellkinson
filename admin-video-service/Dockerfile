@@ -20,7 +20,7 @@ ENV GOOS=linux GOARCH=amd64
 RUN swag init
 
 # 애플리케이션 빌드
-RUN go build -o admin-video-service .
+RUN go build -o /msa/admin-video-service .
 
 # 최종 실행 이미지
 FROM alpine:latest

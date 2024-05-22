@@ -23,7 +23,7 @@ ENV GOOS=linux GOARCH=amd64
 RUN swag init
 
 # 애플리케이션 빌드
-RUN go build -o user-service .
+RUN go build -o /msa/user-service .
 
 # 최종 실행 이미지
 FROM alpine:latest
