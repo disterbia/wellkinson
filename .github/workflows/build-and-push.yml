@@ -25,7 +25,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: all
+          platforms: linux/arm64/v8
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -42,7 +42,7 @@ jobs:
           context: ./${{ matrix.service }}
           platforms: linux/arm64/v8
           push: true
-          tags: disterbia94/wellkinson-${{ matrix.service }}
+          tags: disterbia94/wellkinson-${{ matrix.service }}:latest
 
   notify-deploy:
     needs: build-and-push
