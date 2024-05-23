@@ -14,24 +14,24 @@ RUN go mod download
 ENV GOOS=linux GOARCH=amd64
 
 # 애플리케이션 빌드
-RUN go build -o /msa/fcm-service .
+RUN go build -o fcm-service .
 
 # 최종 실행 이미지
-FROM alpine:latest
+FROM ubuntu:latest
 
 # tzdata 패키지 설치
-RUN apk --no-cache add tzdata
+RUN apt-get update && apt-get install -y tzdata
 
 # 작업 디렉토리 설정
 WORKDIR /msa
 
 # 빌더 스테이지에서 생성된 실행 파일 복사
-COPY --from=builder /msa/fcm-service /msa/fcm-service
+COPY --from=builder /msa/fcm-service .
 # .env 파일 복사 추가
-COPY ./.env /msa/.env 
+COPY --from=builder /msa/.env .
 # .firebase 파일 복사 추가
-COPY --from=builder /msa/firebase-adminkey.json /msa/firebase-adminkey.json
+COPY --from=builder /msa/firebase-adminkey.json .
 
 
 # 애플리케이션 실행
-CMD ["/msa/fcm-service"]
+CMD ["./fcm-service"]

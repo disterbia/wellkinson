@@ -32,9 +32,9 @@ RUN apt-get update && apt-get install -y tzdata
 WORKDIR /msa
 
 # 빌더 스테이지에서 생성된 실행 파일 복사
-COPY --from=builder /msa/diet-service /msa/diet-service
+COPY --from=builder /msa/diet-service .
 # .env 파일 복사 추가
-COPY ./.env /msa/.env 
+COPY --from=builder /msa/.env .
 
 # 애플리케이션 실행
-CMD ["/msa/diet-service"]
+CMD ["./diet-service"]
