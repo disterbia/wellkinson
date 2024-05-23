@@ -25,7 +25,7 @@ RUN go build -o emotion-service .
 # 최종 실행 이미지
 FROM ubuntu:latest
 
-# tzdata 패키지 설치
+# 필요한 패키지 설치
 RUN apt-get update && apt-get install -y tzdata
 
 # 작업 디렉토리 설정

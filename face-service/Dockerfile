@@ -25,13 +25,13 @@ RUN go build -o face-service .
 # 최종 실행 이미지
 FROM ubuntu:latest
 
-# tzdata 패키지 설치
+# 필요한 패키지 설치
 RUN apt-get update && apt-get install -y tzdata
 
 # 작업 디렉토리 설정
 WORKDIR /msa
 
-# tzdata 패키지 설치
+# 필요한 패키지 설치
 RUN apt-get update && apt-get install -y tzdata
 
 # 빌더 스테이지에서 생성된 실행 파일 복사
