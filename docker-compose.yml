@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   gateway:
-    image: disterbia94/wellkinson-gateway
+    image: disterbia94/wellkinson-gateway:latest
     environment:
       - TZ=Asia/Seoul
     ports:
@@ -20,69 +20,69 @@ services:
       - sleep
       - user
       - vocal
-
+# ...
   admin:
-    image: disterbia94/wellkinson-admin-video-service
+    image: disterbia94/wellkinson-admin-video-service:latest
     environment:
       - TZ=Asia/Seoul
 
   alarm:
-    image: disterbia94/wellkinson-alarm-service
+    image: disterbia94/wellkinson-alarm-service:latest
     environment:
       - TZ=Asia/Seoul
 
   diet:
-    image: disterbia94/wellkinson-diet-service
+    image: disterbia94/wellkinson-diet-service:latest
     environment:
       - TZ=Asia/Seoul
 
   email:
-    image: disterbia94/wellkinson-email-service
+    image: disterbia94/wellkinson-email-service:latest
     environment:
       - TZ=Asia/Seoul
 
   emotion:
-    image: disterbia94/wellkinson-emotion-service
+    image: disterbia94/wellkinson-emotion-service:latest
     environment:
       - TZ=Asia/Seoul
 
   exercise:
-    image: disterbia94/wellkinson-exercise-service
+    image: disterbia94/wellkinson-exercise-service:latest
     environment:
       - TZ=Asia/Seoul
-
+  
   face:
-    image: disterbia94/wellkinson-face-service
+    image: disterbia94/wellkinson-face-service:latest
     environment:
       - TZ=Asia/Seoul
 
   fcm:
-    image: disterbia94/wellkinson-fcm-service
+    image: disterbia94/wellkinson-fcm-service:latest
     environment:
       - TZ=Asia/Seoul
 
   inquire:
-    image: disterbia94/wellkinson-inquire-service
+    image: disterbia94/wellkinson-inquire-service:latest
     environment:
       - TZ=Asia/Seoul
 
   medicine:
-    image: disterbia94/wellkinson-medicine-service
+    image: disterbia94/wellkinson-medicine-service:latest
     environment:
       - TZ=Asia/Seoul
 
   sleep:
-    image: disterbia94/wellkinson-sleep-service
+    image: disterbia94/wellkinson-sleep-service:latest
     environment:
       - TZ=Asia/Seoul
 
   user:
-    image: disterbia94/wellkinson-user-service
+    image: disterbia94/wellkinson-user-service:latest
     environment:
       - TZ=Asia/Seoul
 
   vocal:
-    image: disterbia94/wellkinson-vocal-service
+    image: disterbia94/wellkinson-vocal-service:latest
     environment:
       - TZ=Asia/Seoul
 
