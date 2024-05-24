@@ -29,7 +29,7 @@ RUN go build -o user-service .
 FROM ubuntu:latest
 
 # 필요한 패키지 설치
-RUN apt-get update && apt-get install -y tzdata
+RUN apt-get update && apt-get install -y tzdata ca-certificates && update-ca-certificates ca-certificates && update-ca-certificates
 
 # 작업 디렉토리 설정
 WORKDIR /msa
