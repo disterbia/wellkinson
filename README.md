@@ -17,6 +17,7 @@ bind-address = 0.0.0.0
 
 sudo systemctl restart mariadb
 
+rds 인바운드 설정해도 vpc를 열어줘야함. https://gksdudrb922.tistory.com/240
 
 sudo apt-get update
 sudo apt-get install docker.io
