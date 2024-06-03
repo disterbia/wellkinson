@@ -20,7 +20,7 @@ services:
       - sleep
       - user
       - vocal
-# ...
+      
   admin:
     image: disterbia94/wellkinson-admin-video-service:latest
     environment:
