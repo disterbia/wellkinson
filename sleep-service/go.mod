@@ -12,7 +12,7 @@ require (
 	github.com/swaggo/swag v1.16.3
 	google.golang.org/grpc v1.61.0
 	google.golang.org/protobuf v1.32.0
-	gorm.io/driver/mysql v1.5.4
+	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.10
 )
 
@@ -31,7 +31,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.0 // indirect
-	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -49,6 +48,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.3.0 // indirect
@@ -61,5 +61,4 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/postgres v1.5.9 // indirect
 )
