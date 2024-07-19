@@ -35,10 +35,7 @@ func GetVimeoLevel2sEndpoint(s service.AdminVideoService) endpoint.Endpoint {
 
 func SaveEndpoint(s service.AdminVideoService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		reqMap := request.(map[string]interface{})
-		id := reqMap["id"].(uint)
-		videoIds := reqMap["videoIds"].([]string)
-		code, err := s.SaveVideos(id, videoIds)
+		code, err := s.SaveVideos(request.(dto.VideoData))
 		if err != nil {
 			return dto.BasicResponse{Code: err.Error()}, err
 		}

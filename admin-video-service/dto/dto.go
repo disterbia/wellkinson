@@ -11,6 +11,12 @@ type VimeoResponse struct {
 	} `json:"data"`
 }
 
+type VideoData struct {
+	Id               uint     `json:"-"`
+	SelectedVideos   []string `json:"selectedVideos"`
+	DeselectedVideos []string `json:"deselectedVideos"`
+}
+
 type VimeoResponse2 struct {
 	Data []struct {
 		Name string `json:"name"`

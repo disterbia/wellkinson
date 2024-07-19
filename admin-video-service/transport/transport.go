@@ -78,7 +78,7 @@ func GetVimeoLevel2sHandler(getEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 // @Description 활성화 동영상 변경시 호출
 // @Produce  json
 // @Param Authorization header string true "Bearer {jwt_token}"
-// @Param request body []string true "활성화 할 id 배열"
+// @Param request body dto.VideoData true "활성화 할 id 배열"
 // @Success 200 {object} dto.BasicResponse "성공시 200 반환"
 // @Failure 400 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
 // @Failure 500 {object} dto.ErrorResponse "요청 처리 실패시 오류 메시지 반환"
@@ -90,8 +90,8 @@ func SaveHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		var videoIds []string // 삭제할 ID 배열
-		if err := c.ShouldBindJSON(&videoIds); err != nil {
+		var videoData dto.VideoData // 삭제할 ID 배열
+		if err := c.ShouldBindJSON(&videoData); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -103,10 +103,8 @@ func SaveHandler(saveEndpoint kitEndpoint.Endpoint) gin.HandlerFunc {
 		}
 		defer userLocks.Delete(id)
 
-		response, err := saveEndpoint(c.Request.Context(), map[string]interface{}{
-			"id":       id,
-			"videoIds": videoIds,
-		})
+		videoData.Id = id
+		response, err := saveEndpoint(c.Request.Context(), videoData)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

@@ -18,7 +18,7 @@ import (
 type AdminVideoService interface {
 	GetLevel1s(id uint) ([]dto.VimeoLevel1, error)
 	GetLevel2s(id uint, projectId string) ([]dto.VimeoLevel2, error)
-	SaveVideos(id uint, videoIds []string) (string, error)
+	SaveVideos(videoData dto.VideoData) (string, error)
 }
 
 type adminVideoService struct {
@@ -165,9 +165,9 @@ func (service *adminVideoService) GetLevel2s(id uint, projectId string) ([]dto.V
 	return vimeoData, nil // 결과 반환
 }
 
-func (service *adminVideoService) SaveVideos(id uint, videoIds []string) (string, error) {
+func (service *adminVideoService) SaveVideos(videoData dto.VideoData) (string, error) {
 	var user model.User
-	err := service.db.Where("id = ?", id).Find(&user).Error
+	err := service.db.Where("id = ?", videoData.Id).Find(&user).Error
 	if err != nil {
 		return "", errors.New("db error")
 	}
@@ -176,25 +176,16 @@ func (service *adminVideoService) SaveVideos(id uint, videoIds []string) (string
 		return "", errors.New("deny")
 	}
 
-	// 중복 제거
-	seen := make(map[string]bool)
-	unique := []string{}
-
-	for _, v := range videoIds {
-		if !seen[v] {
-			seen[v] = true
-			unique = append(unique, v)
-		}
-	}
+	selectedVideos := videoData.SelectedVideos
+	deselectedVideos := videoData.DeselectedVideos
 
 	// HTTP 클라이언트 생성
 	client := &http.Client{}
 
 	var wg sync.WaitGroup
-	videosChan := make(chan model.Video, len(unique))
-	proIdChan := make(chan string, len(unique))
-
-	for _, item := range unique {
+	videosChan := make(chan model.Video, len(selectedVideos))
+	proIdChan := make(chan string, len(selectedVideos))
+	for _, item := range selectedVideos {
 		wg.Add(1)
 		go func(item string) {
 			defer wg.Done()
@@ -257,10 +248,6 @@ func (service *adminVideoService) SaveVideos(id uint, videoIds []string) (string
 	close(videosChan)
 	close(proIdChan)
 
-	if len(videosChan) == 0 {
-		return "nothing", nil
-	}
-
 	var videos []model.Video
 	var proIds []string
 	for video := range videosChan {
@@ -271,13 +258,23 @@ func (service *adminVideoService) SaveVideos(id uint, videoIds []string) (string
 		proIds = append(proIds, proId)
 	}
 
-	if err := service.db.Where("project_id IN ?", proIds).Delete(&model.Video{}).Error; err != nil {
-		return "", err
+	if len(proIds) > 0 {
+		if err := service.db.Where("project_id IN ?", proIds).Delete(&model.Video{}).Error; err != nil {
+			return "", errors.New("db error2")
+		}
+
+		if len(videos) > 0 {
+			if err := service.db.Create(&videos).Error; err != nil {
+				return "", errors.New("db error3")
+			}
+		}
 	}
 
-	if err := service.db.Create(&videos).Error; err != nil {
-		return "", err
-
+	// 해제된 비디오 처리
+	if len(deselectedVideos) > 0 {
+		if err := service.db.Where("video_id IN ?", deselectedVideos).Delete(&model.Video{}).Error; err != nil {
+			return "", errors.New("db error4")
+		}
 	}
 
 	return "200", nil

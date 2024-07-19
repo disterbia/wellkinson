@@ -17,8 +17,6 @@ bind-address = 0.0.0.0
 
 sudo systemctl restart mariadb
 
-rds 인바운드 설정해도 vpc를 열어줘야함. https://gksdudrb922.tistory.com/240
-
 sudo apt-get update
 sudo apt-get install docker.io
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -40,461 +38,425 @@ CREATE USER 'mark'@'%' IDENTIFIED BY '6853';
 GRANT ALL PRIVILEGES ON wellkinson.* TO 'mark'@'%';
 FLUSH PRIVILEGES;
 
-CREATE TABLE `app_versions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `latest_version` varchar(40) NOT NULL,
-  `android_link` varchar(255) DEFAULT NULL,
-  `ios_link` varchar(255) DEFAULT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='연동된 이메일 정보';
-
+-- wellkinson.app_versions definition
+CREATE TABLE app_versions (
+  id SERIAL PRIMARY KEY,
+  latest_version VARCHAR(40) NOT NULL,
+  android_link VARCHAR(255),
+  ios_link VARCHAR(255),
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE app_versions IS '연동된 이메일 정보';
 
 -- wellkinson.auth_codes definition
-
-CREATE TABLE `auth_codes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `phone_number` varchar(40) NOT NULL,
-  `code` varchar(40) NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=128 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='인증번호 정보';
-
+CREATE TABLE auth_codes (
+  id SERIAL PRIMARY KEY,
+  phone_number VARCHAR(40) NOT NULL,
+  code VARCHAR(40) NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE auth_codes IS '인증번호 정보';
 
 -- wellkinson.face_exams definition
-
-CREATE TABLE `face_exams` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `video_id` varchar(40) DEFAULT NULL COMMENT 'vimeo 비디오 id',
-  `title` varchar(40) NOT NULL COMMENT '표정명',
-  `type` tinyint(4) NOT NULL COMMENT '코드 1:기쁨 2:슬픔 3:놀람 4:분노',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='표정검사 베이스 테이블';
-
+CREATE TABLE face_exams (
+  id SERIAL PRIMARY KEY,
+  video_id VARCHAR(40),
+  title VARCHAR(40) NOT NULL,
+  type SMALLINT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE face_exams IS '표정검사 베이스 테이블';
+COMMENT ON COLUMN face_exams.video_id IS 'vimeo 비디오 id';
+COMMENT ON COLUMN face_exams.title IS '표정명';
+COMMENT ON COLUMN face_exams.type IS '코드 1:기쁨 2:슬픔 3:놀람 4:분노';
 
 -- wellkinson.face_exercises definition
-
-CREATE TABLE `face_exercises` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `video_id` varchar(40) DEFAULT NULL COMMENT 'vimeo 비디오 id',
-  `title` varchar(40) NOT NULL COMMENT '동영상 제목',
-  `type` tinyint(4) NOT NULL COMMENT '코드 1:기쁨 2:슬픔 3:놀람 4:분노',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `guide_video_id` varchar(40) DEFAULT NULL COMMENT '가이드 비디오 아이디',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='표정운동 베이스 테이블';
-
+CREATE TABLE face_exercises (
+  id SERIAL PRIMARY KEY,
+  video_id VARCHAR(40),
+  title VARCHAR(40) NOT NULL,
+  type SMALLINT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  guide_video_id VARCHAR(40)
+);
+COMMENT ON TABLE face_exercises IS '표정운동 베이스 테이블';
+COMMENT ON COLUMN face_exercises.video_id IS 'vimeo 비디오 id';
+COMMENT ON COLUMN face_exercises.title IS '동영상 제목';
+COMMENT ON COLUMN face_exercises.type IS '코드 1:기쁨 2:슬픔 3:놀람 4:분노';
+COMMENT ON COLUMN face_exercises.guide_video_id IS '가이드 비디오 아이디';
 
 -- wellkinson.main_services definition
-
-CREATE TABLE `main_services` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(40) NOT NULL COMMENT '서비스명',
-  `level` tinyint(4) NOT NULL DEFAULT 0 COMMENT ' 0: 활성화 ,10:비활성화',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='이용하고 싶은 서비스 베이스';
-
+CREATE TABLE main_services (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(40) NOT NULL,
+  level SMALLINT NOT NULL DEFAULT 0,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE main_services IS '이용하고 싶은 서비스 베이스';
+COMMENT ON COLUMN main_services.title IS '서비스명';
+COMMENT ON COLUMN main_services.level IS '0: 활성화 ,10:비활성화';
 
 -- wellkinson.medicine_searches definition
-
-CREATE TABLE `medicine_searches` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(40) NOT NULL COMMENT '약 이름',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='사용자별 약물 복용정보';
-
+CREATE TABLE medicine_searches (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(40) NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE medicine_searches IS '사용자별 약물 복용정보';
+COMMENT ON COLUMN medicine_searches.name IS '약 이름';
 
 -- wellkinson.users definition
-
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
-  `birthday` varchar(40) NOT NULL,
-  `device_id` varchar(40) NOT NULL,
-  `gender` tinyint(1) NOT NULL,
-  `fcm_token` varchar(255) NOT NULL,
-  `is_first` tinyint(1) NOT NULL DEFAULT 1,
-  `name` varchar(40) NOT NULL,
-  `phone_num` varchar(40) NOT NULL COMMENT '휴대폰번호',
-  `use_auto_login` tinyint(1) NOT NULL DEFAULT 0,
-  `use_privacy_protection` tinyint(1) NOT NULL DEFAULT 0,
-  `use_sleep_tracking` tinyint(1) NOT NULL DEFAULT 0,
-  `user_type` tinyint(4) NOT NULL,
-  `email` varchar(40) NOT NULL COMMENT '이메일',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `sns_type` tinyint(4) NOT NULL COMMENT '0:카카오 1:구글 2:애플',
-  `indemnification_clause` tinyint(1) NOT NULL COMMENT '면책조항 동의 여부',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `phone_num` (`phone_num`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+  birthday VARCHAR(40) NOT NULL,
+  device_id VARCHAR(40) NOT NULL,
+  gender BOOLEAN NOT NULL,
+  fcm_token VARCHAR(255) NOT NULL,
+  is_first BOOLEAN NOT NULL DEFAULT TRUE,
+  name VARCHAR(40) NOT NULL,
+  phone_num VARCHAR(40) NOT NULL UNIQUE,
+  use_auto_login BOOLEAN NOT NULL DEFAULT FALSE,
+  use_privacy_protection BOOLEAN NOT NULL DEFAULT FALSE,
+  use_sleep_tracking BOOLEAN NOT NULL DEFAULT FALSE,
+  user_type SMALLINT NOT NULL,
+  email VARCHAR(40) NOT NULL UNIQUE,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sns_type SMALLINT NOT NULL,
+  indemnification_clause BOOLEAN NOT NULL
+);
+COMMENT ON TABLE users IS '연동된 이메일 정보';
+COMMENT ON COLUMN users.phone_num IS '휴대폰번호';
+COMMENT ON COLUMN users.email IS '이메일';
+COMMENT ON COLUMN users.sns_type IS '0:카카오 1:구글 2:애플';
+COMMENT ON COLUMN users.indemnification_clause IS '면책조항 동의 여부';
 
 -- wellkinson.verified_numbers definition
-
-CREATE TABLE `verified_numbers` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `phone_number` varchar(40) NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='인증완료 휴대폰 번호 정보';
-
+CREATE TABLE verified_numbers (
+  id SERIAL PRIMARY KEY,
+  phone_number VARCHAR(40) NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE verified_numbers IS '인증완료 휴대폰 번호 정보';
 
 -- wellkinson.videos definition
-
-CREATE TABLE `videos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `duration` int(11) DEFAULT NULL COMMENT '동영상길이',
-  `name` varchar(255) NOT NULL COMMENT '제목',
-  `project_name` varchar(255) NOT NULL COMMENT '상위 폴더명',
-  `project_id` varchar(255) DEFAULT NULL COMMENT '상위 폴더 id',
-  `video_id` varchar(40) NOT NULL COMMENT 'vimeo 비디오 id',
-  `thumbnail_url` varchar(255) DEFAULT NULL COMMENT '썸네일url',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='동영상 정보';
-
+CREATE TABLE videos (
+  id SERIAL PRIMARY KEY,
+  duration INT,
+  name VARCHAR(255) NOT NULL,
+  project_name VARCHAR(255) NOT NULL,
+  project_id VARCHAR(255),
+  video_id VARCHAR(40) NOT NULL,
+  thumbnail_url VARCHAR(255),
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE videos IS '동영상 정보';
+COMMENT ON COLUMN videos.duration IS '동영상길이';
+COMMENT ON COLUMN videos.name IS '제목';
+COMMENT ON COLUMN videos.project_name IS '상위 폴더명';
+COMMENT ON COLUMN videos.project_id IS '상위 폴더 id';
+COMMENT ON COLUMN videos.video_id IS 'vimeo 비디오 id';
+COMMENT ON COLUMN videos.thumbnail_url IS '썸네일url';
 
 -- wellkinson.vocal_words definition
-
-CREATE TABLE `vocal_words` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(40) NOT NULL COMMENT '단어',
-  `type` tinyint(4) NOT NULL COMMENT '코드 1:a 2:e 3:i 4:o 5:u',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=614 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='발성운동 단어 베이스';
-
+CREATE TABLE vocal_words (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(40) NOT NULL,
+  type SMALLINT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE vocal_words IS '발성운동 단어 베이스';
+COMMENT ON COLUMN vocal_words.title IS '단어';
+COMMENT ON COLUMN vocal_words.type IS '코드 1:a 2:e 3:i 4:o 5:u';
 
 -- wellkinson.alarms definition
-
-CREATE TABLE `alarms` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저아이디',
-  `type` tinyint(4) NOT NULL COMMENT '타입코드 1: 운동 2:약',
-  `parent_id` int(11) DEFAULT NULL COMMENT '부모 pk',
-  `body` text NOT NULL COMMENT '알람내용',
-  `start_at` varchar(255) NOT NULL COMMENT '시작일',
-  `end_at` varchar(255) NOT NULL COMMENT '종료알',
-  `timestamp` varchar(255) NOT NULL COMMENT '알람시간',
-  `week` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '알람요일' CHECK (json_valid(`week`)),
-  `created` datetime DEFAULT current_timestamp() COMMENT '생성일',
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT '수정일',
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `alarms_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=518 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='사용자별 알람정보';
-
+CREATE TABLE alarms (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  type SMALLINT NOT NULL,
+  parent_id INT,
+  body TEXT NOT NULL,
+  start_at VARCHAR(255) NOT NULL,
+  end_at VARCHAR(255) NOT NULL,
+  timestamp VARCHAR(255) NOT NULL,
+  week JSONB NOT NULL CHECK (jsonb_typeof(week) = 'array'),
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT alarms_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE alarms IS '사용자별 알람정보';
+COMMENT ON COLUMN alarms.uid IS '유저아이디';
+COMMENT ON COLUMN alarms.type IS '타입코드 1: 운동 2:약';
+COMMENT ON COLUMN alarms.parent_id IS '부모 pk';
+COMMENT ON COLUMN alarms.body IS '알람내용';
+COMMENT ON COLUMN alarms.start_at IS '시작일';
+COMMENT ON COLUMN alarms.end_at IS '종료알';
+COMMENT ON COLUMN alarms.timestamp IS '알람시간';
+COMMENT ON COLUMN alarms.week IS '알람요일';
 
 -- wellkinson.diet_presets definition
-
-CREATE TABLE `diet_presets` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `name` varchar(40) NOT NULL,
-  `foods` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`foods`)),
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `diet_presets_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE diet_presets (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  name VARCHAR(40) NOT NULL,
+  foods JSONB NOT NULL CHECK (jsonb_typeof(foods) = 'array'),
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT diet_presets_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE diet_presets IS '사용자별 다이어트 프리셋';
 
 -- wellkinson.diets definition
-
-CREATE TABLE `diets` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `memo` varchar(255) DEFAULT NULL COMMENT '메모',
-  `time` varchar(40) NOT NULL,
-  `type` int(11) NOT NULL,
-  `foods` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`foods`)),
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `date` varchar(40) NOT NULL COMMENT '식단 날짜',
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `diets_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE diets (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  memo VARCHAR(255),
+  time VARCHAR(40) NOT NULL,
+  type INT NOT NULL,
+  foods JSONB NOT NULL CHECK (jsonb_typeof(foods) = 'array'),
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  date VARCHAR(40) NOT NULL,
+  CONSTRAINT diets_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE diets IS '사용자별 식단 정보';
+COMMENT ON COLUMN diets.memo IS '메모';
+COMMENT ON COLUMN diets.date IS '식단 날짜';
 
 -- wellkinson.emotions definition
-
-CREATE TABLE `emotions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `emotion` int(11) NOT NULL COMMENT '감정코드',
-  `state` varchar(255) NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `emotions_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE emotions (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  emotion INT NOT NULL,
+  state VARCHAR(255) NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT emotions_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE emotions IS '사용자별 감정 정보';
+COMMENT ON COLUMN emotions.emotion IS '감정코드';
 
 -- wellkinson.exercises definition
-
-CREATE TABLE `exercises` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `title` varchar(40) NOT NULL,
-  `exercise_end_at` varchar(40) NOT NULL,
-  `exercise_start_at` varchar(40) NOT NULL,
-  `plan_end_at` varchar(40) NOT NULL,
-  `plan_start_at` varchar(40) NOT NULL,
-  `use_alarm` tinyint(1) NOT NULL,
-  `weekdays` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`weekdays`)),
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `is_delete` tinyint(1) NOT NULL DEFAULT 0 COMMENT '삭제여부',
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `exercises_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE exercises (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  title VARCHAR(40) NOT NULL,
+  exercise_end_at VARCHAR(40) NOT NULL,
+  exercise_start_at VARCHAR(40) NOT NULL,
+  plan_end_at VARCHAR(40) NOT NULL,
+  plan_start_at VARCHAR(40) NOT NULL,
+  use_alarm BOOLEAN NOT NULL,
+  weekdays JSONB NOT NULL CHECK (jsonb_typeof(weekdays) = 'array'),
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  is_delete BOOLEAN NOT NULL DEFAULT FALSE,
+  CONSTRAINT exercises_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE exercises IS '사용자별 운동 정보';
+COMMENT ON COLUMN exercises.is_delete IS '삭제여부';
 
 -- wellkinson.face_scores definition
-
-CREATE TABLE `face_scores` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `score` int(11) NOT NULL,
-  `type` tinyint(4) NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `face_scores_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE face_scores (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  score INT NOT NULL,
+  type SMALLINT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT face_scores_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE face_scores IS '사용자별 표정 점수';
 
 -- wellkinson.images definition
-
-CREATE TABLE `images` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저 아이디',
-  `url` varchar(255) NOT NULL COMMENT '이미지 url',
-  `thumbnail_url` varchar(255) NOT NULL COMMENT '썸네일 url',
-  `parent_id` int(11) NOT NULL COMMENT '부모 아이디',
-  `type` tinyint(4) NOT NULL COMMENT '0:메인 프로필 1:식단',
-  `level` tinyint(4) NOT NULL DEFAULT 0 COMMENT '상태 0:기본 10:삭제',
-  `created` datetime DEFAULT current_timestamp() COMMENT '생성일',
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT '수정일',
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `images_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='사용자별 업로드한 이미지 정보';
-
+CREATE TABLE images (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  url VARCHAR(255) NOT NULL,
+  thumbnail_url VARCHAR(255) NOT NULL,
+  parent_id INT NOT NULL,
+  type SMALLINT NOT NULL,
+  level SMALLINT NOT NULL DEFAULT 0,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT images_uid_fk FOREIGN KEY (uid) REFERENCES users (id)
+);
+COMMENT ON TABLE images IS '사용자별 업로드한 이미지 정보';
+COMMENT ON COLUMN images.uid IS '유저 아이디';
+COMMENT ON COLUMN images.url IS '이미지 url';
+COMMENT ON COLUMN images.thumbnail_url IS '썸네일 url';
+COMMENT ON COLUMN images.parent_id IS '부모 아이디';
+COMMENT ON COLUMN images.type IS '0:메인 프로필 1:식단';
+COMMENT ON COLUMN images.level IS '상태 0:기본 10:삭제';
 
 -- wellkinson.inquires definition
-
-CREATE TABLE `inquires` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `email` varchar(40) NOT NULL,
-  `title` varchar(40) NOT NULL,
-  `content` text NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `level` tinyint(4) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `inquires_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE inquires (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  email VARCHAR(40) NOT NULL,
+  title VARCHAR(40) NOT NULL,
+  content TEXT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  level SMALLINT NOT NULL DEFAULT 0,
+  CONSTRAINT inquires_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE inquires IS '사용자별 문의 정보';
 
 -- wellkinson.linked_emails definition
-
-CREATE TABLE `linked_emails` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `email` varchar(40) NOT NULL,
-  `uid` int(11) NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `sns_type` tinyint(4) NOT NULL COMMENT '0:카카오 1:구글 2:애플',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `linked_emails_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='연동된 이메일 정보';
-
+CREATE TABLE linked_emails (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(40) NOT NULL,
+  uid INT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sns_type SMALLINT NOT NULL,
+  CONSTRAINT linked_emails_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE,
+  UNIQUE (email)
+);
+COMMENT ON TABLE linked_emails IS '연동된 이메일 정보';
+COMMENT ON COLUMN linked_emails.sns_type IS '0:카카오 1:구글 2:애플';
 
 -- wellkinson.medicines definition
-
-CREATE TABLE `medicines` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저아이디',
-  `timestamp` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '복용시간' CHECK (json_valid(`timestamp`)),
-  `weekdays` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '알람요일' CHECK (json_valid(`weekdays`)),
-  `dose` float NOT NULL COMMENT '복용량',
-  `interval_type` tinyint(4) NOT NULL COMMENT '복용타입',
-  `is_active` tinyint(1) NOT NULL COMMENT '활성화 여부',
-  `least_store` float DEFAULT NULL COMMENT '최소 비축량',
-  `medicine_type` varchar(40) NOT NULL COMMENT '약 타입',
-  `name` varchar(40) NOT NULL COMMENT '약 이름',
-  `store` float DEFAULT NULL COMMENT '비축량',
-  `start_at` varchar(40) DEFAULT NULL COMMENT '시작일',
-  `end_at` varchar(40) DEFAULT NULL COMMENT '종료일',
-  `use_privacy` tinyint(1) NOT NULL COMMENT '개인정보 보호 알림 사용 여부',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `use_least_store` tinyint(1) NOT NULL COMMENT '최소비축량 표시여부',
-  `is_delete` tinyint(1) NOT NULL DEFAULT 0 COMMENT '삭제여부',
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `medicines_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='약 정보';
-
+CREATE TABLE medicines (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  timestamp JSONB CHECK (jsonb_typeof(timestamp) = 'array'),
+  weekdays JSONB CHECK (jsonb_typeof(weekdays) = 'array'),
+  dose FLOAT NOT NULL,
+  interval_type SMALLINT NOT NULL,
+  is_active BOOLEAN NOT NULL,
+  least_store FLOAT,
+  medicine_type VARCHAR(40) NOT NULL,
+  name VARCHAR(40) NOT NULL,
+  store FLOAT,
+  start_at VARCHAR(40),
+  end_at VARCHAR(40),
+  use_privacy BOOLEAN NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  use_least_store BOOLEAN NOT NULL,
+  is_delete BOOLEAN NOT NULL DEFAULT FALSE,
+  CONSTRAINT medicines_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE medicines IS '약 정보';
 
 -- wellkinson.notifications definition
-
-CREATE TABLE `notifications` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `type` tinyint(4) NOT NULL,
-  `body` text NOT NULL,
-  `is_read` tinyint(1) NOT NULL DEFAULT 0,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `parent_id` int(11) DEFAULT NULL COMMENT '부모 pk',
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE notifications (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  type SMALLINT NOT NULL,
+  body TEXT NOT NULL,
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  parent_id INT,
+  CONSTRAINT notifications_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE notifications IS '알림 정보';
 
 -- wellkinson.sleep_alarms definition
-
-CREATE TABLE `sleep_alarms` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저아이디',
-  `start_time` varchar(40) NOT NULL COMMENT '취침 시간',
-  `end_time` varchar(40) NOT NULL COMMENT '기상 시간',
-  `alarm_time` varchar(40) NOT NULL COMMENT '알람 시간',
-  `is_active` tinyint(1) NOT NULL COMMENT '활성화 여부',
-  `weekdays` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '알람 요일' CHECK (json_valid(`weekdays`)),
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `sleep_alarms_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='사용자별 수면알람 정보';
-
+CREATE TABLE sleep_alarms (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  start_time VARCHAR(40) NOT NULL,
+  end_time VARCHAR(40) NOT NULL,
+  alarm_time VARCHAR(40) NOT NULL,
+  is_active BOOLEAN NOT NULL,
+  weekdays JSONB NOT NULL CHECK (jsonb_typeof(weekdays) = 'array'),
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT sleep_alarms_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE sleep_alarms IS '사용자별 수면알람 정보';
 
 -- wellkinson.sleep_times definition
-
-CREATE TABLE `sleep_times` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저아이디',
-  `start_time` varchar(40) NOT NULL COMMENT '취침 시간',
-  `end_time` varchar(40) NOT NULL COMMENT '기상 시간',
-  `date_sleep` varchar(40) NOT NULL COMMENT '수면 일자',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `sleep_times_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='사용자별 수면시간 정보';
-
+CREATE TABLE sleep_times (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  start_time VARCHAR(40) NOT NULL,
+  end_time VARCHAR(40) NOT NULL,
+  date_sleep VARCHAR(40) NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT sleep_times_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE sleep_times IS '사용자별 수면시간 정보';
 
 -- wellkinson.user_services definition
-
-CREATE TABLE `user_services` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저아이디',
-  `service_id` int(11) NOT NULL COMMENT '서비스 아이디',
-  `title` varchar(40) NOT NULL COMMENT '서비스명',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  KEY `service_id` (`service_id`),
-  CONSTRAINT `user_services_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `user_services_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `main_services` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=125 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='유저별 이용하고 싶은 서비스';
-
+CREATE TABLE user_services (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  service_id INT NOT NULL,
+  title VARCHAR(40) NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT user_services_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT user_services_service_id_fk FOREIGN KEY (service_id) REFERENCES main_services (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE user_services IS '유저별 이용하고 싶은 서비스';
 
 -- wellkinson.vocal_scores definition
-
-CREATE TABLE `vocal_scores` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저아이디',
-  `score` int(11) NOT NULL COMMENT '점수',
-  `type` tinyint(4) NOT NULL COMMENT '코드 1:a 2:e 3:i 4:o 5:u',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  CONSTRAINT `vocal_scores_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='사용자별 발성검사 점수';
-
+CREATE TABLE vocal_scores (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  score INT NOT NULL,
+  type SMALLINT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT vocal_scores_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE vocal_scores IS '사용자별 발성검사 점수';
 
 -- wellkinson.exercise_infos definition
-
-CREATE TABLE `exercise_infos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `date_performed` varchar(40) NOT NULL,
-  `exercise_id` int(11) NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  KEY `exercise_id` (`exercise_id`),
-  CONSTRAINT `exercise_infos_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `exercise_infos_ibfk_2` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=304 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE exercise_infos (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  date_performed VARCHAR(40) NOT NULL,
+  exercise_id INT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT exercise_infos_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT exercise_infos_exercise_id_fk FOREIGN KEY (exercise_id) REFERENCES exercises (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE exercise_infos IS '사용자별 운동 정보';
 
 -- wellkinson.inquire_replies definition
-
-CREATE TABLE `inquire_replies` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
-  `inquire_id` int(11) NOT NULL,
-  `reply_type` tinyint(1) NOT NULL COMMENT '답변 or 추가 문의',
-  `content` text NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `level` tinyint(4) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  KEY `inquire_id` (`inquire_id`),
-  CONSTRAINT `inquire_replies_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `inquire_replies_ibfk_2` FOREIGN KEY (`inquire_id`) REFERENCES `inquires` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
+CREATE TABLE inquire_replies (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  inquire_id INT NOT NULL,
+  reply_type BOOLEAN NOT NULL,
+  content TEXT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  level SMALLINT NOT NULL DEFAULT 0,
+  CONSTRAINT inquire_replies_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT inquire_replies_inquire_id_fk FOREIGN KEY (inquire_id) REFERENCES inquires (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE inquire_replies IS '사용자별 문의 답변 정보';
 
 -- wellkinson.medicine_takes definition
-
-CREATE TABLE `medicine_takes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '유저아이디',
-  `date_taken` varchar(40) NOT NULL COMMENT '약 복용 일자',
-  `time_taken` varchar(40) NOT NULL COMMENT '약 복용 시간',
-  `dose` float NOT NULL COMMENT '복용량',
-  `medicine_id` int(11) NOT NULL COMMENT '약물 pk',
-  `created` datetime DEFAULT current_timestamp(),
-  `updated` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `real_taken` varchar(40) NOT NULL COMMENT '복용해야하는 시간',
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  KEY `medicine_id` (`medicine_id`),
-  CONSTRAINT `medicine_takes_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `medicine_takes_ibfk_2` FOREIGN KEY (`medicine_id`) REFERENCES `medicines` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=137 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='사용자별 약물 복용정보';
+CREATE TABLE medicine_takes (
+  id SERIAL PRIMARY KEY,
+  uid INT NOT NULL,
+  date_taken VARCHAR(40) NOT NULL,
+  time_taken VARCHAR(40) NOT NULL,
+  dose FLOAT NOT NULL,
+  medicine_id INT NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  real_taken VARCHAR(40) NOT NULL,
+  CONSTRAINT medicine_takes_uid_fk FOREIGN KEY (uid) REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT medicine_takes_medicine_id_fk FOREIGN KEY (medicine_id) REFERENCES medicines (id) ON DELETE CASCADE
+);
+COMMENT ON TABLE medicine_takes IS '사용자별 약물 복용 정보';

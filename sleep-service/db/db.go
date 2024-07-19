@@ -2,13 +2,13 @@
 package db
 
 import (
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 // 데이터베이스 연결 초기화
 func NewDB(dataSourceName string) (*gorm.DB, error) {
-	db, err := gorm.Open(mysql.Open(dataSourceName), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dataSourceName), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
