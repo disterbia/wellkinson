@@ -64,7 +64,7 @@ type JWKS struct {
 
 func (service *userService) SendAuthCode(number string) (string, error) {
 	//존재하는 번호인지 체크
-	result := service.db.Debug().Where("phone_number=?", number).Find(&model.VerifiedNumbers{})
+	result := service.db.Debug().Where("phone_num=?", number).Find(&model.User{})
 	if result.Error != nil {
 		return "", errors.New("db error")
 
@@ -177,7 +177,8 @@ func (service *userService) SnsLogin(idToken string, userRequest dto.UserRequest
 
 	var user model.User
 	var err error
-
+	log.Println(userRequest.DeviceID)
+	log.Println(userRequest.FCMToken)
 	if strings.Contains(iss, "kakao") { // 카카오
 		if user, err = KakaoLogin(idToken, userRequest); err != nil {
 			return "", err

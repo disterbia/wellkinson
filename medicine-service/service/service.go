@@ -309,7 +309,7 @@ func (service *medicineService) GetMedicines(id uint) ([]dto.MedicineOriginRespo
 	var medicines []model.Medicine
 	var medicineTemp []dto.MedicineOriginResponse
 
-	err := service.db.Where("uid = ? AND is_delete = 0  ", id).Find(&medicines).Error
+	err := service.db.Where("uid = ? AND is_delete = false ", id).Find(&medicines).Error
 	if err != nil {
 		return nil, errors.New("db error")
 	}
