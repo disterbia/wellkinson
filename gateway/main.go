@@ -135,7 +135,7 @@ func main() {
 		sleepProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	userServiceURL, _ := url.Parse("http://localhost:44409")
+	userServiceURL, _ := url.Parse("http://user:44409")
 	userProxy := httputil.NewSingleHostReverseProxy(userServiceURL)
 	router.Any("/user/*path", func(c *gin.Context) {
 		c.Request.URL.Path = c.Param("path") // '/user' 접두사 제거

@@ -113,9 +113,12 @@ func (service *userService) SendAuthCode(number string) (string, error) {
 }
 
 func (service *userService) VerifyAuthCode(number, code string) (string, error) {
+	now := time.Now()
+	threeMinutesAgo := now.Add(-3 * time.Minute)
+	threeMinutesAgoStr := threeMinutesAgo.Format("2006-01-02 15:04:05")
 	var authCode model.AuthCode
 
-	if err := service.db.Where("phone_number = ? ", number).Last(&authCode).Error; err != nil {
+	if err := service.db.Where("phone_number = ? AND created >= ? ", number, threeMinutesAgoStr).Last(&authCode).Error; err != nil {
 		return "", errors.New("db error")
 	}
 	if authCode.Code != code {
