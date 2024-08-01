@@ -24,7 +24,6 @@ type InquireResponse struct {
 }
 
 type InquireReplyRequest struct {
-	Id        uint   `json:"-"`
 	Uid       uint   `json:"-"`
 	InquireId uint   `json:"inquire_id"`
 	Content   string `json:"content"`

@@ -416,7 +416,7 @@ func (service *userService) LinkEmail(uid uint, idToken string) (string, error) 
 
 func saveLinkedEmail(uid uint, email string, service *userService, snsType uint) error {
 	var user model.User
-	if err := service.db.Where("email = ? ", email).First(&user).Error; err != nil {
+	if err := service.db.Where("id = ? ", email).First(&user).Error; err != nil {
 		return errors.New("db error")
 	}
 	if user.Email == email {
