@@ -73,12 +73,6 @@ func ValidateDate(dateStr string) error {
 }
 
 func ValidateTime(timeStr string) error {
-	if len(timeStr) != 5 {
-		return errors.New("invalid time format, should be HH:MM")
-	}
-	if len(timeStr) != 5 {
-		return errors.New("invalid time format, should be HH:MM")
-	}
 	_, err := time.Parse("15:04", timeStr)
 	if err != nil {
 		return errors.New("invalid time format, should be HH:MM")
