@@ -38,6 +38,7 @@ type UserService interface {
 	RemoveUser(id uint) (string, error)
 	LinkEmail(uid uint, idToken string) (string, error) // 0:카카오 1:구글 2:애플
 	GetVersion() (dto.AppVersionResponse, error)
+	GetPolices() ([]dto.PoliceResponse, error)
 	RemoveProfile(uid uint) (string, error)
 }
 
@@ -739,6 +740,20 @@ func (service *userService) GetVersion() (dto.AppVersionResponse, error) {
 		return dto.AppVersionResponse{}, err
 	}
 	return versionResponse, nil
+}
+
+func (service *userService) GetPolices() ([]dto.PoliceResponse, error) {
+	var polices []model.Polices
+	if err := service.db.Where("is_last = true").Find(&polices).Error; err != nil {
+		return nil, errors.New("db error")
+	}
+
+	var policeResponse []dto.PoliceResponse
+	if err := util.CopyStruct(polices, &policeResponse); err != nil {
+		return nil, err
+	}
+
+	return policeResponse, nil
 }
 
 func (service *userService) RemoveProfile(uid uint) (string, error) {

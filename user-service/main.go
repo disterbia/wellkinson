@@ -102,6 +102,7 @@ func main() {
 	setUserEndpoint := endpoint.MakeSetUserEndpoint(usvc)
 	getUserEndpoint := endpoint.MakeGetUserEndpoint(usvc)
 	getversionEndpoint := endpoint.GetVersionEndpoint(usvc)
+	getpolicesEndpoint := endpoint.GetPolicesEndpoint(usvc)
 	getMainServicesEndpoint := endpoint.GetMainServicesEndpoint(usvc)
 	sendCodeEndpoint := endpoint.SendCodeEndpoint(usvc)
 	verifyEndpoint := endpoint.VerifyEndpoint(usvc)
@@ -124,6 +125,7 @@ func main() {
 	router.POST("/remove-profile", transport.RemoveProfileHandler(removeProfileEndpoint))
 
 	router.GET("/get-user", transport.GetUserHandler(getUserEndpoint))
+	router.GET("/get-polices", transport.GetPolicesHandeler(getpolicesEndpoint))
 	router.GET("/get-version", transport.GetVersionHandeler(getversionEndpoint))
 	router.GET("/get-services", transport.GetMainServicesHandeler(getMainServicesEndpoint))
 

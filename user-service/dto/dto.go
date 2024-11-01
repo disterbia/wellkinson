@@ -112,6 +112,12 @@ type AppVersionResponse struct {
 	IosLink       string `json:"ios_link"`
 }
 
+type PoliceResponse struct {
+	PoliceType uint   `json:"police_type"`
+	Title      string `json:"title"`
+	Body       string `json:"body"`
+}
+
 type LoginResponse struct {
 	Jwt string `json:"jwt,omitempty"`
 	Err string `json:"err,omitempty"`

@@ -134,6 +134,16 @@ func GetVersionEndpoint(s service.UserService) endpoint.Endpoint {
 	}
 }
 
+func GetPolicesEndpoint(s service.UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		polices, err := s.GetPolices()
+		if err != nil {
+			return dto.BasicResponse{Code: err.Error()}, err
+		}
+		return polices, nil
+	}
+}
+
 func RemoveProfileEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		id := request.(uint)

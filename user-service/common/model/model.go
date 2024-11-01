@@ -283,6 +283,14 @@ type AppVersion struct {
 	IosLink       string `json:"ios_link"`
 }
 
+type Polices struct {
+	TimestampModel
+	Id         uint
+	Title      string `json:"title"`
+	Body       string `json:"body"`
+	PoliceType uint   `json:"police_type"`
+}
+
 func (tm *TimestampModel) BeforeCreate(tx *gorm.DB) (err error) {
 	now := time.Now().Format("2006-01-02 15:04:05")
 	if tm.Created == "" {
