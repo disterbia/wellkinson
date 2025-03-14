@@ -409,6 +409,7 @@ func (service *medicineService) UnTakeMedicine(unTakeMedicine dto.UnTakeMedicine
 	result2 := tx.Where("medicine_id = ? AND uid=? AND date_taken = ? AND time_taken = ?",
 		unTakeMedicine.MedicineId, unTakeMedicine.Uid, unTakeMedicine.DateTaken, unTakeMedicine.TimeTaken).Delete(&model.MedicineTake{})
 	if result2.Error != nil {
+		tx.Rollback()
 		return "", errors.New("db error2")
 	}
 

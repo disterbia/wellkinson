@@ -35,6 +35,7 @@ type User struct {
 type Alarm struct {
 	TimestampModel
 	Id        uint
+	User      User `gorm:"foreignKey:Uid"`
 	Uid       uint
 	ParentId  uint `json:"parent_id"`
 	Type      uint
